@@ -12,6 +12,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ចំណូល-ចំណាយ">
 <meta name="mobile-web-app-capable" content="yes">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --paper:#F5F2EA;
@@ -252,10 +255,91 @@
     .entry .del{display:none;}
     .book-header{box-shadow:none;}
   }
+
+  /* Login screen */
+  .login-wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .login-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-left:6px solid var(--margin-red);
+    border-radius:var(--radius);
+    padding:28px 26px;
+    max-width:360px;
+    width:100%;
+    box-shadow:0 1px 3px rgba(0,0,0,0.06);
+  }
+  .login-card h1{font-size:19px;margin:0 0 4px;}
+  .login-card .sub{color:var(--ink-soft);font-size:13px;margin-bottom:18px;}
+  .login-card .field{margin-bottom:12px;}
+  .login-card .err{
+    color:var(--expense);
+    font-size:12.5px;
+    min-height:16px;
+    margin-bottom:8px;
+  }
+  .login-card .btn{width:100%;margin-bottom:10px;}
+  .login-switch{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .login-switch a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
+  .user-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .user-bar button{
+    background:none;border:none;color:var(--ink-soft);
+    font-family:var(--khmer-font);font-size:12.5px;
+    cursor:pointer;text-decoration:underline;
+  }
+  .sync-dot{
+    display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:var(--income);margin-right:5px;
+  }
+  .sync-dot.off{background:var(--expense);}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div class="login-wrap" id="loginScreen">
+  <div class="login-card">
+    <h1>សៀវភៅចំណូល-ចំណាយ</h1>
+    <div class="sub" id="loginSub">ចូលគណនីរបស់អ្នក ដើម្បីមើលទិន្នន័យដូចគ្នាលើគ្រប់ឧបករណ៍</div>
+
+    <div class="field">
+      <label>ឈ្មោះអ្នកប្រើ</label>
+      <input type="text" id="authUsername" autocomplete="username" placeholder="ឧ. linda_hmv">
+    </div>
+    <div class="field">
+      <label>ពាក្យសម្ងាត់</label>
+      <input type="password" id="authPassword" autocomplete="current-password" placeholder="យ៉ាងតិច ៦ តួអក្សរ">
+    </div>
+    <div class="err" id="authErr"></div>
+
+    <button class="btn btn-add" id="authSubmitBtn">ចូលប្រើ</button>
+    <div class="login-switch" id="authSwitchWrap">
+      មិនទាន់មានគណនី? <a id="authSwitchLink">ចុះឈ្មោះថ្មី</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="appRoot" style="display:none;">
+
+  <div class="user-bar no-print">
+    <span><span class="sync-dot" id="syncDot"></span><span id="userLabel"></span></span>
+    <button id="logoutBtn">ចាកចេញ</button>
+  </div>
 
   <div class="book-header">
     <div class="tab">សៀវភៅផ្ទាល់ខ្លួន</div>
@@ -434,24 +518,120 @@ $("typeToggle").addEventListener("click",(e)=>{
   setType(btn.dataset.type);
 });
 
-const STORAGE_KEY = "personal_txns_v1";
+/* ===== Firebase config =====
+   ជំនួសតម្លៃខាងក្រោមដោយតម្លៃពិតរបស់អ្នក ដែលបានចម្លងពី Firebase Console
+   (Project settings → General → Your apps → SDK setup and configuration)
+*/
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-async function loadEntries(){
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const EMAIL_DOMAIN = "@tracker.local";
+function usernameToEmail(u){
+  return u.trim().toLowerCase().replace(/\s+/g,"") + EMAIL_DOMAIN;
+}
+
+let unsubscribeSnapshot = null;
+let authMode = "login"; // or "signup"
+
+function setAuthErr(msg){ $("authErr").textContent = msg || ""; }
+
+// re-bind switch link each time it's re-rendered
+function rebindSwitchLink(){
+  const link = document.getElementById("authSwitchLink");
+  if(link) link.onclick = toggleAuthMode;
+}
+function toggleAuthMode(){
+  authMode = authMode === "login" ? "signup" : "login";
+  setAuthErr("");
+  if(authMode === "signup"){
+    $("authSubmitBtn").textContent = "ចុះឈ្មោះ";
+    $("loginSub").textContent = "បង្កើតគណនីថ្មី ដើម្បីប្រើលើគ្រប់ឧបករណ៍";
+    $("authSwitchWrap").innerHTML = 'មានគណនីរួចហើយ? <a id="authSwitchLink">ចូលប្រើ</a>';
+  } else {
+    $("authSubmitBtn").textContent = "ចូលប្រើ";
+    $("loginSub").textContent = "ចូលគណនីរបស់អ្នក ដើម្បីមើលទិន្នន័យដូចគ្នាលើគ្រប់ឧបករណ៍";
+    $("authSwitchWrap").innerHTML = 'មិនទាន់មានគណនី? <a id="authSwitchLink">ចុះឈ្មោះថ្មី</a>';
+  }
+  rebindSwitchLink();
+}
+rebindSwitchLink();
+
+$("authSubmitBtn").addEventListener("click", async ()=>{
+  const uname = $("authUsername").value.trim();
+  const pass = $("authPassword").value;
+  setAuthErr("");
+
+  if(!uname || !pass){ setAuthErr("សូមបំពេញឈ្មោះអ្នកប្រើ និងពាក្យសម្ងាត់"); return; }
+  if(pass.length < 6){ setAuthErr("ពាក្យសម្ងាត់ត្រូវការយ៉ាងតិច ៦ តួអក្សរ"); return; }
+
+  const email = usernameToEmail(uname);
+  $("authSubmitBtn").disabled = true;
+
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    entries = raw ? JSON.parse(raw) : [];
+    if(authMode === "signup"){
+      await auth.createUserWithEmailAndPassword(email, pass);
+    } else {
+      await auth.signInWithEmailAndPassword(email, pass);
+    }
   }catch(err){
+    if(err.code === "auth/email-already-in-use"){
+      setAuthErr("ឈ្មោះអ្នកប្រើនេះមានគេប្រើរួចហើយ");
+    } else if(err.code === "auth/wrong-password" || err.code === "auth/user-not-found" || err.code === "auth/invalid-credential"){
+      setAuthErr("ឈ្មោះអ្នកប្រើ ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ");
+    } else {
+      setAuthErr("មានបញ្ហា៖ " + err.message);
+    }
+  }
+  $("authSubmitBtn").disabled = false;
+});
+
+$("logoutBtn").addEventListener("click", ()=> auth.signOut());
+
+auth.onAuthStateChanged((user)=>{
+  if(unsubscribeSnapshot){ unsubscribeSnapshot(); unsubscribeSnapshot = null; }
+
+  if(user){
+    $("loginScreen").style.display = "none";
+    $("appRoot").style.display = "block";
+    $("userLabel").textContent = user.email.replace(EMAIL_DOMAIN, "");
+    subscribeToEntries(user.uid);
+  } else {
+    $("appRoot").style.display = "none";
+    $("loginScreen").style.display = "flex";
     entries = [];
   }
-  render();
+});
+
+function subscribeToEntries(uid){
+  const docRef = db.collection("users").doc(uid);
+  unsubscribeSnapshot = docRef.onSnapshot((doc)=>{
+    $("syncDot").classList.remove("off");
+    entries = (doc.exists && doc.data().entries) ? doc.data().entries : [];
+    render();
+  }, (err)=>{
+    console.error("Sync error", err);
+    $("syncDot").classList.add("off");
+  });
 }
 
 async function saveEntries(){
+  const user = auth.currentUser;
+  if(!user) return;
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    await db.collection("users").doc(user.uid).set({ entries }, { merge: true });
   }catch(err){
-    console.error("Storage save failed", err);
-    alert("មិនអាចរក្សាទុកទិន្នន័យបានទេ សូមពិនិត្យទំហំផ្ទុករបស់ឧបករណ៍");
+    console.error("Save failed", err);
+    $("syncDot").classList.add("off");
   }
 }
 
@@ -655,7 +835,6 @@ $("printBtn").addEventListener("click", ()=> window.print());
 // init
 $("fDate").value = todayStr();
 populateCategories();
-loadEntries();
 </script>
 </body>
 </html>
