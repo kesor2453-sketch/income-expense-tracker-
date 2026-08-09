@@ -200,6 +200,22 @@
   }
   .day-heading .d{font-weight:700;font-size:14px;}
   .day-heading .net{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;}
+  .cat-breakdown{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:0 4px 8px;
+  }
+  .cat-chip{
+    font-size:11.5px;
+    padding:3px 9px;
+    border-radius:999px;
+    background:var(--expense-bg);
+    color:var(--expense);
+    font-family:var(--mono);
+    white-space:nowrap;
+  }
+  .cat-chip .n{font-family:var(--khmer-font);color:var(--ink);font-weight:600;margin-right:4px;}
   .entry{
     display:grid;
     grid-template-columns:auto 1fr auto auto;
@@ -299,6 +315,7 @@
     background:none;border:none;color:var(--ink-soft);
     font-family:var(--khmer-font);font-size:12.5px;
     cursor:pointer;text-decoration:underline;
+    margin-left:12px;
   }
   .sync-dot{
     display:inline-block;width:7px;height:7px;border-radius:50%;
@@ -335,7 +352,10 @@
 
   <div class="user-bar no-print">
     <span><span class="sync-dot" id="syncDot"></span><span id="userLabel"></span></span>
-    <button id="logoutBtn">ចាកចេញ</button>
+    <span>
+      <button id="changeUserBtn">ប្តូរឈ្មោះ</button>
+      <button id="logoutBtn">ចាកចេញ</button>
+    </span>
   </div>
 
   <div class="book-header">
@@ -593,6 +613,33 @@ $("logoutBtn").addEventListener("click", ()=>{
   $("loginScreen").style.display = "flex";
 });
 
+$("changeUserBtn").addEventListener("click", async ()=>{
+  if(!currentUser) return;
+  const newName = prompt("ឈ្មោះអ្នកប្រើថ្មី៖", currentUser.username);
+  if(newName === null) return;
+  const trimmed = newName.trim();
+  if(!trimmed){ alert("សូមបញ្ចូលឈ្មោះមួយ"); return; }
+  if(trimmed.toLowerCase() === currentUser.username){ return; }
+
+  try{
+    const result = await apiCall("changeUsername", {
+      username: currentUser.username,
+      password: currentUser.password,
+      newUsername: trimmed
+    });
+    if(!result.success){
+      alert(result.message || "មិនអាចប្តូរបានទេ");
+      return;
+    }
+    currentUser.username = result.newUsername || trimmed.toLowerCase();
+    localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+    $("userLabel").textContent = currentUser.username;
+    alert("ប្តូរឈ្មោះជោគជ័យ!");
+  }catch(err){
+    alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
+  }
+});
+
 function showApp(){
   $("loginScreen").style.display = "none";
   $("appRoot").style.display = "block";
@@ -796,6 +843,35 @@ function render(){
         សុទ្ធ: ${fmtAmount(netUSD,"USD")}${netKHR? " / " + fmtAmount(netKHR,"KHR") : ""}
       </span>`;
     groupDiv.appendChild(heading);
+
+    // ចំណាយបែងចែកតាមប្រភេទ សម្រាប់ថ្ងៃនេះ
+    const catTotals = {}; // category -> {USD, KHR}
+    dayEntries.forEach(e=>{
+      if(e.type !== "expense") return;
+      if(!catTotals[e.category]) catTotals[e.category] = {USD:0, KHR:0};
+      if(e.currency === "KHR") catTotals[e.category].KHR += Number(e.amount)||0;
+      else catTotals[e.category].USD += Number(e.amount)||0;
+    });
+    const catList = Object.keys(catTotals).sort((a,b)=> {
+      const av = catTotals[a].USD + catTotals[a].KHR/4000;
+      const bv = catTotals[b].USD + catTotals[b].KHR/4000;
+      return bv - av;
+    });
+    if(catList.length){
+      const catRow = document.createElement("div");
+      catRow.className = "cat-breakdown";
+      catList.forEach(cat=>{
+        const t = catTotals[cat];
+        const parts = [];
+        if(t.USD) parts.push(fmtAmount(t.USD,"USD"));
+        if(t.KHR) parts.push(fmtAmount(t.KHR,"KHR"));
+        const chip = document.createElement("span");
+        chip.className = "cat-chip";
+        chip.innerHTML = `<span class="n">${escapeHtml(cat)}</span>${parts.join(" / ")}`;
+        catRow.appendChild(chip);
+      });
+      groupDiv.appendChild(catRow);
+    }
 
     dayEntries.forEach(e=>{
       const row = document.createElement("div");
