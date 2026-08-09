@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>សៀវភៅចំណូល-ចំណាយប្រចាំថ្ងៃ</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#B98A2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ចំណូល-ចំណាយ">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  :root{
+    --paper:#F5F2EA;
+    --paper-line:#DED6C2;
+    --ink:#26241F;
+    --ink-soft:#6b6555;
+    --margin-red:#B0413E;
+    --income:#2F6F4E;
+    --income-bg:#E7F0EA;
+    --expense:#B0413E;
+    --expense-bg:#F5E7E4;
+    --gold:#B98A2E;
+    --gold-bg:#F3E9D2;
+    --card:#FFFFFF;
+    --border:#E1D9C6;
+    --radius:10px;
+    --khmer-font:"Khmer OS Battambang","Khmer OS","Noto Sans Khmer","Leelawadee UI","Khmer UI",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"IBM Plex Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--khmer-font);}
+  body{
+    min-height:100vh;
+    padding:28px 16px 60px;
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 40px;
+    background-attachment:local;
+  }
+  .wrap{max-width:820px;margin:0 auto;}
+
+  /* Notebook header */
+  .book-header{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-left:6px solid var(--margin-red);
+    border-radius:var(--radius);
+    padding:20px 24px 18px 28px;
+    margin-bottom:18px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.05);
+  }
+  .book-header .tab{
+    position:absolute;
+    top:-12px; left:28px;
+    background:var(--gold);
+    color:#fff;
+    font-size:12px;
+    letter-spacing:.5px;
+    padding:4px 12px;
+    border-radius:4px 4px 0 0;
+    font-weight:600;
+  }
+  .book-header h1{
+    margin:6px 0 2px;
+    font-size:22px;
+    font-weight:700;
+  }
+  .book-header .sub{
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+
+  /* Summary row */
+  .summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .sum-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+  }
+  .sum-card .label{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+  .sum-card .val{font-family:var(--mono);font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .sum-card.income{border-top:3px solid var(--income);}
+  .sum-card.expense{border-top:3px solid var(--expense);}
+  .sum-card.balance{border-top:3px solid var(--gold);}
+  .sum-card .val.pos{color:var(--income);}
+  .sum-card .val.neg{color:var(--expense);}
+
+  /* Form */
+  .form-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .form-card h2{font-size:15px;margin:0 0 12px;color:var(--ink);}
+  .type-toggle{
+    display:flex;
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:12px;
+    width:fit-content;
+  }
+  .type-toggle button{
+    border:none;background:var(--card);
+    padding:8px 20px;
+    font-family:var(--khmer-font);
+    font-size:14px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .type-toggle button.active[data-type="income"]{background:var(--income-bg);color:var(--income);font-weight:700;}
+  .type-toggle button.active[data-type="expense"]{background:var(--expense-bg);color:var(--expense);font-weight:700;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+  .field label{font-size:12px;color:var(--ink-soft);}
+  .field input,.field select{
+    font-family:var(--khmer-font);
+    font-size:14px;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:7px;
+    background:#FCFAF4;
+    color:var(--ink);
+  }
+  .field input:focus,.field select:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+  .chip{
+    font-family:var(--khmer-font);
+    font-size:12.5px;
+    padding:6px 12px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:#FCFAF4;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .chip:hover{background:#F0ECE0;}
+  .chip.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
+  .amount-row{display:flex;gap:8px;}
+  .amount-row .field{flex:1;}
+  .amount-row .field.currency{flex:0 0 90px;}
+
+  .btn{
+    font-family:var(--khmer-font);
+    font-size:14px;
+    font-weight:600;
+    padding:10px 18px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+  }
+  .btn-add{background:var(--ink);color:#fff;}
+  .btn-add:hover{background:#3a3730;}
+  .btn-add:disabled{background:#a9a496;cursor:not-allowed;}
+  .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--ink-soft);}
+  .btn-secondary:hover{background:#f0ece0;}
+  .btn-row{display:flex;gap:10px;justify-content:flex-end;}
+
+  /* Filter bar */
+  .filter-bar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+  .filter-bar input,.filter-bar select{
+    font-family:var(--khmer-font);
+    font-size:13px;
+    padding:7px 10px;
+    border:1px solid var(--border);
+    border-radius:7px;
+    background:var(--card);
+  }
+  .filter-bar .spacer{flex:1;}
+
+  /* Ledger */
+  .day-group{margin-bottom:16px;}
+  .day-heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:6px 4px;
+    border-bottom:1px solid var(--paper-line);
+    margin-bottom:6px;
+  }
+  .day-heading .d{font-weight:700;font-size:14px;}
+  .day-heading .net{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;}
+  .entry{
+    display:grid;
+    grid-template-columns:auto 1fr auto auto;
+    gap:10px;
+    align-items:center;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:6px;
+  }
+  .entry .dot{width:8px;height:8px;border-radius:50%;}
+  .entry .dot.income{background:var(--income);}
+  .entry .dot.expense{background:var(--expense);}
+  .entry .desc{min-width:0;}
+  .entry .cat{font-size:13px;font-weight:600;}
+  .entry .note{font-size:12px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .entry .amt{font-family:var(--mono);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .entry .amt.income{color:var(--income);}
+  .entry .amt.expense{color:var(--expense);}
+  .entry .row-actions{display:flex;gap:2px;}
+  .entry .del{
+    background:none;border:none;color:#b7ae98;cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;
+  }
+  .entry .del:hover{color:var(--expense);}
+  .entry .edit{
+    background:none;border:none;color:#b7ae98;cursor:pointer;font-size:14px;padding:2px 6px;line-height:1;
+  }
+  .entry .edit:hover{color:var(--gold);}
+
+  .empty{
+    text-align:center;
+    padding:40px 20px;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+
+  .loading{text-align:center;padding:30px;color:var(--ink-soft);font-size:13px;}
+
+  @media (max-width:520px){
+    .summary{grid-template-columns:1fr;}
+    .grid2{grid-template-columns:1fr;}
+    .entry{grid-template-columns:auto 1fr auto;}
+    .entry .row-actions{grid-column:3;}
+  }
+
+  @media print{
+    body{background:#fff;padding:0;}
+    .form-card,.filter-bar,.btn-row,.no-print{display:none !important;}
+    .entry .del{display:none;}
+    .book-header{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="book-header">
+    <div class="tab">សៀវភៅផ្ទាល់ខ្លួន</div>
+    <h1>ចំណូល - ចំណាយប្រចាំថ្ងៃ</h1>
+    <div class="sub">កត់ត្រា និងតាមដានលុយចូល-លុយចេញរបស់អ្នកជារៀងរាល់ថ្ងៃ</div>
+  </div>
+
+  <div class="summary" id="summary">
+    <div class="sum-card income">
+      <div class="label">ចំណូលថ្ងៃនេះ</div>
+      <div class="val" id="todayIncome">$0.00</div>
+    </div>
+    <div class="sum-card expense">
+      <div class="label">ចំណាយថ្ងៃនេះ</div>
+      <div class="val" id="todayExpense">$0.00</div>
+    </div>
+    <div class="sum-card balance">
+      <div class="label">សមតុល្យសរុប</div>
+      <div class="val" id="totalBalance">$0.00</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h2>បន្ថែមប្រតិបត្តិការថ្មី</h2>
+    <div class="type-toggle" id="typeToggle">
+      <button type="button" data-type="income" class="active">ចំណូល</button>
+      <button type="button" data-type="expense">ចំណាយ</button>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>កាលបរិច្ឆេទ</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label>ប្រភេទ</label>
+        <select id="fCategory"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ចំណាំ (ស្រេចចិត្ត — អាចជ្រើសបានច្រើន)</label>
+      <div class="chip-row" id="noteChips"></div>
+      <input type="text" id="fNote" placeholder="សរសេរបន្ថែម (ស្រេចចិត្ត)...">
+    </div>
+
+    <div class="amount-row">
+      <div class="field">
+        <label>ចំនួនទឹកប្រាក់</label>
+        <input type="number" id="fAmount" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field currency">
+        <label>រូបិយប័ណ្ណ</label>
+        <select id="fCurrency">
+          <option value="USD">$</option>
+          <option value="KHR">៛</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="cancelBtn" style="display:none;">បោះបង់</button>
+      <button class="btn btn-add" id="addBtn">＋ បន្ថែម</button>
+    </div>
+  </div>
+
+  <div class="filter-bar no-print">
+    <input type="month" id="filterMonth">
+    <select id="filterType">
+      <option value="all">ទាំងអស់</option>
+      <option value="income">ចំណូលតែប៉ុណ្ណោះ</option>
+      <option value="expense">ចំណាយតែប៉ុណ្ណោះ</option>
+    </select>
+    <input type="text" id="filterSearch" placeholder="ស្វែងរកចំណាំ / ប្រភេទ...">
+    <div class="spacer"></div>
+    <button class="btn btn-secondary" id="printBtn">បោះពុម្ព</button>
+  </div>
+
+  <div id="ledger">
+    <div class="loading">កំពុងផ្ទុកទិន្នន័យ...</div>
+  </div>
+
+</div>
+
+<script>
+const INCOME_CATS = ["ប្រាក់ខែ HMV","ប្រាក់ខែ SPV","ចំណូលបន្ថែម","ជំនួយគ្រួសារ","ការវិនិយោគ/ការជួញដូរ","ផ្សេងៗ"];
+const EXPENSE_CATS = ["អាហារ","ធ្វើដំណើរ/សាំង","ជួលផ្ទះ/ក្រុមហ៊ុន","អគ្គិសនី/ទឹក/អ៊ីនធឺណិត","សុខភាព","គ្រួសារ/កូន","សិក្សា","សម្លៀកបំពាក់","កម្សាន្ត","សន្សំ","ផ្សេងៗ"];
+
+const NOTE_SUGGESTIONS = {
+  "ប្រាក់ខែ HMV": ["ប្រាក់ខែ HMV ១២ម៉ោង","ប្រាក់ខែ HMV ២៤ម៉ោង","ប្រាក់ខែ HMV OPD","ប្រាក់ខែ HMV IPD"],
+  "ប្រាក់ខែ SPV": ["ប្រាក់ខែ SPV ១២ម៉ោង","ប្រាក់ខែ SPV ២៤ម៉ោង","ប្រាក់ខែ SPV OPD","ប្រាក់ខែ SPV IPD"],
+  "ចំណូលបន្ថែម": ["ប្រឹក្សាយោបល់វេជ្ជសាស្ត្រ","ថ្លៃពិគ្រោះជាមួយអ្នកជំងឺឯកជន","កម្រៃជើងសារ"],
+  "ជំនួយគ្រួសារ": ["ជំនួយពីឪពុកម្តាយ","ជំនួយពីបងប្អូន"],
+  "ការវិនិយោគ/ការជួញដូរ": ["ចំណេញពីការជួញដូរ MT5","ការវិនិយោគផ្សេងៗ"],
+  "អាហារ": ["អាហារពេលព្រឹក","អាហារពេលថ្ងៃត្រង់","អាហារពេលល្ងាច","កាហ្វេ/ភេសជ្ជៈ","ទិញទំនិញទស្សនាវដ្តី/គ្រួសារ"],
+  "ធ្វើដំណើរ/សាំង": ["សាំងម៉ូតូ","សាំងឡាន","តាក់ស៊ី/ម៉ូតូឌុប","ជួសជុលរថយន្ត"],
+  "ជួលផ្ទះ/ក្រុមហ៊ុន": ["ថ្លៃជួលផ្ទះ","ថ្លៃជួលការិយាល័យ"],
+  "អគ្គិសនី/ទឹក/អ៊ីនធឺណិត": ["ថ្លៃភ្លើង","ថ្លៃទឹក","ថ្លៃអ៊ីនធឺណិត/ទូរស័ព្ទ"],
+  "សុខភាព": ["ថ្នាំពេទ្យ","ពិនិត្យសុខភាព","ធានារ៉ាប់រងសុខភាព"],
+  "គ្រួសារ/កូន": ["ចំណាយសម្រាប់កូន","សម្ភារៈសាលារៀន","ចំណាយឪពុកម្តាយ"],
+  "សិក្សា": ["ថ្លៃសិក្សា","សៀវភៅ/សម្ភារៈសិក្សា","វគ្គបណ្តុះបណ្តាល"],
+  "សម្លៀកបំពាក់": ["សម្លៀកបំពាក់","ស្បែកជើង"],
+  "កម្សាន្ត": ["ភាពយន្ត","ដំណើរកំសាន្ត","ជួបជុំមិត្តភ័ក្តិ"],
+  "សន្សំ": ["ដាក់សន្សំធនាគារ","ទិញមាស"],
+  "ផ្សេងៗ": []
+};
+
+let entries = [];
+let currentType = "income";
+let editingId = null;
+
+const $ = (id) => document.getElementById(id);
+
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+
+function fmtAmount(val, currency){
+  const n = Number(val)||0;
+  if(currency === "KHR"){
+    return n.toLocaleString("en-US",{maximumFractionDigits:0}) + " ៛";
+  }
+  return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+let selectedChips = new Set();
+
+function populateCategories(){
+  const sel = $("fCategory");
+  sel.innerHTML = "";
+  const list = currentType === "income" ? INCOME_CATS : EXPENSE_CATS;
+  list.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+  renderNoteChips();
+}
+
+function renderNoteChips(){
+  selectedChips.clear();
+  const wrap = $("noteChips");
+  wrap.innerHTML = "";
+  let suggestions;
+  if(currentType === "income"){
+    suggestions = ["HMV","SPV","Investive"];
+  } else {
+    const cat = $("fCategory").value;
+    suggestions = NOTE_SUGGESTIONS[cat] || [];
+  }
+  suggestions.forEach(s=>{
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = s;
+    chip.addEventListener("click", ()=>{
+      if(selectedChips.has(s)){ selectedChips.delete(s); chip.classList.remove("active"); }
+      else { selectedChips.add(s); chip.classList.add("active"); }
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+function setType(type){
+  currentType = type;
+  document.querySelectorAll("#typeToggle button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.type === type);
+  });
+  populateCategories();
+}
+
+$("typeToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  setType(btn.dataset.type);
+});
+
+const STORAGE_KEY = "personal_txns_v1";
+
+async function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : [];
+  }catch(err){
+    entries = [];
+  }
+  render();
+}
+
+async function saveEntries(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }catch(err){
+    console.error("Storage save failed", err);
+    alert("មិនអាចរក្សាទុកទិន្នន័យបានទេ សូមពិនិត្យទំហំផ្ទុករបស់ឧបករណ៍");
+  }
+}
+
+function addEntry(){
+  const date = $("fDate").value || todayStr();
+  const category = $("fCategory").value;
+  const customText = $("fNote").value.trim();
+  const note = [...selectedChips, customText].filter(Boolean).join(", ");
+  const amount = parseFloat($("fAmount").value);
+  const currency = $("fCurrency").value;
+
+  if(!amount || amount <= 0){
+    $("fAmount").focus();
+    return;
+  }
+
+  if(editingId){
+    const idx = entries.findIndex(e => e.id === editingId);
+    if(idx !== -1){
+      entries[idx] = { ...entries[idx], date, type: currentType, category, note, amount, currency };
+    }
+    stopEdit();
+  } else {
+    entries.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      date, type: currentType, category, note, amount, currency
+    });
+  }
+
+  $("fAmount").value = "";
+  $("fNote").value = "";
+  renderNoteChips();
+
+  saveEntries();
+  render();
+}
+
+function startEdit(id){
+  const entry = entries.find(e => e.id === id);
+  if(!entry) return;
+  editingId = id;
+
+  setType(entry.type);
+  $("fDate").value = entry.date;
+  $("fCategory").value = entry.category;
+  renderNoteChips();
+  $("fNote").value = entry.note || "";
+  $("fAmount").value = entry.amount;
+  $("fCurrency").value = entry.currency;
+
+  $("addBtn").textContent = "✓ រក្សាទុកការកែប្រែ";
+  $("cancelBtn").style.display = "inline-block";
+
+  document.querySelector(".form-card").scrollIntoView({behavior:"smooth", block:"start"});
+  $("fAmount").focus();
+}
+
+function stopEdit(){
+  editingId = null;
+  $("addBtn").textContent = "＋ បន្ថែម";
+  $("cancelBtn").style.display = "none";
+}
+
+$("cancelBtn").addEventListener("click", ()=>{
+  stopEdit();
+  $("fAmount").value = "";
+  $("fNote").value = "";
+  $("fDate").value = todayStr();
+  renderNoteChips();
+});
+
+$("addBtn").addEventListener("click", addEntry);
+$("fAmount").addEventListener("keydown",(e)=>{ if(e.key === "Enter") addEntry(); });
+
+function deleteEntry(id){
+  if(editingId === id) stopEdit();
+  entries = entries.filter(e => e.id !== id);
+  saveEntries();
+  render();
+}
+
+function khmerDate(dstr){
+  const months = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+  const d = new Date(dstr + "T00:00:00");
+  if(isNaN(d)) return dstr;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function render(){
+  // summary
+  const today = todayStr();
+  let todayIncomeUSD=0, todayIncomeKHR=0, todayExpenseUSD=0, todayExpenseKHR=0;
+  let balUSD=0, balKHR=0;
+
+  entries.forEach(e=>{
+    const amt = Number(e.amount)||0;
+    const sign = e.type === "income" ? 1 : -1;
+    if(e.currency === "KHR"){ balKHR += sign*amt; } else { balUSD += sign*amt; }
+    if(e.date === today){
+      if(e.type === "income"){
+        if(e.currency==="KHR") todayIncomeKHR += amt; else todayIncomeUSD += amt;
+      } else {
+        if(e.currency==="KHR") todayExpenseKHR += amt; else todayExpenseUSD += amt;
+      }
+    }
+  });
+
+  $("todayIncome").textContent = fmtAmount(todayIncomeUSD,"USD") + (todayIncomeKHR? " / " + fmtAmount(todayIncomeKHR,"KHR") : "");
+  $("todayExpense").textContent = fmtAmount(todayExpenseUSD,"USD") + (todayExpenseKHR? " / " + fmtAmount(todayExpenseKHR,"KHR") : "");
+  const balEl = $("totalBalance");
+  balEl.textContent = fmtAmount(balUSD,"USD") + (balKHR? " / " + fmtAmount(balKHR,"KHR") : "");
+  balEl.classList.toggle("pos", balUSD >= 0);
+  balEl.classList.toggle("neg", balUSD < 0);
+
+  // filters
+  const monthFilter = $("filterMonth").value; // "YYYY-MM"
+  const typeFilter = $("filterType").value;
+  const searchFilter = $("filterSearch").value.trim().toLowerCase();
+
+  let filtered = entries.filter(e=>{
+    if(monthFilter && !e.date.startsWith(monthFilter)) return false;
+    if(typeFilter !== "all" && e.type !== typeFilter) return false;
+    if(searchFilter){
+      const hay = (e.category + " " + (e.note||"")).toLowerCase();
+      if(!hay.includes(searchFilter)) return false;
+    }
+    return true;
+  });
+
+  // group by date desc
+  const groups = {};
+  filtered.forEach(e=>{
+    if(!groups[e.date]) groups[e.date] = [];
+    groups[e.date].push(e);
+  });
+  const dates = Object.keys(groups).sort((a,b)=> b.localeCompare(a));
+
+  const ledger = $("ledger");
+  ledger.innerHTML = "";
+
+  if(dates.length === 0){
+    ledger.innerHTML = `<div class="empty">មិនទាន់មានប្រតិបត្តិការទេ។ ចាប់ផ្តើមបញ្ចូលចំណូល ឬចំណាយខាងលើ។</div>`;
+    return;
+  }
+
+  dates.forEach(date=>{
+    const dayEntries = groups[date].sort((a,b)=> (b.id||"").localeCompare(a.id||""));
+    let netUSD=0, netKHR=0;
+    dayEntries.forEach(e=>{
+      const sign = e.type==="income"?1:-1;
+      if(e.currency==="KHR") netKHR += sign*Number(e.amount); else netUSD += sign*Number(e.amount);
+    });
+
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "day-group";
+
+    const heading = document.createElement("div");
+    heading.className = "day-heading";
+    heading.innerHTML = `<span class="d">${khmerDate(date)}</span>
+      <span class="net ${netUSD>=0?'':'neg'}" style="color:${netUSD>=0?'var(--income)':'var(--expense)'}">
+        សុទ្ធ: ${fmtAmount(netUSD,"USD")}${netKHR? " / " + fmtAmount(netKHR,"KHR") : ""}
+      </span>`;
+    groupDiv.appendChild(heading);
+
+    dayEntries.forEach(e=>{
+      const row = document.createElement("div");
+      row.className = "entry";
+      row.innerHTML = `
+        <span class="dot ${e.type}"></span>
+        <span class="desc">
+          <div class="cat">${escapeHtml(e.category)}</div>
+          ${e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : ""}
+        </span>
+        <span class="amt ${e.type}">${e.type==="income"?"+":"−"} ${fmtAmount(e.amount, e.currency)}</span>
+        <span class="row-actions no-print">
+          <button class="edit" title="កែសម្រួល" aria-label="កែសម្រួល">✎</button>
+          <button class="del" title="លុប" aria-label="លុប">✕</button>
+        </span>
+      `;
+      row.querySelector(".edit").addEventListener("click", ()=> startEdit(e.id));
+      row.querySelector(".del").addEventListener("click", ()=> deleteEntry(e.id));
+      groupDiv.appendChild(row);
+    });
+
+    ledger.appendChild(groupDiv);
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str || "";
+  return div.innerHTML;
+}
+
+$("fCategory").addEventListener("change", renderNoteChips);
+$("filterMonth").addEventListener("change", render);
+$("filterType").addEventListener("change", render);
+$("filterSearch").addEventListener("input", render);
+$("printBtn").addEventListener("click", ()=> window.print());
+
+// init
+$("fDate").value = todayStr();
+populateCategories();
+loadEntries();
+</script>
+</body>
+</html>
