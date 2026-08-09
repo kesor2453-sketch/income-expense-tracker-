@@ -216,6 +216,64 @@
     white-space:nowrap;
   }
   .cat-chip .n{font-family:var(--khmer-font);color:var(--ink);font-weight:600;margin-right:4px;}
+
+  .month-summary{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:14px;
+  }
+  .month-summary .ms-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  .month-summary .ms-total{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--expense);
+    font-weight:700;
+  }
+  .ms-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:7px;
+  }
+  .ms-row .ms-cat{
+    flex:0 0 120px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .ms-row .ms-bar-wrap{
+    flex:1;
+    background:var(--expense-bg);
+    border-radius:5px;
+    height:8px;
+    overflow:hidden;
+  }
+  .ms-row .ms-bar{
+    height:100%;
+    background:var(--expense);
+    border-radius:5px;
+  }
+  .ms-row .ms-amt{
+    flex:0 0 auto;
+    font-family:var(--mono);
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .ms-empty{font-size:12.5px;color:var(--ink-soft);}
   .entry{
     display:grid;
     grid-template-columns:auto 1fr auto auto;
@@ -434,6 +492,8 @@
     <div class="spacer"></div>
     <button class="btn btn-secondary" id="printBtn">បោះពុម្ព</button>
   </div>
+
+  <div class="month-summary" id="monthSummary"></div>
 
   <div id="ledger">
     <div class="loading">កំពុងផ្ទុកទិន្នន័យ...</div>
@@ -768,6 +828,64 @@ function khmerDate(dstr){
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+function khmerMonthLabel(monthKey){
+  const months = ["មករា","កុម្ភៈ","មីនា","មេសា","ឧសភា","មិថុនា","កក្កដា","សីហា","កញ្ញា","តុលា","វិច្ឆិកា","ធ្នូ"];
+  const parts = monthKey.split("-");
+  const y = parts[0], m = parseInt(parts[1],10)-1;
+  return `${months[m]||""} ${y}`;
+}
+
+function renderMonthSummary(monthKey){
+  const wrap = $("monthSummary");
+  const monthEntries = entries.filter(e => e.date && e.date.startsWith(monthKey) && e.type === "expense");
+
+  if(monthEntries.length === 0){
+    wrap.innerHTML = `
+      <div class="ms-title"><span>ចំណាយប្រចាំខែ ${khmerMonthLabel(monthKey)} តាមប្រភេទ</span></div>
+      <div class="ms-empty">មិនទាន់មានចំណាយក្នុងខែនេះទេ</div>`;
+    return;
+  }
+
+  const catTotals = {}; // category -> {USD, KHR}
+  let totalUSD = 0, totalKHR = 0;
+  monthEntries.forEach(e=>{
+    if(!catTotals[e.category]) catTotals[e.category] = {USD:0, KHR:0};
+    const amt = Number(e.amount)||0;
+    if(e.currency === "KHR"){ catTotals[e.category].KHR += amt; totalKHR += amt; }
+    else { catTotals[e.category].USD += amt; totalUSD += amt; }
+  });
+
+  const catList = Object.keys(catTotals).sort((a,b)=>{
+    const av = catTotals[a].USD + catTotals[a].KHR/4000;
+    const bv = catTotals[b].USD + catTotals[b].KHR/4000;
+    return bv - av;
+  });
+  const maxVal = Math.max(...catList.map(c => catTotals[c].USD + catTotals[c].KHR/4000));
+
+  let rows = "";
+  catList.forEach(cat=>{
+    const t = catTotals[cat];
+    const val = t.USD + t.KHR/4000;
+    const pct = maxVal ? Math.max(4, Math.round((val/maxVal)*100)) : 0;
+    const parts = [];
+    if(t.USD) parts.push(fmtAmount(t.USD,"USD"));
+    if(t.KHR) parts.push(fmtAmount(t.KHR,"KHR"));
+    rows += `
+      <div class="ms-row">
+        <span class="ms-cat">${escapeHtml(cat)}</span>
+        <span class="ms-bar-wrap"><span class="ms-bar" style="width:${pct}%"></span></span>
+        <span class="ms-amt">${parts.join(" / ")}</span>
+      </div>`;
+  });
+
+  wrap.innerHTML = `
+    <div class="ms-title">
+      <span>ចំណាយប្រចាំខែ ${khmerMonthLabel(monthKey)} តាមប្រភេទ</span>
+      <span class="ms-total">សរុប ${fmtAmount(totalUSD,"USD")}${totalKHR? " / " + fmtAmount(totalKHR,"KHR") : ""}</span>
+    </div>
+    ${rows}`;
+}
+
 function render(){
   // summary
   const today = todayStr();
@@ -809,6 +927,10 @@ function render(){
     return true;
   });
 
+  // ខែសម្រាប់សរុប៖ ប្រើ filter ប្រសិនបានជ្រើស បើអត់ប្រើខែបច្ចុប្បន្ន
+  const summaryMonth = monthFilter || today.slice(0,7);
+  renderMonthSummary(summaryMonth);
+
   // group by date desc
   const groups = {};
   filtered.forEach(e=>{
@@ -843,35 +965,6 @@ function render(){
         សុទ្ធ: ${fmtAmount(netUSD,"USD")}${netKHR? " / " + fmtAmount(netKHR,"KHR") : ""}
       </span>`;
     groupDiv.appendChild(heading);
-
-    // ចំណាយបែងចែកតាមប្រភេទ សម្រាប់ថ្ងៃនេះ
-    const catTotals = {}; // category -> {USD, KHR}
-    dayEntries.forEach(e=>{
-      if(e.type !== "expense") return;
-      if(!catTotals[e.category]) catTotals[e.category] = {USD:0, KHR:0};
-      if(e.currency === "KHR") catTotals[e.category].KHR += Number(e.amount)||0;
-      else catTotals[e.category].USD += Number(e.amount)||0;
-    });
-    const catList = Object.keys(catTotals).sort((a,b)=> {
-      const av = catTotals[a].USD + catTotals[a].KHR/4000;
-      const bv = catTotals[b].USD + catTotals[b].KHR/4000;
-      return bv - av;
-    });
-    if(catList.length){
-      const catRow = document.createElement("div");
-      catRow.className = "cat-breakdown";
-      catList.forEach(cat=>{
-        const t = catTotals[cat];
-        const parts = [];
-        if(t.USD) parts.push(fmtAmount(t.USD,"USD"));
-        if(t.KHR) parts.push(fmtAmount(t.KHR,"KHR"));
-        const chip = document.createElement("span");
-        chip.className = "cat-chip";
-        chip.innerHTML = `<span class="n">${escapeHtml(cat)}</span>${parts.join(" / ")}`;
-        catRow.appendChild(chip);
-      });
-      groupDiv.appendChild(catRow);
-    }
 
     dayEntries.forEach(e=>{
       const row = document.createElement("div");
