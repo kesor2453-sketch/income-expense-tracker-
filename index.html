@@ -621,6 +621,7 @@ function subscribeToEntries(uid){
   }, (err)=>{
     console.error("Sync error", err);
     $("syncDot").classList.add("off");
+    alert("ការតភ្ជាប់ទិន្នន័យមានបញ្ហា៖ " + err.code + " - " + err.message);
   });
 }
 
@@ -629,9 +630,11 @@ async function saveEntries(){
   if(!user) return;
   try{
     await db.collection("users").doc(user.uid).set({ entries }, { merge: true });
+    $("syncDot").classList.remove("off");
   }catch(err){
     console.error("Save failed", err);
     $("syncDot").classList.add("off");
+    alert("រក្សាទុកមិនបានទេ៖ " + err.code + " - " + err.message);
   }
 }
 
