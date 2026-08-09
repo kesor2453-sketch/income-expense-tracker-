@@ -12,9 +12,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ចំណូល-ចំណាយ">
 <meta name="mobile-web-app-capable" content="yes">
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --paper:#F5F2EA;
@@ -518,34 +515,18 @@ $("typeToggle").addEventListener("click",(e)=>{
   setType(btn.dataset.type);
 });
 
-/* ===== Firebase config =====
-   ជំនួសតម្លៃខាងក្រោមដោយតម្លៃពិតរបស់អ្នក ដែលបានចម្លងពី Firebase Console
-   (Project settings → General → Your apps → SDK setup and configuration)
+/* ===== Google Apps Script backend =====
+   ដាក់ URL របស់ Apps Script Web App ដែលបង deploy ចូលទីនេះ
+   (ចម្លងពី Deploy → New deployment → Web app → URL)
 */
-const firebaseConfig = {
-  apiKey: "AIzaSyAHXeCcDySYHe90wHDzsFjS7Rgg7eeNtlM",
-  authDomain: "income-expense-tracker-254f7.firebaseapp.com",
-  projectId: "income-expense-tracker-254f7",
-  storageBucket: "income-expense-tracker-254f7.firebasestorage.app",
-  messagingSenderId: "357245248442",
-  appId: "1:357245248442:web:c1ca23764721dbd0e4b383"
-};
+const API_URL = "https://script.google.com/macros/s/AKfycbyQXUkWQj9JkQaX-sTGDBZI-M15ST4TaGlLUHJNuaqAW09mjf2mE8xI0tbspOF6Q8Fh_A/exec";
+const SESSION_KEY = "tracker_session_v1";
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-const EMAIL_DOMAIN = "@tracker.local";
-function usernameToEmail(u){
-  return u.trim().toLowerCase().replace(/\s+/g,"") + EMAIL_DOMAIN;
-}
-
-let unsubscribeSnapshot = null;
 let authMode = "login"; // or "signup"
+let currentUser = null; // { username, password }
 
 function setAuthErr(msg){ $("authErr").textContent = msg || ""; }
 
-// re-bind switch link each time it's re-rendered
 function rebindSwitchLink(){
   const link = document.getElementById("authSwitchLink");
   if(link) link.onclick = toggleAuthMode;
@@ -566,6 +547,18 @@ function toggleAuthMode(){
 }
 rebindSwitchLink();
 
+async function apiCall(action, extra){
+  const payload = Object.assign({ action }, extra);
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight on Apps Script
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error("HTTP " + res.status);
+  const data = await res.json();
+  return data;
+}
+
 $("authSubmitBtn").addEventListener("click", async ()=>{
   const uname = $("authUsername").value.trim();
   const pass = $("authPassword").value;
@@ -573,68 +566,73 @@ $("authSubmitBtn").addEventListener("click", async ()=>{
 
   if(!uname || !pass){ setAuthErr("សូមបំពេញឈ្មោះអ្នកប្រើ និងពាក្យសម្ងាត់"); return; }
   if(pass.length < 6){ setAuthErr("ពាក្យសម្ងាត់ត្រូវការយ៉ាងតិច ៦ តួអក្សរ"); return; }
+  if(API_URL.indexOf("PASTE_YOUR") === 0){ setAuthErr("សូមដាក់ Apps Script URL ជាមុនសិន (មើលកូដ)"); return; }
 
-  const email = usernameToEmail(uname);
   $("authSubmitBtn").disabled = true;
-
   try{
-    if(authMode === "signup"){
-      await auth.createUserWithEmailAndPassword(email, pass);
+    const result = await apiCall(authMode, { username: uname, password: pass });
+    if(!result.success){
+      setAuthErr(result.message || "មានបញ្ហា");
     } else {
-      await auth.signInWithEmailAndPassword(email, pass);
+      currentUser = { username: uname.trim().toLowerCase(), password: pass };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+      entries = result.entries || [];
+      showApp();
     }
   }catch(err){
-    if(err.code === "auth/email-already-in-use"){
-      setAuthErr("ឈ្មោះអ្នកប្រើនេះមានគេប្រើរួចហើយ");
-    } else if(err.code === "auth/wrong-password" || err.code === "auth/user-not-found" || err.code === "auth/invalid-credential"){
-      setAuthErr("ឈ្មោះអ្នកប្រើ ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ");
-    } else {
-      setAuthErr("មានបញ្ហា៖ " + err.message);
-    }
+    setAuthErr("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
   }
   $("authSubmitBtn").disabled = false;
 });
 
-$("logoutBtn").addEventListener("click", ()=> auth.signOut());
-
-auth.onAuthStateChanged((user)=>{
-  if(unsubscribeSnapshot){ unsubscribeSnapshot(); unsubscribeSnapshot = null; }
-
-  if(user){
-    $("loginScreen").style.display = "none";
-    $("appRoot").style.display = "block";
-    $("userLabel").textContent = user.email.replace(EMAIL_DOMAIN, "");
-    subscribeToEntries(user.uid);
-  } else {
-    $("appRoot").style.display = "none";
-    $("loginScreen").style.display = "flex";
-    entries = [];
-  }
+$("logoutBtn").addEventListener("click", ()=>{
+  currentUser = null;
+  entries = [];
+  localStorage.removeItem(SESSION_KEY);
+  $("appRoot").style.display = "none";
+  $("loginScreen").style.display = "flex";
 });
 
-function subscribeToEntries(uid){
-  const docRef = db.collection("users").doc(uid);
-  unsubscribeSnapshot = docRef.onSnapshot((doc)=>{
-    $("syncDot").classList.remove("off");
-    entries = (doc.exists && doc.data().entries) ? doc.data().entries : [];
-    render();
-  }, (err)=>{
-    console.error("Sync error", err);
-    $("syncDot").classList.add("off");
-    alert("ការតភ្ជាប់ទិន្នន័យមានបញ្ហា៖ " + err.code + " - " + err.message);
-  });
+function showApp(){
+  $("loginScreen").style.display = "none";
+  $("appRoot").style.display = "block";
+  $("userLabel").textContent = currentUser.username;
+  render();
+}
+
+async function tryRestoreSession(){
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(!raw) return;
+  try{
+    const saved = JSON.parse(raw);
+    const result = await apiCall("login", { username: saved.username, password: saved.password });
+    if(result.success){
+      currentUser = saved;
+      entries = result.entries || [];
+      showApp();
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+    }
+  }catch(err){
+    // offline or server unreachable — stay on login screen
+    console.error("Session restore failed", err);
+  }
 }
 
 async function saveEntries(){
-  const user = auth.currentUser;
-  if(!user) return;
+  if(!currentUser) return;
   try{
-    await db.collection("users").doc(user.uid).set({ entries }, { merge: true });
-    $("syncDot").classList.remove("off");
+    const result = await apiCall("save", { username: currentUser.username, password: currentUser.password, entries });
+    if(!result.success){
+      $("syncDot").classList.add("off");
+      alert("រក្សាទុកមិនបានទេ៖ " + (result.message || "unknown error"));
+    } else {
+      $("syncDot").classList.remove("off");
+    }
   }catch(err){
     console.error("Save failed", err);
     $("syncDot").classList.add("off");
-    alert("រក្សាទុកមិនបានទេ៖ " + err.code + " - " + err.message);
+    alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
   }
 }
 
@@ -838,6 +836,7 @@ $("printBtn").addEventListener("click", ()=> window.print());
 // init
 $("fDate").value = todayStr();
 populateCategories();
+tryRestoreSession();
 </script>
 </body>
 </html>
