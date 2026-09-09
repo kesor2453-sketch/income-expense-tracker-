@@ -354,6 +354,12 @@
     min-height:16px;
     margin-bottom:8px;
   }
+  .login-card .msg-ok{
+    color:var(--income);
+    font-size:12.5px;
+    min-height:16px;
+    margin-bottom:8px;
+  }
   .login-card .btn{width:100%;margin-bottom:10px;}
   .login-switch{
     text-align:center;
@@ -361,6 +367,12 @@
     color:var(--ink-soft);
   }
   .login-switch a{color:var(--gold);cursor:pointer;font-weight:600;text-decoration:none;}
+  .login-extra-link{
+    text-align:center;
+    font-size:12.5px;
+    margin-bottom:14px;
+  }
+  .login-extra-link a{color:var(--ink-soft);cursor:pointer;text-decoration:underline;}
   .user-bar{
     display:flex;
     justify-content:space-between;
@@ -386,20 +398,51 @@
 
 <div class="login-wrap" id="loginScreen">
   <div class="login-card">
-    <h1>សៀវភៅចំណូល-ចំណាយ</h1>
+    <h1 id="loginTitle">សៀវភៅចំណូល-ចំណាយ</h1>
     <div class="sub" id="loginSub">ចូលគណនីរបស់អ្នក ដើម្បីមើលទិន្នន័យដូចគ្នាលើគ្រប់ឧបករណ៍</div>
 
-    <div class="field">
-      <label>ឈ្មោះអ្នកប្រើ</label>
-      <input type="text" id="authUsername" autocomplete="username" placeholder="ឧ. linda_hmv">
+    <div id="loginFields">
+      <div class="field">
+        <label>ឈ្មោះអ្នកប្រើ</label>
+        <input type="text" id="authUsername" autocomplete="username" placeholder="ឧ. linda_hmv">
+      </div>
+      <div class="field">
+        <label>ពាក្យសម្ងាត់</label>
+        <input type="password" id="authPassword" autocomplete="current-password" placeholder="យ៉ាងតិច ៦ តួអក្សរ">
+      </div>
     </div>
-    <div class="field">
-      <label>ពាក្យសម្ងាត់</label>
-      <input type="password" id="authPassword" autocomplete="current-password" placeholder="យ៉ាងតិច ៦ តួអក្សរ">
+
+    <div id="resetRequestFields" style="display:none;">
+      <div class="field">
+        <label>ឈ្មោះអ្នកប្រើ</label>
+        <input type="text" id="resetUsername" autocomplete="username" placeholder="ឧ. linda_hmv">
+      </div>
     </div>
+
+    <div id="resetConfirmFields" style="display:none;">
+      <div class="field">
+        <label>លេខកូដពី Telegram</label>
+        <input type="text" id="resetCode" inputmode="numeric" placeholder="ឧ. 482913">
+      </div>
+      <div class="field">
+        <label>ពាក្យសម្ងាត់ថ្មី</label>
+        <input type="password" id="resetNewPassword" autocomplete="new-password" placeholder="យ៉ាងតិច ៦ តួអក្សរ">
+      </div>
+      <div class="field">
+        <label>បញ្ជាក់ពាក្យសម្ងាត់ថ្មី</label>
+        <input type="password" id="resetConfirmPassword" autocomplete="new-password" placeholder="វាយម្តងទៀត">
+      </div>
+    </div>
+
     <div class="err" id="authErr"></div>
+    <div class="msg-ok" id="authOk"></div>
 
     <button class="btn btn-add" id="authSubmitBtn">ចូលប្រើ</button>
+
+    <div class="login-extra-link" id="forgotLinkWrap">
+      <a id="forgotLink">ភ្លេចលេខសម្ងាត់?</a>
+    </div>
+
     <div class="login-switch" id="authSwitchWrap">
       មិនទាន់មានគណនី? <a id="authSwitchLink">ចុះឈ្មោះថ្មី</a>
     </div>
@@ -411,6 +454,7 @@
   <div class="user-bar no-print">
     <span><span class="sync-dot" id="syncDot"></span><span id="userLabel"></span></span>
     <span>
+      <button id="linkTelegramBtn">ភ្ជាប់ Telegram</button>
       <button id="changeUserBtn">ប្តូរឈ្មោះ</button>
       <button id="logoutBtn">ចាកចេញ</button>
     </span>
@@ -602,23 +646,51 @@ $("typeToggle").addEventListener("click",(e)=>{
 const API_URL = "https://script.google.com/macros/s/AKfycbyQXUkWQj9JkQaX-sTGDBZI-M15ST4TaGlLUHJNuaqAW09mjf2mE8xI0tbspOF6Q8Fh_A/exec";
 const SESSION_KEY = "tracker_session_v1";
 
-let authMode = "login"; // or "signup"
+let authMode = "login"; // "login" | "signup" | "reset"
+let resetStage = "request"; // "request" | "confirm"
+let pendingResetUsername = "";
 let currentUser = null; // { username, password }
 
-function setAuthErr(msg){ $("authErr").textContent = msg || ""; }
+function setAuthErr(msg){ $("authErr").textContent = msg || ""; $("authOk").textContent = ""; }
+function setAuthOk(msg){ $("authOk").textContent = msg || ""; $("authErr").textContent = ""; }
 
 function rebindSwitchLink(){
   const link = document.getElementById("authSwitchLink");
-  if(link) link.onclick = toggleAuthMode;
+  if(link) link.onclick = () => setAuthMode(authMode === "signup" ? "login" : "signup");
+  const forgot = document.getElementById("forgotLink");
+  if(forgot) forgot.onclick = () => setAuthMode("reset");
 }
-function toggleAuthMode(){
-  authMode = authMode === "login" ? "signup" : "login";
+
+function setAuthMode(mode){
+  authMode = mode;
   setAuthErr("");
-  if(authMode === "signup"){
+
+  const isReset = mode === "reset";
+  $("loginFields").style.display = isReset ? "none" : "block";
+  $("forgotLinkWrap").style.display = isReset ? "none" : "block";
+
+  if(isReset){
+    resetStage = "request";
+    pendingResetUsername = "";
+    $("resetRequestFields").style.display = "block";
+    $("resetConfirmFields").style.display = "none";
+  } else {
+    $("resetRequestFields").style.display = "none";
+    $("resetConfirmFields").style.display = "none";
+  }
+
+  if(mode === "signup"){
+    $("loginTitle").textContent = "សៀវភៅចំណូល-ចំណាយ";
     $("authSubmitBtn").textContent = "ចុះឈ្មោះ";
     $("loginSub").textContent = "បង្កើតគណនីថ្មី ដើម្បីប្រើលើគ្រប់ឧបករណ៍";
     $("authSwitchWrap").innerHTML = 'មានគណនីរួចហើយ? <a id="authSwitchLink">ចូលប្រើ</a>';
+  } else if(mode === "reset"){
+    $("loginTitle").textContent = "កំណត់ពាក្យសម្ងាត់ថ្មី";
+    $("authSubmitBtn").textContent = "ផ្ញើលេខកូដតាម Telegram";
+    $("loginSub").textContent = "បញ្ចូលឈ្មោះអ្នកប្រើ ដើម្បីទទួលលេខកូដ reset តាម Telegram";
+    $("authSwitchWrap").innerHTML = '<a id="authSwitchLink">ត្រឡប់ទៅចូលប្រើវិញ</a>';
   } else {
+    $("loginTitle").textContent = "សៀវភៅចំណូល-ចំណាយ";
     $("authSubmitBtn").textContent = "ចូលប្រើ";
     $("loginSub").textContent = "ចូលគណនីរបស់អ្នក ដើម្បីមើលទិន្នន័យដូចគ្នាលើគ្រប់ឧបករណ៍";
     $("authSwitchWrap").innerHTML = 'មិនទាន់មានគណនី? <a id="authSwitchLink">ចុះឈ្មោះថ្មី</a>';
@@ -640,6 +712,15 @@ async function apiCall(action, extra){
 }
 
 $("authSubmitBtn").addEventListener("click", async ()=>{
+  if(authMode === "reset"){
+    if(resetStage === "request"){
+      await handleRequestResetCode();
+    } else {
+      await handleConfirmReset();
+    }
+    return;
+  }
+
   const uname = $("authUsername").value.trim();
   const pass = $("authPassword").value;
   setAuthErr("");
@@ -664,6 +745,79 @@ $("authSubmitBtn").addEventListener("click", async ()=>{
   }
   $("authSubmitBtn").disabled = false;
 });
+
+async function handleRequestResetCode(){
+  const uname = $("resetUsername").value.trim();
+  setAuthErr("");
+
+  if(!uname){ setAuthErr("សូមបញ្ចូលឈ្មោះអ្នកប្រើ"); return; }
+  if(API_URL.indexOf("PASTE_YOUR") === 0){ setAuthErr("សូមដាក់ Apps Script URL ជាមុនសិន (មើលកូដ)"); return; }
+
+  $("authSubmitBtn").disabled = true;
+  try{
+    const result = await apiCall("requestResetCode", { username: uname });
+    if(!result.success){
+      setAuthErr(result.message || "មិនអាចផ្ញើលេខកូដបានទេ");
+    } else {
+      pendingResetUsername = uname;
+      resetStage = "confirm";
+      $("resetRequestFields").style.display = "none";
+      $("resetConfirmFields").style.display = "block";
+      $("authSubmitBtn").textContent = "កំណត់ពាក្យសម្ងាត់ថ្មី";
+      $("loginSub").textContent = "លេខកូដត្រូវបានផ្ញើទៅ Telegram របស់អ្នកហើយ";
+      setAuthOk("សូមពិនិត្យមើល Telegram សម្រាប់លេខកូដ");
+    }
+  }catch(err){
+    setAuthErr("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
+  }
+  $("authSubmitBtn").disabled = false;
+}
+
+async function handleConfirmReset(){
+  const code = $("resetCode").value.trim();
+  const newPass = $("resetNewPassword").value;
+  const confirmPass = $("resetConfirmPassword").value;
+  setAuthErr("");
+
+  if(!code || !newPass || !confirmPass){ setAuthErr("សូមបំពេញគ្រប់ប្រអប់"); return; }
+  if(newPass.length < 6){ setAuthErr("ពាក្យសម្ងាត់ត្រូវការយ៉ាងតិច ៦ តួអក្សរ"); return; }
+  if(newPass !== confirmPass){ setAuthErr("ពាក្យសម្ងាត់ទាំងពីរមិនដូចគ្នាទេ"); return; }
+
+  $("authSubmitBtn").disabled = true;
+  try{
+    const result = await apiCall("confirmResetPassword", { username: pendingResetUsername, code, newPassword: newPass });
+    if(!result.success){
+      setAuthErr(result.message || "មិនអាចកំណត់ពាក្យសម្ងាត់ថ្មីបានទេ");
+    } else {
+      const uname = pendingResetUsername;
+      $("resetCode").value = "";
+      $("resetNewPassword").value = "";
+      $("resetConfirmPassword").value = "";
+      setAuthMode("login");
+      setAuthOk("កំណត់ពាក្យសម្ងាត់ថ្មីជោគជ័យ! សូមចូលប្រើវិញ។");
+      $("authUsername").value = uname;
+    }
+  }catch(err){
+    setAuthErr("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
+  }
+  $("authSubmitBtn").disabled = false;
+}
+
+async function requestTelegramLink(){
+  if(!currentUser) return;
+  try{
+    const result = await apiCall("requestTelegramLink", { username: currentUser.username, password: currentUser.password });
+    if(!result.success){
+      alert(result.message || "មិនអាចបង្កើតលេខកូដបានទេ");
+      return;
+    }
+    const botLabel = result.botUsername ? "@" + result.botUsername : "bot របស់អ្នក";
+    alert("សូមបើក Telegram ស្វែងរក " + botLabel + " រួចផ្ញើសារនេះទៅវា៖\n\n/link " + result.code + "\n\nលេខកូដនេះមានសុពលភាព ១០ នាទី។");
+  }catch(err){
+    alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
+  }
+}
+$("linkTelegramBtn").addEventListener("click", requestTelegramLink);
 
 $("logoutBtn").addEventListener("click", ()=>{
   currentUser = null;
