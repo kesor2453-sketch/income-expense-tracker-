@@ -1119,7 +1119,8 @@ function renderMonthSummary(scope){
     titleLabel = `ចំណាយថ្ងៃនេះ (${khmerDate(t)}) តាមប្រភេទ`;
   } else if(scope === "all"){
     scopeEntries = entries.filter(e => e.type === "expense");
-    titleLabel = "ចំណាយសរុបទាំងអស់ តាមប្រភេទ";
+    const monthsSet = new Set(scopeEntries.map(e => e.date ? e.date.slice(0,7) : null).filter(Boolean));
+    titleLabel = `ចំណាយសរុបទាំងអស់ (${monthsSet.size} ខែ) តាមប្រភេទ`;
   } else {
     const currentMonth = todayStr().slice(0,7);
     scopeEntries = entries.filter(e => e.date && e.date.startsWith(currentMonth) && e.type === "expense");
