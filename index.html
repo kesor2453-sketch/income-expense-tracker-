@@ -150,6 +150,13 @@
   }
   .chip:hover{background:#F0ECE0;}
   .chip.active{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
+  .chip .chip-del{
+    margin-left:8px;
+    font-weight:700;
+    opacity:0.55;
+  }
+  .chip .chip-del:hover{opacity:1;color:var(--expense);}
+  .chip.active .chip-del:hover{color:#fff;}
   .amount-row{display:flex;gap:8px;}
   .amount-row .field{flex:1;}
   .amount-row .field.currency{flex:0 0 90px;}
@@ -571,11 +578,44 @@ let entries = [];
 let currentType = "income";
 let editingId = null;
 
+const CUSTOM_NOTES_KEY = "tracker_custom_notes_v1";
+let customNotes = loadCustomNotes();
+
+function loadCustomNotes(){
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_NOTES_KEY) || "{}");
+  } catch(e){
+    return {};
+  }
+}
+
+function saveCustomNotes(){
+  localStorage.setItem(CUSTOM_NOTES_KEY, JSON.stringify(customNotes));
+}
+
+function addCustomNote(category, text){
+  if(!text) return;
+  const builtIn = NOTE_SUGGESTIONS[category] || [];
+  if(builtIn.includes(text)) return;
+  if(!customNotes[category]) customNotes[category] = [];
+  if(customNotes[category].includes(text)) return;
+  customNotes[category].push(text);
+  saveCustomNotes();
+}
+
+function removeCustomNote(category, text){
+  if(!customNotes[category]) return;
+  customNotes[category] = customNotes[category].filter(n => n !== text);
+  saveCustomNotes();
+}
+
 const $ = (id) => document.getElementById(id);
 
 function todayStr(){
   const d = new Date();
-  return d.toISOString().slice(0,10);
+  const offsetMs = d.getTimezoneOffset() * 60000;
+  const local = new Date(d.getTime() - offsetMs);
+  return local.toISOString().slice(0,10);
 }
 
 function fmtAmount(val, currency){
@@ -605,13 +645,31 @@ function renderNoteChips(){
   const wrap = $("noteChips");
   wrap.innerHTML = "";
   const cat = $("fCategory").value;
-  const suggestions = NOTE_SUGGESTIONS[cat] || [];
+  const builtIn = NOTE_SUGGESTIONS[cat] || [];
+  const custom = customNotes[cat] || [];
+  const suggestions = [...builtIn, ...custom];
+
   suggestions.forEach(s=>{
+    const isCustom = custom.includes(s);
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip";
-    chip.textContent = s;
-    chip.addEventListener("click", ()=>{
+
+    if(isCustom){
+      chip.innerHTML = `<span class="chip-text"></span><span class="chip-del" title="លុប">×</span>`;
+      chip.querySelector(".chip-text").textContent = s;
+    } else {
+      chip.textContent = s;
+    }
+
+    chip.addEventListener("click", (e)=>{
+      if(isCustom && e.target.classList.contains("chip-del")){
+        e.stopPropagation();
+        removeCustomNote(cat, s);
+        selectedChips.delete(s);
+        renderNoteChips();
+        return;
+      }
       if(selectedChips.has(s)){ selectedChips.delete(s); chip.classList.remove("active"); }
       else { selectedChips.add(s); chip.classList.add("active"); }
     });
@@ -902,6 +960,10 @@ function addEntry(){
   if(!amount || amount <= 0){
     $("fAmount").focus();
     return;
+  }
+
+  if(customText){
+    addCustomNote(category, customText);
   }
 
   if(editingId){
