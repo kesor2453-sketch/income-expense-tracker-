@@ -467,6 +467,7 @@
     <span><span class="sync-dot" id="syncDot"></span><span id="userLabel"></span></span>
     <span>
       <button id="linkTelegramBtn">ភ្ជាប់ Telegram</button>
+      <button id="unlinkTelegramBtn">ផ្ដាច់ Telegram</button>
       <button id="changeUserBtn">ប្តូរឈ្មោះ</button>
       <button id="logoutBtn">ចាកចេញ</button>
     </span>
@@ -539,7 +540,21 @@
 
   <div class="filter-bar no-print">
     <label class="month-filter-label" for="filterMonth">មើលខែផ្សេង៖</label>
-    <input type="month" id="filterMonth" title="ជ្រើសរើសខែ ដើម្បីមើលប្រតិបត្តិការនិងចំណាយចាស់ៗ (លំនាំដើមបង្ហាញតែថ្ងៃនេះ)">
+    <select id="filterMonth" title="ជ្រើសរើសខែ ដើម្បីមើលប្រតិបត្តិការនិងចំណាយចាស់ៗ (លំនាំដើមបង្ហាញតែថ្ងៃនេះ)">
+      <option value="">ថ្ងៃនេះ (លំនាំដើម)</option>
+      <option value="01">មករា</option>
+      <option value="02">កុម្ភៈ</option>
+      <option value="03">មីនា</option>
+      <option value="04">មេសា</option>
+      <option value="05">ឧសភា</option>
+      <option value="06">មិថុនា</option>
+      <option value="07">កក្កដា</option>
+      <option value="08">សីហា</option>
+      <option value="09">កញ្ញា</option>
+      <option value="10">តុលា</option>
+      <option value="11">វិច្ឆិកា</option>
+      <option value="12">ធ្នូ</option>
+    </select>
     <select id="filterType">
       <option value="all">ទាំងអស់</option>
       <option value="income">ចំណូលតែប៉ុណ្ណោះ</option>
@@ -877,6 +892,24 @@ async function requestTelegramLink(){
 }
 $("linkTelegramBtn").addEventListener("click", requestTelegramLink);
 
+async function unlinkTelegram(){
+  if(!currentUser) return;
+  const confirmed = confirm("តើអ្នកប្រាកដជាចង់ផ្ដាច់ Telegram ចេញពីគណនីនេះមែនទេ? អ្នកនឹងលែងអាចទទួលលេខកូដ reset ពាក្យសម្ងាត់តាម Telegram រហូតដល់ភ្ជាប់ម្តងទៀត។");
+  if(!confirmed) return;
+
+  try{
+    const result = await apiCall("unlinkTelegram", { username: currentUser.username, password: currentUser.password });
+    if(!result.success){
+      alert(result.message || "មិនអាចផ្ដាច់បានទេ");
+      return;
+    }
+    alert("ផ្ដាច់ Telegram ជោគជ័យ!");
+  }catch(err){
+    alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
+  }
+}
+$("unlinkTelegramBtn").addEventListener("click", unlinkTelegram);
+
 $("logoutBtn").addEventListener("click", ()=>{
   currentUser = null;
   entries = [];
@@ -1129,7 +1162,9 @@ function render(){
   balEl.classList.toggle("neg", balUSD < 0);
 
   // filters
-  const monthFilter = $("filterMonth").value; // "YYYY-MM"
+  const monthRaw = $("filterMonth").value; // "" ឬ "01".."12"
+  const currentYear = today.slice(0,4);
+  const monthFilter = monthRaw ? (currentYear + "-" + monthRaw) : ""; // "YYYY-MM"
   const typeFilter = $("filterType").value;
   const searchFilter = $("filterSearch").value.trim().toLowerCase();
 
