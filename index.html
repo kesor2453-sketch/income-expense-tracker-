@@ -194,6 +194,11 @@
     background:var(--card);
   }
   .filter-bar .spacer{flex:1;}
+  .month-filter-label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
 
   /* Ledger */
   .day-group{margin-bottom:16px;}
@@ -533,7 +538,8 @@
   </div>
 
   <div class="filter-bar no-print">
-    <input type="month" id="filterMonth">
+    <label class="month-filter-label" for="filterMonth">មើលខែផ្សេង៖</label>
+    <input type="month" id="filterMonth" title="ជ្រើសរើសខែ ដើម្បីមើលប្រតិបត្តិការនិងចំណាយចាស់ៗ (លំនាំដើមបង្ហាញតែថ្ងៃនេះ)">
     <select id="filterType">
       <option value="all">ទាំងអស់</option>
       <option value="income">ចំណូលតែប៉ុណ្ណោះ</option>
