@@ -546,12 +546,11 @@
 </div>
 
 <script>
-const INCOME_CATS = ["ប្រាក់ខែ HMV","ប្រាក់ខែ SPV","ចំណូលបន្ថែម","ជំនួយគ្រួសារ","ការវិនិយោគ/ការជួញដូរ","ផ្សេងៗ"];
+const INCOME_CATS = ["ប្រាក់ខែ","ចំណូលបន្ថែម","ជំនួយគ្រួសារ","ការវិនិយោគ/ការជួញដូរ","ផ្សេងៗ"];
 const EXPENSE_CATS = ["អាហារ","ធ្វើដំណើរ/សាំង","ជួលផ្ទះ/ក្រុមហ៊ុន","អគ្គិសនី/ទឹក/អ៊ីនធឺណិត","សុខភាព","គ្រួសារ/កូន","សិក្សា","សម្លៀកបំពាក់","កម្សាន្ត","សន្សំ","ផ្សេងៗ"];
 
 const NOTE_SUGGESTIONS = {
-  "ប្រាក់ខែ HMV": ["ប្រាក់ខែ HMV ១២ម៉ោង","ប្រាក់ខែ HMV ២៤ម៉ោង","ប្រាក់ខែ HMV OPD","ប្រាក់ខែ HMV IPD"],
-  "ប្រាក់ខែ SPV": ["ប្រាក់ខែ SPV ១២ម៉ោង","ប្រាក់ខែ SPV ២៤ម៉ោង","ប្រាក់ខែ SPV OPD","ប្រាក់ខែ SPV IPD"],
+  "ប្រាក់ខែ": ["HMV ១២ម៉ោង","HMV ២៤ម៉ោង","HMV OPD","HMV IPD","SPV ១២ម៉ោង","SPV ២៤ម៉ោង","SPV OPD","SPV IPD"],
   "ចំណូលបន្ថែម": ["ប្រឹក្សាយោបល់វេជ្ជសាស្ត្រ","ថ្លៃពិគ្រោះជាមួយអ្នកជំងឺឯកជន","កម្រៃជើងសារ"],
   "ជំនួយគ្រួសារ": ["ជំនួយពីឪពុកម្តាយ","ជំនួយពីបងប្អូន"],
   "ការវិនិយោគ/ការជួញដូរ": ["ចំណេញពីការជួញដូរ MT5","ការវិនិយោគផ្សេងៗ"],
@@ -605,13 +604,8 @@ function renderNoteChips(){
   selectedChips.clear();
   const wrap = $("noteChips");
   wrap.innerHTML = "";
-  let suggestions;
-  if(currentType === "income"){
-    suggestions = ["HMV","SPV","Investive"];
-  } else {
-    const cat = $("fCategory").value;
-    suggestions = NOTE_SUGGESTIONS[cat] || [];
-  }
+  const cat = $("fCategory").value;
+  const suggestions = NOTE_SUGGESTIONS[cat] || [];
   suggestions.forEach(s=>{
     const chip = document.createElement("button");
     chip.type = "button";
@@ -1072,7 +1066,12 @@ function render(){
   const searchFilter = $("filterSearch").value.trim().toLowerCase();
 
   let filtered = entries.filter(e=>{
-    if(monthFilter && !e.date.startsWith(monthFilter)) return false;
+    if(monthFilter){
+      if(!e.date.startsWith(monthFilter)) return false;
+    } else {
+      // លំនាំដើម (មិនបានជ្រើសខែ): បង្ហាញតែប្រតិបត្តិការថ្ងៃនេះប៉ុណ្ណោះ
+      if(e.date !== today) return false;
+    }
     if(typeFilter !== "all" && e.type !== typeFilter) return false;
     if(searchFilter){
       const hay = (e.category + " " + (e.note||"")).toLowerCase();
@@ -1097,7 +1096,10 @@ function render(){
   ledger.innerHTML = "";
 
   if(dates.length === 0){
-    ledger.innerHTML = `<div class="empty">មិនទាន់មានប្រតិបត្តិការទេ។ ចាប់ផ្តើមបញ្ចូលចំណូល ឬចំណាយខាងលើ។</div>`;
+    const msg = monthFilter
+      ? "គ្មានប្រតិបត្តិការសម្រាប់ខែនេះទេ។"
+      : "មិនទាន់មានប្រតិបត្តិការថ្ងៃនេះទេ។ (ជ្រើសរើសខែខាងលើ ដើម្បីមើលប្រតិបត្តិការចាស់ៗ)";
+    ledger.innerHTML = `<div class="empty">${msg}</div>`;
     return;
   }
 
