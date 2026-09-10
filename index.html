@@ -539,22 +539,6 @@
   </div>
 
   <div class="filter-bar no-print">
-    <label class="month-filter-label" for="filterMonth">មើលខែផ្សេង៖</label>
-    <select id="filterMonth" title="ជ្រើសរើសខែ ដើម្បីមើលប្រតិបត្តិការនិងចំណាយចាស់ៗ (លំនាំដើមបង្ហាញតែថ្ងៃនេះ)">
-      <option value="">ថ្ងៃនេះ (លំនាំដើម)</option>
-      <option value="01">មករា</option>
-      <option value="02">កុម្ភៈ</option>
-      <option value="03">មីនា</option>
-      <option value="04">មេសា</option>
-      <option value="05">ឧសភា</option>
-      <option value="06">មិថុនា</option>
-      <option value="07">កក្កដា</option>
-      <option value="08">សីហា</option>
-      <option value="09">កញ្ញា</option>
-      <option value="10">តុលា</option>
-      <option value="11">វិច្ឆិកា</option>
-      <option value="12">ធ្នូ</option>
-    </select>
     <select id="filterType">
       <option value="all">ទាំងអស់</option>
       <option value="income">ចំណូលតែប៉ុណ្ណោះ</option>
@@ -1161,20 +1145,12 @@ function render(){
   balEl.classList.toggle("pos", balUSD >= 0);
   balEl.classList.toggle("neg", balUSD < 0);
 
-  // filters
-  const monthRaw = $("filterMonth").value; // "" ឬ "01".."12"
-  const currentYear = today.slice(0,4);
-  const monthFilter = monthRaw ? (currentYear + "-" + monthRaw) : ""; // "YYYY-MM"
+  // filters (ស្វ័យប្រវត្តិ៖ ថ្ងៃនេះ/ខែនេះ)
   const typeFilter = $("filterType").value;
   const searchFilter = $("filterSearch").value.trim().toLowerCase();
 
   let filtered = entries.filter(e=>{
-    if(monthFilter){
-      if(!e.date.startsWith(monthFilter)) return false;
-    } else {
-      // លំនាំដើម (មិនបានជ្រើសខែ): បង្ហាញតែប្រតិបត្តិការថ្ងៃនេះប៉ុណ្ណោះ
-      if(e.date !== today) return false;
-    }
+    if(e.date !== today) return false;
     if(typeFilter !== "all" && e.type !== typeFilter) return false;
     if(searchFilter){
       const hay = (e.category + " " + (e.note||"")).toLowerCase();
@@ -1183,8 +1159,8 @@ function render(){
     return true;
   });
 
-  // ខែសម្រាប់សរុប៖ ប្រើ filter ប្រសិនបានជ្រើស បើអត់ប្រើខែបច្ចុប្បន្ន
-  const summaryMonth = monthFilter || today.slice(0,7);
+  // ខែសម្រាប់សរុប៖ ប្រើខែបច្ចុប្បន្នជានិច្ច
+  const summaryMonth = today.slice(0,7);
   renderMonthSummary(summaryMonth);
 
   // group by date desc
@@ -1199,10 +1175,7 @@ function render(){
   ledger.innerHTML = "";
 
   if(dates.length === 0){
-    const msg = monthFilter
-      ? "គ្មានប្រតិបត្តិការសម្រាប់ខែនេះទេ។"
-      : "មិនទាន់មានប្រតិបត្តិការថ្ងៃនេះទេ។ (ជ្រើសរើសខែខាងលើ ដើម្បីមើលប្រតិបត្តិការចាស់ៗ)";
-    ledger.innerHTML = `<div class="empty">${msg}</div>`;
+    ledger.innerHTML = `<div class="empty">មិនទាន់មានប្រតិបត្តិការថ្ងៃនេះទេ។ ចាប់ផ្តើមបញ្ចូលចំណូល ឬចំណាយខាងលើ។</div>`;
     return;
   }
 
@@ -1256,7 +1229,6 @@ function escapeHtml(str){
 }
 
 $("fCategory").addEventListener("change", renderNoteChips);
-$("filterMonth").addEventListener("change", render);
 $("filterType").addEventListener("change", render);
 $("filterSearch").addEventListener("input", render);
 $("printBtn").addEventListener("click", ()=> window.print());
