@@ -510,13 +510,16 @@
   </div>
 
   <div class="summary" id="summary">
-    <div class="sum-card income">
-      <div class="label">ចំណូលថ្ងៃនេះ</div>
-      <div class="val" id="todayIncome">$0.00</div>
+    <div class="sum-card balance">
+      <div class="label">លុយសល់ពីខែមុន</div>
+      <div class="val" id="carryoverBalance">$0.00</div>
     </div>
-    <div class="sum-card expense">
-      <div class="label">ចំណាយថ្ងៃនេះ</div>
-      <div class="val" id="todayExpense">$0.00</div>
+    <div class="sum-card">
+      <div class="label">ចំណូល/ចំណាយ ខែនេះ</div>
+      <div class="val" style="font-size:14px; line-height:1.6;">
+        <div>ចំណូល: <span id="monthIncomeVal" style="color:var(--income)">$0.00</span></div>
+        <div>ចំណាយ: <span id="monthExpenseVal" style="color:var(--expense)">$0.00</span></div>
+      </div>
     </div>
     <div class="sum-card balance">
       <div class="label">សមតុល្យសរុប</div>
@@ -1158,24 +1161,41 @@ function renderMonthSummary(monthKey){
 function render(){
   // summary
   const today = todayStr();
-  let todayIncomeUSD=0, todayIncomeKHR=0, todayExpenseUSD=0, todayExpenseKHR=0;
+  const currentMonth = today.slice(0,7); // "YYYY-MM"
+  let carryUSD=0, carryKHR=0;
+  let monthIncomeUSD=0, monthIncomeKHR=0, monthExpenseUSD=0, monthExpenseKHR=0;
   let balUSD=0, balKHR=0;
 
   entries.forEach(e=>{
     const amt = Number(e.amount)||0;
     const sign = e.type === "income" ? 1 : -1;
+
+    // សមតុល្យសរុប (គិតគ្រប់ប្រតិបត្តិការទាំងអស់)
     if(e.currency === "KHR"){ balKHR += sign*amt; } else { balUSD += sign*amt; }
-    if(e.date === today){
+
+    // លុយសល់ពីខែមុន (គិតតែប្រតិបត្តិការមុនខែបច្ចុប្បន្ន)
+    if(e.date && e.date.slice(0,7) < currentMonth){
+      if(e.currency === "KHR"){ carryKHR += sign*amt; } else { carryUSD += sign*amt; }
+    }
+
+    // ចំណូល/ចំណាយ ខែនេះ
+    if(e.date && e.date.slice(0,7) === currentMonth){
       if(e.type === "income"){
-        if(e.currency==="KHR") todayIncomeKHR += amt; else todayIncomeUSD += amt;
+        if(e.currency==="KHR") monthIncomeKHR += amt; else monthIncomeUSD += amt;
       } else {
-        if(e.currency==="KHR") todayExpenseKHR += amt; else todayExpenseUSD += amt;
+        if(e.currency==="KHR") monthExpenseKHR += amt; else monthExpenseUSD += amt;
       }
     }
   });
 
-  $("todayIncome").textContent = fmtAmount(todayIncomeUSD,"USD") + (todayIncomeKHR? " / " + fmtAmount(todayIncomeKHR,"KHR") : "");
-  $("todayExpense").textContent = fmtAmount(todayExpenseUSD,"USD") + (todayExpenseKHR? " / " + fmtAmount(todayExpenseKHR,"KHR") : "");
+  const carryEl = $("carryoverBalance");
+  carryEl.textContent = fmtAmount(carryUSD,"USD") + (carryKHR? " / " + fmtAmount(carryKHR,"KHR") : "");
+  carryEl.classList.toggle("pos", carryUSD >= 0);
+  carryEl.classList.toggle("neg", carryUSD < 0);
+
+  $("monthIncomeVal").textContent = fmtAmount(monthIncomeUSD,"USD") + (monthIncomeKHR? " / " + fmtAmount(monthIncomeKHR,"KHR") : "");
+  $("monthExpenseVal").textContent = fmtAmount(monthExpenseUSD,"USD") + (monthExpenseKHR? " / " + fmtAmount(monthExpenseKHR,"KHR") : "");
+
   const balEl = $("totalBalance");
   balEl.textContent = fmtAmount(balUSD,"USD") + (balKHR? " / " + fmtAmount(balKHR,"KHR") : "");
   balEl.classList.toggle("pos", balUSD >= 0);
