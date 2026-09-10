@@ -1107,30 +1107,35 @@ function khmerMonthLabel(monthKey){
   return `${months[m]||""} ${y}`;
 }
 
-function renderMonthSummary(scope){
+function renderMonthSummary(scope, typeFilter){
   const wrap = $("monthSummary");
+  const isIncome = typeFilter === "income";
+  const typeLabel = isIncome ? "ចំណូល" : "ចំណាយ";
+  const entryType = isIncome ? "income" : "expense"; // "all" លំនាំដើមបង្ហាញចំណាយ
+  const barColor = isIncome ? "var(--income)" : "var(--expense)";
+  const barBg = isIncome ? "var(--income-bg)" : "var(--expense-bg)";
 
   let scopeEntries;
   let titleLabel;
 
   if(scope === "today"){
     const t = todayStr();
-    scopeEntries = entries.filter(e => e.date === t && e.type === "expense");
-    titleLabel = `ចំណាយថ្ងៃនេះ (${khmerDate(t)}) តាមប្រភេទ`;
+    scopeEntries = entries.filter(e => e.date === t && e.type === entryType);
+    titleLabel = `${typeLabel}ថ្ងៃនេះ (${khmerDate(t)}) តាមប្រភេទ`;
   } else if(scope === "all"){
-    scopeEntries = entries.filter(e => e.type === "expense");
+    scopeEntries = entries.filter(e => e.type === entryType);
     const monthsSet = new Set(scopeEntries.map(e => e.date ? e.date.slice(0,7) : null).filter(Boolean));
-    titleLabel = `ចំណាយសរុបទាំងអស់ (${monthsSet.size} ខែ) តាមប្រភេទ`;
+    titleLabel = `${typeLabel}សរុបទាំងអស់ (${monthsSet.size} ខែ) តាមប្រភេទ`;
   } else {
     const currentMonth = todayStr().slice(0,7);
-    scopeEntries = entries.filter(e => e.date && e.date.startsWith(currentMonth) && e.type === "expense");
-    titleLabel = `ចំណាយប្រចាំខែ ${khmerMonthLabel(currentMonth)} តាមប្រភេទ`;
+    scopeEntries = entries.filter(e => e.date && e.date.startsWith(currentMonth) && e.type === entryType);
+    titleLabel = `${typeLabel}ប្រចាំខែ ${khmerMonthLabel(currentMonth)} តាមប្រភេទ`;
   }
 
   if(scopeEntries.length === 0){
     wrap.innerHTML = `
       <div class="ms-title"><span>${titleLabel}</span></div>
-      <div class="ms-empty">មិនទាន់មានចំណាយសម្រាប់ចន្លោះពេលនេះទេ</div>`;
+      <div class="ms-empty">មិនទាន់មាន${typeLabel}សម្រាប់ចន្លោះពេលនេះទេ</div>`;
     return;
   }
 
@@ -1161,7 +1166,7 @@ function renderMonthSummary(scope){
     rows += `
       <div class="ms-row">
         <span class="ms-cat">${escapeHtml(cat)}</span>
-        <span class="ms-bar-wrap"><span class="ms-bar" style="width:${pct}%"></span></span>
+        <span class="ms-bar-wrap" style="background:${barBg}"><span class="ms-bar" style="width:${pct}%; background:${barColor}"></span></span>
         <span class="ms-amt">${parts.join(" / ")}</span>
       </div>`;
   });
@@ -1169,7 +1174,7 @@ function renderMonthSummary(scope){
   wrap.innerHTML = `
     <div class="ms-title">
       <span>${titleLabel}</span>
-      <span class="ms-total">សរុប ${fmtAmount(totalUSD,"USD")}${totalKHR? " / " + fmtAmount(totalKHR,"KHR") : ""}</span>
+      <span class="ms-total" style="color:${barColor}">សរុប ${fmtAmount(totalUSD,"USD")}${totalKHR? " / " + fmtAmount(totalKHR,"KHR") : ""}</span>
     </div>
     ${rows}`;
 }
@@ -1236,8 +1241,8 @@ function render(){
     return true;
   });
 
-  // ចំណាយតាមប្រភេទ៖ ដើរតាមម៉ឺនុយថ្ងៃនេះ/ខែនេះ/ប្រវត្តិទាំងអស់
-  renderMonthSummary(ledgerScope);
+  // ចំណូល/ចំណាយតាមប្រភេទ៖ ដើរតាមម៉ឺនុយថ្ងៃនេះ/ខែនេះ/ប្រវត្តិទាំងអស់ និងជម្រើសចំណូល/ចំណាយ
+  renderMonthSummary(ledgerScope, typeFilter);
 
   // group by date desc
   const groups = {};
