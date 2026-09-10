@@ -124,6 +124,27 @@
   .type-toggle button.active[data-type="income"]{background:var(--income-bg);color:var(--income);font-weight:700;}
   .type-toggle button.active[data-type="expense"]{background:var(--expense-bg);color:var(--expense);font-weight:700;}
 
+  .scope-toggle{
+    display:flex;
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .scope-toggle button{
+    border:none;background:var(--card);
+    padding:7px 14px;
+    font-family:var(--khmer-font);
+    font-size:13px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .scope-toggle button.active{
+    background:var(--gold);
+    color:#fff;
+    font-weight:600;
+  }
+
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
   .field label{font-size:12px;color:var(--ink-soft);}
@@ -202,6 +223,15 @@
 
   /* Ledger */
   .day-group{margin-bottom:16px;}
+  .month-header{
+    font-weight:700;
+    font-size:15px;
+    color:var(--gold);
+    margin:20px 0 10px;
+    padding-bottom:5px;
+    border-bottom:2px solid var(--gold);
+  }
+  .month-header:first-child{margin-top:0;}
   .day-heading{
     display:flex;
     justify-content:space-between;
@@ -539,6 +569,11 @@
   </div>
 
   <div class="filter-bar no-print">
+    <div class="scope-toggle" id="scopeToggle">
+      <button type="button" data-scope="today" class="active">ថ្ងៃនេះ</button>
+      <button type="button" data-scope="month">ខែនេះ</button>
+      <button type="button" data-scope="all">ប្រវត្តិទាំងអស់</button>
+    </div>
     <select id="filterType">
       <option value="all">ទាំងអស់</option>
       <option value="income">ចំណូលតែប៉ុណ្ណោះ</option>
@@ -582,6 +617,7 @@ const NOTE_SUGGESTIONS = {
 let entries = [];
 let currentType = "income";
 let editingId = null;
+let ledgerScope = "today"; // "today" | "month" | "all"
 
 const CUSTOM_NOTES_KEY = "tracker_custom_notes_v1";
 let customNotes = loadCustomNotes();
@@ -1150,7 +1186,12 @@ function render(){
   const searchFilter = $("filterSearch").value.trim().toLowerCase();
 
   let filtered = entries.filter(e=>{
-    if(e.date !== today) return false;
+    if(ledgerScope === "today"){
+      if(e.date !== today) return false;
+    } else if(ledgerScope === "month"){
+      if(!e.date.startsWith(today.slice(0,7))) return false;
+    }
+    // ledgerScope === "all" → គ្មានការត្រង់តាមកាលបរិច្ឆេទ
     if(typeFilter !== "all" && e.type !== typeFilter) return false;
     if(searchFilter){
       const hay = (e.category + " " + (e.note||"")).toLowerCase();
@@ -1175,11 +1216,28 @@ function render(){
   ledger.innerHTML = "";
 
   if(dates.length === 0){
-    ledger.innerHTML = `<div class="empty">មិនទាន់មានប្រតិបត្តិការថ្ងៃនេះទេ។ ចាប់ផ្តើមបញ្ចូលចំណូល ឬចំណាយខាងលើ។</div>`;
+    const emptyMsg = ledgerScope === "today"
+      ? "មិនទាន់មានប្រតិបត្តិការថ្ងៃនេះទេ។ ចាប់ផ្តើមបញ្ចូលចំណូល ឬចំណាយខាងលើ។"
+      : ledgerScope === "month"
+        ? "មិនទាន់មានប្រតិបត្តិការក្នុងខែនេះទេ។"
+        : "មិនទាន់មានប្រតិបត្តិការទេ។";
+    ledger.innerHTML = `<div class="empty">${emptyMsg}</div>`;
     return;
   }
 
+  let lastMonth = null;
   dates.forEach(date=>{
+    if(ledgerScope === "all"){
+      const monthKey = date.slice(0,7);
+      if(monthKey !== lastMonth){
+        lastMonth = monthKey;
+        const monthHeader = document.createElement("div");
+        monthHeader.className = "month-header";
+        monthHeader.textContent = khmerMonthLabel(monthKey);
+        ledger.appendChild(monthHeader);
+      }
+    }
+
     const dayEntries = groups[date].sort((a,b)=> (b.id||"").localeCompare(a.id||""));
     let netUSD=0, netKHR=0;
     dayEntries.forEach(e=>{
@@ -1229,6 +1287,15 @@ function escapeHtml(str){
 }
 
 $("fCategory").addEventListener("change", renderNoteChips);
+$("scopeToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  ledgerScope = btn.dataset.scope;
+  document.querySelectorAll("#scopeToggle button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.scope === ledgerScope);
+  });
+  render();
+});
 $("filterType").addEventListener("change", render);
 $("filterSearch").addEventListener("input", render);
 $("printBtn").addEventListener("click", ()=> window.print());
