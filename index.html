@@ -286,7 +286,14 @@
     align-items:center;
     gap:10px;
     margin-bottom:7px;
+    padding:3px 4px;
+    margin-left:-4px;
+    margin-right:-4px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background 0.15s;
   }
+  .ms-row:hover{background:var(--gold-bg);}
   .ms-row .ms-cat{
     flex:0 0 120px;
     font-size:12.5px;
@@ -1177,6 +1184,15 @@ function renderMonthSummary(scope, typeFilter){
       <span class="ms-total" style="color:${barColor}">សរុប ${fmtAmount(totalUSD,"USD")}${totalKHR? " / " + fmtAmount(totalKHR,"KHR") : ""}</span>
     </div>
     ${rows}`;
+
+  wrap.querySelectorAll(".ms-row").forEach(row=>{
+    row.addEventListener("click", ()=>{
+      const cat = row.querySelector(".ms-cat").textContent;
+      $("filterSearch").value = cat;
+      render();
+      $("ledger").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
 }
 
 function render(){
