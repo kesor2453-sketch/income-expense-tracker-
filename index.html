@@ -641,6 +641,24 @@ function fmtAmount(val, currency){
   return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
+/* ===== អត្រាប្តូរប្រាក់ ៛ → $ (កែលេខនេះបើអត្រាប្តូរ) ===== */
+const KHR_RATE = 4000;
+
+// សរុបដុល្លារ + រៀល (ប្តូរជាដុល្លារ)
+function toUSD(usd, khr){
+  return (Number(usd)||0) + (Number(khr)||0) / KHR_RATE;
+}
+
+// បង្ហាញ "$X / Y ៛ ($សរុប)" — វង់ក្រចកបង្ហាញតែពេលមានលុយរៀល
+function fmtMixed(usd, khr){
+  const parts = [];
+  if(usd || !khr) parts.push(fmtAmount(usd,"USD"));
+  if(khr) parts.push(fmtAmount(khr,"KHR"));
+  let s = parts.join(" / ");
+  if(khr) s += " (" + fmtAmount(toUSD(usd,khr),"USD") + ")";
+  return s;
+}
+
 let selectedChips = new Set();
 
 function populateCategories(){
@@ -969,32 +987,27 @@ function renderMonthSummary(scope, typeFilter){
   });
 
   const catList = Object.keys(catTotals).sort((a,b)=>{
-    const av = catTotals[a].USD + catTotals[a].KHR/4000;
-    const bv = catTotals[b].USD + catTotals[b].KHR/4000;
-    return bv - av;
+    return toUSD(catTotals[b].USD, catTotals[b].KHR) - toUSD(catTotals[a].USD, catTotals[a].KHR);
   });
-  const maxVal = Math.max(...catList.map(c => catTotals[c].USD + catTotals[c].KHR/4000));
+  const maxVal = Math.max(...catList.map(c => toUSD(catTotals[c].USD, catTotals[c].KHR)));
 
   let rows = "";
   catList.forEach(cat=>{
     const t = catTotals[cat];
-    const val = t.USD + t.KHR/4000;
+    const val = toUSD(t.USD, t.KHR);
     const pct = maxVal ? Math.max(4, Math.round((val/maxVal)*100)) : 0;
-    const parts = [];
-    if(t.USD) parts.push(fmtAmount(t.USD,"USD"));
-    if(t.KHR) parts.push(fmtAmount(t.KHR,"KHR"));
     rows += `
       <div class="ms-row">
         <span class="ms-cat">${escapeHtml(cat)}</span>
         <span class="ms-bar-wrap" style="background:${barBg}"><span class="ms-bar" style="width:${pct}%; background:${barColor}"></span></span>
-        <span class="ms-amt">${parts.join(" / ")}</span>
+        <span class="ms-amt">${fmtMixed(t.USD, t.KHR)}</span>
       </div>`;
   });
 
   wrap.innerHTML = `
     <div class="ms-title">
       <span>${titleLabel}</span>
-      <span class="ms-total" style="color:${barColor}">សរុប ${fmtAmount(totalUSD,"USD")}${totalKHR? " / " + fmtAmount(totalKHR,"KHR") : ""}</span>
+      <span class="ms-total" style="color:${barColor}">សរុប ${fmtMixed(totalUSD, totalKHR)}</span>
     </div>
     ${rows}`;
 
@@ -1039,17 +1052,19 @@ function render(){
   });
 
   const carryEl = $("carryoverBalance");
-  carryEl.textContent = fmtAmount(carryUSD,"USD") + (carryKHR? " / " + fmtAmount(carryKHR,"KHR") : "");
-  carryEl.classList.toggle("pos", carryUSD >= 0);
-  carryEl.classList.toggle("neg", carryUSD < 0);
+  const carryTotal = toUSD(carryUSD, carryKHR);
+  carryEl.textContent = fmtMixed(carryUSD, carryKHR);
+  carryEl.classList.toggle("pos", carryTotal >= 0);
+  carryEl.classList.toggle("neg", carryTotal < 0);
 
-  $("monthIncomeVal").textContent = fmtAmount(monthIncomeUSD,"USD") + (monthIncomeKHR? " / " + fmtAmount(monthIncomeKHR,"KHR") : "");
-  $("monthExpenseVal").textContent = fmtAmount(monthExpenseUSD,"USD") + (monthExpenseKHR? " / " + fmtAmount(monthExpenseKHR,"KHR") : "");
+  $("monthIncomeVal").textContent = fmtMixed(monthIncomeUSD, monthIncomeKHR);
+  $("monthExpenseVal").textContent = fmtMixed(monthExpenseUSD, monthExpenseKHR);
 
   const balEl = $("totalBalance");
-  balEl.textContent = fmtAmount(balUSD,"USD") + (balKHR? " / " + fmtAmount(balKHR,"KHR") : "");
-  balEl.classList.toggle("pos", balUSD >= 0);
-  balEl.classList.toggle("neg", balUSD < 0);
+  const balTotal = toUSD(balUSD, balKHR);
+  balEl.textContent = fmtMixed(balUSD, balKHR);
+  balEl.classList.toggle("pos", balTotal >= 0);
+  balEl.classList.toggle("neg", balTotal < 0);
 
   // filters (ស្វ័យប្រវត្តិ៖ ថ្ងៃនេះ/ខែនេះ)
   const typeFilter = $("filterType").value;
@@ -1113,6 +1128,7 @@ function render(){
       const sign = e.type==="income"?1:-1;
       if(e.currency==="KHR") netKHR += sign*Number(e.amount); else netUSD += sign*Number(e.amount);
     });
+    const netTotal = toUSD(netUSD, netKHR);
 
     const groupDiv = document.createElement("div");
     groupDiv.className = "day-group";
@@ -1120,12 +1136,14 @@ function render(){
     const heading = document.createElement("div");
     heading.className = "day-heading";
     heading.innerHTML = `<span class="d">${khmerDate(date)}</span>
-      <span class="net ${netUSD>=0?'':'neg'}" style="color:${netUSD>=0?'var(--income)':'var(--expense)'}">
-        សុទ្ធ: ${fmtAmount(netUSD,"USD")}${netKHR? " / " + fmtAmount(netKHR,"KHR") : ""}
+      <span class="net" style="color:${netTotal>=0?'var(--income)':'var(--expense)'}">
+        សុទ្ធ: ${fmtMixed(netUSD, netKHR)}
       </span>`;
     groupDiv.appendChild(heading);
 
     dayEntries.forEach(e=>{
+      const amtText = fmtAmount(e.amount, e.currency)
+        + (e.currency === "KHR" ? " (" + fmtAmount(toUSD(0, e.amount),"USD") + ")" : "");
       const row = document.createElement("div");
       row.className = "entry";
       row.innerHTML = `
@@ -1134,7 +1152,7 @@ function render(){
           <div class="cat">${escapeHtml(e.category)}</div>
           ${e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : ""}
         </span>
-        <span class="amt ${e.type}">${e.type==="income"?"+":"−"} ${fmtAmount(e.amount, e.currency)}</span>
+        <span class="amt ${e.type}">${e.type==="income"?"+":"−"} ${amtText}</span>
         <span class="row-actions no-print">
           <button class="edit" title="កែសម្រួល" aria-label="កែសម្រួល">✎</button>
           <button class="del" title="លុប" aria-label="លុប">✕</button>
