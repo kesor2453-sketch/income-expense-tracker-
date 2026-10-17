@@ -505,20 +505,68 @@
   @keyframes fadeUp{from{opacity:0;translate:0 8px;}to{opacity:1;translate:0 0;}}
   .view-title{font-size:18px;margin:4px 0 14px;}
 
-  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .tile{
     background:#fff;border:none;border-radius:20px;
-    padding:20px 10px 16px;
+    padding:16px 6px 12px;min-width:0;
     box-shadow:0 3px 10px rgba(58,46,57,0.07);
-    display:flex;flex-direction:column;align-items:center;gap:10px;
-    font-family:var(--khmer-font);font-size:14px;font-weight:600;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    font-family:var(--khmer-font);font-size:13.5px;font-weight:600;color:var(--ink);
     cursor:pointer;transition:transform .12s;
   }
   .tile:active{transform:scale(.95);}
   .tile .ti{
-    width:60px;height:60px;border-radius:20px;
-    display:flex;align-items:center;justify-content:center;font-size:30px;
+    width:54px;height:54px;border-radius:18px;margin-bottom:4px;
+    display:flex;align-items:center;justify-content:center;font-size:27px;
   }
+  .tile .ts{
+    font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--ink-soft);
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* Hero (month card) */
+  .hero{
+    background:linear-gradient(135deg,#FF6B9A 0%,#FF8A5B 55%,#FFB13B 100%);
+    color:#fff;border-radius:24px;padding:16px 16px 14px;margin-bottom:16px;
+    box-shadow:0 6px 18px rgba(255,107,154,0.30);
+  }
+  .hero-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .hero-nav button{
+    width:44px;height:40px;border:none;border-radius:13px;
+    background:rgba(255,255,255,0.25);color:#fff;font-size:22px;line-height:1;cursor:pointer;
+  }
+  .hero-nav button:active{background:rgba(255,255,255,0.4);}
+  .hero-nav .m{font-weight:700;font-size:18px;text-align:center;}
+  .hero .lbl{font-size:13px;opacity:.92;margin-top:14px;}
+  .hero .big{font-family:var(--mono);font-size:34px;font-weight:800;line-height:1.2;}
+  .hero-detail{font-family:var(--mono);font-size:11.5px;opacity:.88;min-height:0;}
+  .hero-boxes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .hero-boxes.three{grid-template-columns:repeat(3,1fr);}
+  .hero-box{background:rgba(255,255,255,0.22);border-radius:16px;padding:10px 12px;min-width:0;}
+  .hero-box .hl{font-size:12.5px;opacity:.95;}
+  .hero-box .v{font-family:var(--mono);font-weight:700;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hero-foot{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 10px;
+    margin-top:12px;padding-top:10px;border-top:1px dashed rgba(255,255,255,0.45);
+    font-size:12px;
+  }
+  .hero-foot b{font-family:var(--mono);}
+  .hero-small{margin-top:0;}
+
+  /* Year list */
+  .yr-row{
+    display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;
+    padding:7px 6px;margin:0 -6px;border-radius:10px;cursor:pointer;
+  }
+  .yr-row:hover,.yr-row:active{background:var(--gold-bg);}
+  .yr-row.empty-m{opacity:.45;}
+  .yr-row .mn{font-size:13px;font-weight:600;}
+  .yr-bars{display:flex;flex-direction:column;gap:4px;}
+  .yr-bars span{display:block;height:7px;border-radius:5px;}
+  .yr-row.empty-m .yr-bars span{display:none;}
+  .hero-boxes.three .v{font-size:13px;}
+  .hero-boxes.three .hero-box{padding:9px 8px;}
+  .yr-row .nt{font-family:var(--mono);font-size:12px;font-weight:700;text-align:right;}
 
   .report-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
   .ms-hint{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:-4px;}
@@ -608,32 +656,80 @@
     <div class="sub">កត់ត្រា និងតាមដានលុយចូល-លុយចេញរបស់អ្នកជារៀងរាល់ថ្ងៃ</div>
   </div>
 
-  <div class="summary" id="summary">
-    <div class="sum-card balance carry">
-      <span class="big-emoji">🐷</span>
-      <div class="label">លុយសល់ពីខែមុន</div>
-      <div class="val" id="carryoverBalance">$0.00</div>
+  <div class="hero">
+    <div class="hero-nav">
+      <button type="button" id="prevMonth" aria-label="ខែមុន">‹</button>
+      <span class="m" id="monthLabel">ខែ</span>
+      <button type="button" id="nextMonth" aria-label="ខែបន្ទាប់">›</button>
     </div>
-    <div class="sum-card month">
-      <span class="big-emoji">📅</span>
-      <div class="label">ចំណូល/ចំណាយ ខែនេះ</div>
-      <div class="val" style="font-size:14px; line-height:1.6;">
-        <div>💚 ចំណូល: <span id="monthIncomeVal" style="color:var(--income)">$0.00</span></div>
-        <div>💸 ចំណាយ: <span id="monthExpenseVal" style="color:var(--expense)">$0.00</span></div>
+    <div class="lbl">សមតុល្យខែនេះ (សល់)</div>
+    <div class="big" id="monthNetVal">$0.00</div>
+    <div class="hero-detail" id="monthNetDetail"></div>
+    <div class="hero-boxes">
+      <div class="hero-box">
+        <div class="hl">💚 ចំណូល</div>
+        <div class="v" id="monthIncomeVal">$0.00</div>
+        <div class="hero-detail" id="monthIncomeDetail"></div>
+      </div>
+      <div class="hero-box">
+        <div class="hl">💸 ចំណាយ</div>
+        <div class="v" id="monthExpenseVal">$0.00</div>
+        <div class="hero-detail" id="monthExpenseDetail"></div>
       </div>
     </div>
-    <div class="sum-card balance total">
-      <span class="big-emoji">💎</span>
-      <div class="label">សមតុល្យសរុប</div>
-      <div class="val" id="totalBalance">$0.00</div>
+    <div class="hero-foot">
+      <span>🐷 សល់ពីខែមុន: <b id="carryoverBalance">$0.00</b></span>
+      <span>💎 សរុបទាំងអស់: <b id="totalBalance">$0.00</b></span>
     </div>
   </div>
 
   <div class="tiles">
-    <button class="tile" data-go="add" data-type="income"><span class="ti" style="background:#DCF8EA">💵</span>បន្ថែមចំណូល</button>
-    <button class="tile" data-go="add" data-type="expense"><span class="ti" style="background:#FFE3EA">🛍️</span>បន្ថែមចំណាយ</button>
-    <button class="tile" data-go="history"><span class="ti" style="background:#E3F1FF">📋</span>ប្រវត្តិ</button>
-    <button class="tile" data-go="report"><span class="ti" style="background:#FFF0D6">📊</span>សង្ខេបតាមប្រភេទ</button>
+    <button class="tile" data-go="add" data-type="income"><span class="ti" style="background:#DCF8EA">💵</span>ចំណូល<span class="ts" id="tIncome">$0</span></button>
+    <button class="tile" data-go="add" data-type="expense"><span class="ti" style="background:#FFE3EA">🛍️</span>ចំណាយ<span class="ts" id="tExpense">$0</span></button>
+    <button class="tile" data-go="report" data-preset="month"><span class="ti" style="background:#E3F1FF">📅</span>សង្ខេបខែ<span class="ts" id="tNet">$0</span></button>
+    <button class="tile" data-go="year"><span class="ti" style="background:#E8E3FF">📊</span>សង្ខេបឆ្នាំ<span class="ts" id="tYear">ឆ្នាំ</span></button>
+    <button class="tile" data-go="history" data-preset="save"><span class="ti" style="background:#FFF0D6">🐷</span>សន្សំប្រាក់<span class="ts" id="tSave">$0</span></button>
+    <button class="tile" data-go="settings"><span class="ti" style="background:#EEF2F5">⚙️</span>ការកំណត់<span class="ts" id="tRate">$1 = 4,000៛</span></button>
+  </div>
+</section>
+
+<section class="view" id="view-year">
+  <h2 class="view-title">📊 សង្ខេបឆ្នាំ</h2>
+  <div class="hero hero-small">
+    <div class="hero-nav">
+      <button type="button" id="prevYear" aria-label="ឆ្នាំមុន">‹</button>
+      <span class="m" id="yearLabel">ឆ្នាំ</span>
+      <button type="button" id="nextYear" aria-label="ឆ្នាំបន្ទាប់">›</button>
+    </div>
+    <div class="hero-boxes three">
+      <div class="hero-box"><div class="hl">💚 ចំណូល</div><div class="v" id="yIncome">$0</div></div>
+      <div class="hero-box"><div class="hl">💸 ចំណាយ</div><div class="v" id="yExpense">$0</div></div>
+      <div class="hero-box"><div class="hl">💎 សល់</div><div class="v" id="yNet">$0</div></div>
+    </div>
+  </div>
+  <div class="month-summary" id="yearList"></div>
+  <div class="ms-hint no-print">👆 ចុចលើខែណាមួយ ដើម្បីមើលខែនោះ</div>
+</section>
+
+<section class="view" id="view-settings">
+  <h2 class="view-title">⚙️ ការកំណត់</h2>
+  <div class="form-card">
+    <h2>💱 អត្រាប្តូរប្រាក់</h2>
+    <div class="amount-row">
+      <div class="field">
+        <label>ចំនួនរៀល ក្នុង $1</label>
+        <input type="number" id="setRate" min="1" step="1" inputmode="numeric">
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-add" id="saveRateBtn">💾 រក្សាទុក</button></div>
+  </div>
+  <div class="form-card">
+    <h2>👤 គណនី</h2>
+    <div class="field"><label>ឈ្មោះអ្នកប្រើ</label><div id="setUser" style="font-weight:700;font-size:15px"></div></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="setChangeUser">✏️ ប្តូរឈ្មោះ</button>
+      <button class="btn btn-secondary" id="setLogout">🚪 ចាកចេញ</button>
+    </div>
   </div>
 </section>
 
@@ -829,11 +925,29 @@ function fmtAmount(val, currency){
   if(currency === "KHR"){
     return n.toLocaleString("en-US",{maximumFractionDigits:0}) + " ៛";
   }
-  return "$" + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  return (n < 0 ? "-" : "") + "$" + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-/* ===== អត្រាប្តូរប្រាក់ ៛ → $ (កែលេខនេះបើអត្រាប្តូរ) ===== */
-const KHR_RATE = 4000;
+/* ===== អត្រាប្តូរប្រាក់ ៛ → $ (កែបានក្នុងទំព័រ ការកំណត់) ===== */
+const RATE_KEY = "tracker_khr_rate_v1";
+let KHR_RATE = 4000;
+try { const r = Number(localStorage.getItem(RATE_KEY)); if(r > 0) KHR_RATE = r; } catch(e){}
+
+// ខែដែលកំពុងមើល (YYYY-MM) — ប្តូរដោយប៊ូតុង ‹ ›
+let selMonth = todayStr().slice(0,7);
+
+function khNum(s){ return String(s).replace(/\d/g, d => "០១២៣៤៥៦៧៨៩"[d]); }
+function shiftMonth(ym, delta){
+  let [y, m] = ym.split("-").map(Number);
+  m += delta;
+  while(m < 1){ m += 12; y--; }
+  while(m > 12){ m -= 12; y++; }
+  return y + "-" + String(m).padStart(2,"0");
+}
+// "$X + Y ៛" — បង្ហាញតែពេលមានលុយរៀល
+function mixDetail(usd, khr){
+  return khr ? "(" + fmtAmount(usd,"USD") + " + " + fmtAmount(khr,"KHR") + ")" : "";
+}
 
 // សរុបដុល្លារ + រៀល (ប្តូរជាដុល្លារ)
 function toUSD(usd, khr){
@@ -991,6 +1105,7 @@ $("changeUserBtn").addEventListener("click", async ()=>{
     currentUser.username = result.newUsername || trimmed.toLowerCase();
     localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
     $("userLabel").textContent = currentUser.username;
+    $("setUser").textContent = currentUser.username;
     alert("ប្តូរឈ្មោះជោគជ័យ!");
   }catch(err){
     alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
@@ -1161,7 +1276,7 @@ function renderMonthSummary(scope, typeFilter){
     const monthsSet = new Set(scopeEntries.map(e => e.date ? e.date.slice(0,7) : null).filter(Boolean));
     titleLabel = `${typeLabel}សរុបទាំងអស់ (${monthsSet.size} ខែ) តាមប្រភេទ`;
   } else {
-    const currentMonth = todayStr().slice(0,7);
+    const currentMonth = selMonth;
     scopeEntries = entries.filter(e => e.date && e.date.startsWith(currentMonth) && e.type === entryType);
     titleLabel = `${typeLabel}ប្រចាំខែ ${khmerMonthLabel(currentMonth)} តាមប្រភេទ`;
   }
@@ -1221,7 +1336,7 @@ function renderMonthSummary(scope, typeFilter){
 function render(){
   // summary
   const today = todayStr();
-  const currentMonth = today.slice(0,7); // "YYYY-MM"
+  const currentMonth = selMonth; // ខែដែលកំពុងមើល "YYYY-MM"
   let carryUSD=0, carryKHR=0;
   let monthIncomeUSD=0, monthIncomeKHR=0, monthExpenseUSD=0, monthExpenseKHR=0;
   let balUSD=0, balKHR=0;
@@ -1248,20 +1363,41 @@ function render(){
     }
   });
 
-  const carryEl = $("carryoverBalance");
-  const carryTotal = toUSD(carryUSD, carryKHR);
-  carryEl.textContent = fmtMixed(carryUSD, carryKHR);
-  carryEl.classList.toggle("pos", carryTotal >= 0);
-  carryEl.classList.toggle("neg", carryTotal < 0);
+  // ===== ផ្ទាំងខែ (hero) =====
+  const incTotal = toUSD(monthIncomeUSD, monthIncomeKHR);
+  const expTotal = toUSD(monthExpenseUSD, monthExpenseKHR);
+  const netU = monthIncomeUSD - monthExpenseUSD, netK = monthIncomeKHR - monthExpenseKHR;
+  $("monthLabel").textContent = "ខែ" + khNum(khmerMonthLabel(selMonth));
+  $("monthNetVal").textContent = fmtAmount(incTotal - expTotal, "USD");
+  $("monthNetDetail").textContent = mixDetail(netU, netK);
+  $("monthIncomeVal").textContent = fmtAmount(incTotal, "USD");
+  $("monthIncomeDetail").textContent = mixDetail(monthIncomeUSD, monthIncomeKHR);
+  $("monthExpenseVal").textContent = fmtAmount(expTotal, "USD");
+  $("monthExpenseDetail").textContent = mixDetail(monthExpenseUSD, monthExpenseKHR);
+  $("carryoverBalance").textContent = fmtAmount(toUSD(carryUSD, carryKHR), "USD");
+  $("totalBalance").textContent = fmtAmount(toUSD(balUSD, balKHR), "USD");
 
-  $("monthIncomeVal").textContent = fmtMixed(monthIncomeUSD, monthIncomeKHR);
-  $("monthExpenseVal").textContent = fmtMixed(monthExpenseUSD, monthExpenseKHR);
+  // ===== ប៊ូតុងទាំង ៦ =====
+  const selYear = selMonth.slice(0,4);
+  let saveU = 0, saveK = 0;
+  entries.forEach(e=>{
+    if(e.category === "សន្សំ" && e.type === "expense"){
+      if(e.currency === "KHR") saveK += Number(e.amount)||0; else saveU += Number(e.amount)||0;
+    }
+  });
+  $("tIncome").textContent = fmtAmount(incTotal, "USD");
+  $("tExpense").textContent = fmtAmount(expTotal, "USD");
+  $("tNet").textContent = fmtAmount(incTotal - expTotal, "USD");
+  $("tYear").textContent = "ឆ្នាំ " + khNum(selYear);
+  $("tSave").textContent = fmtAmount(toUSD(saveU, saveK), "USD");
+  $("tRate").textContent = "$1 = " + KHR_RATE.toLocaleString("en-US") + "៛";
 
-  const balEl = $("totalBalance");
-  const balTotal = toUSD(balUSD, balKHR);
-  balEl.textContent = fmtMixed(balUSD, balKHR);
-  balEl.classList.toggle("pos", balTotal >= 0);
-  balEl.classList.toggle("neg", balTotal < 0);
+  // ឈ្មោះប៊ូតុង "ខែ" ក្នុងប្រវត្តិ/សង្ខេប តាមខែដែលកំពុងមើល
+  const isThisMonth = selMonth === today.slice(0,7);
+  const mBtnText = isThisMonth ? "📅 ខែនេះ" : "📅 " + khmerMonthLabel(selMonth).split(" ")[0];
+  document.querySelectorAll('#scopeToggle [data-scope="month"], #reportScopeToggle [data-rscope="month"]').forEach(b => b.textContent = mBtnText);
+
+  renderYear();
 
   // filters (ស្វ័យប្រវត្តិ៖ ថ្ងៃនេះ/ខែនេះ)
   const typeFilter = $("filterType").value;
@@ -1271,7 +1407,7 @@ function render(){
     if(ledgerScope === "today"){
       if(e.date !== today) return false;
     } else if(ledgerScope === "month"){
-      if(!e.date.startsWith(today.slice(0,7))) return false;
+      if(!e.date.startsWith(selMonth)) return false;
     }
     // ledgerScope === "all" → គ្មានការត្រង់តាមកាលបរិច្ឆេទ
     if(typeFilter !== "all" && e.type !== typeFilter) return false;
@@ -1402,7 +1538,74 @@ $("reportTypeToggle").addEventListener("click",(e)=>{
 });
 
 /* ===== ប្តូរទំព័រ (ប៊ូតុងខាងក្រោម + ប៊ូតុងធំៗនៅទំព័រដើម) ===== */
-const VIEWS = ["home","add","history","report"];
+const VIEWS = ["home","add","history","report","year","settings"];
+
+/* ===== ប្តូរខែ / ឆ្នាំ ===== */
+$("prevMonth").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, -1); render(); });
+$("nextMonth").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, 1); render(); });
+$("prevYear").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, -12); render(); });
+$("nextYear").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, 12); render(); });
+
+function renderYear(){
+  const y = selMonth.slice(0,4);
+  $("yearLabel").textContent = "ឆ្នាំ " + khNum(y);
+  const months = [];
+  for(let i = 1; i <= 12; i++) months.push({ key: y + "-" + String(i).padStart(2,"0"), inc: 0, exp: 0 });
+  entries.forEach(e=>{
+    if(!e.date || e.date.slice(0,4) !== y) return;
+    const m = months[parseInt(e.date.slice(5,7),10) - 1];
+    if(!m) return;
+    const v = e.currency === "KHR" ? (Number(e.amount)||0) / KHR_RATE : (Number(e.amount)||0);
+    if(e.type === "income") m.inc += v; else m.exp += v;
+  });
+  const yInc = months.reduce((s,m)=> s + m.inc, 0);
+  const yExp = months.reduce((s,m)=> s + m.exp, 0);
+  $("yIncome").textContent = fmtAmount(yInc, "USD");
+  $("yExpense").textContent = fmtAmount(yExp, "USD");
+  $("yNet").textContent = fmtAmount(yInc - yExp, "USD");
+
+  const max = Math.max(1, ...months.map(m => Math.max(m.inc, m.exp)));
+  const wrap = $("yearList");
+  wrap.innerHTML = months.map(m=>{
+    const net = m.inc - m.exp;
+    const has = m.inc || m.exp;
+    return `<div class="yr-row ${has ? "" : "empty-m"}" data-month="${m.key}">
+      <span class="mn">${khmerMonthLabel(m.key).split(" ")[0]}</span>
+      <span class="yr-bars">
+        <span style="width:${has ? Math.max(2, m.inc / max * 100) : 0}%;background:var(--income)"></span>
+        <span style="width:${has ? Math.max(2, m.exp / max * 100) : 0}%;background:var(--expense)"></span>
+      </span>
+      <span class="nt" style="color:${net >= 0 ? "var(--income)" : "var(--expense)"}">${has ? fmtAmount(net, "USD") : "—"}</span>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".yr-row").forEach(r=>{
+    r.addEventListener("click", ()=>{ selMonth = r.dataset.month; render(); showView("home"); });
+  });
+}
+
+/* ===== ការកំណត់ ===== */
+$("saveRateBtn").addEventListener("click", ()=>{
+  const r = Math.round(Number($("setRate").value));
+  if(!(r > 0)){ $("setRate").focus(); return; }
+  KHR_RATE = r;
+  try { localStorage.setItem(RATE_KEY, String(r)); } catch(e){}
+  render();
+  showToast("✅ $1 = " + r.toLocaleString("en-US") + " ៛");
+});
+$("setChangeUser").addEventListener("click", ()=> $("changeUserBtn").click());
+$("setLogout").addEventListener("click", ()=> $("logoutBtn").click());
+
+function applyPreset(p){
+  if(p === "save"){
+    $("filterSearch").value = "សន្សំ";
+    $("filterType").value = "expense";
+    setLedgerScope("all");
+  } else if(p === "month"){
+    reportScope = "month";
+    document.querySelectorAll("#reportScopeToggle button").forEach(b => b.classList.toggle("active", b.dataset.rscope === "month"));
+    render();
+  }
+}
 function showView(v, push = true){
   if(!VIEWS.includes(v)) v = "home";
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "view-" + v));
@@ -1417,6 +1620,11 @@ document.addEventListener("click",(e)=>{
   const b = e.target.closest("[data-go]");
   if(!b) return;
   if(b.dataset.type && !editingId) setType(b.dataset.type);
+  if(b.dataset.preset) applyPreset(b.dataset.preset);
+  if(b.dataset.go === "settings"){
+    $("setRate").value = KHR_RATE;
+    $("setUser").textContent = currentUser ? currentUser.username : "";
+  }
   showView(b.dataset.go);
   if(b.dataset.go === "add") setTimeout(()=> $("fAmount").focus(), 60);
 });
