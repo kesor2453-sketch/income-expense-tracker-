@@ -623,8 +623,104 @@
     .bottom-nav,.tiles,.toast{display:none !important;}
   }
 
+  /* ================= Clean, big, phone-fit ================= */
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:#FFF6F2;
+    background-image:none;
+    padding:max(12px, env(safe-area-inset-top)) 14px 16px;
+  }
+  .wrap{max-width:520px;}
+
+  /* header: simple greeting + one cute sticker */
+  .topbar{margin-bottom:6px;}
+  .topbar .who{font-size:14px;}
+  .book-header{
+    background:none;box-shadow:none;border:none;border-radius:0;
+    padding:0 64px 0 2px;margin:0 0 14px;
+  }
+  .book-header .tab,.book-header .sub,.sticker.s2,.sticker.s3,.sticker.s4{display:none;}
+  .book-header h1{font-size:23px;margin:0;line-height:1.5;}
+  .sticker.s1{top:-6px;right:4px;font-size:46px;rotate:10deg;}
+
+  /* hero */
+  .hero{position:relative;border-radius:28px;padding:18px 18px 16px;margin-bottom:14px;overflow:hidden;}
+  .hero::before{content:"✨";position:absolute;right:16px;top:58px;font-size:20px;opacity:.9;}
+  .hero::after{
+    content:"💰";position:absolute;right:-4px;bottom:-12px;font-size:62px;
+    opacity:.22;rotate:-12deg;pointer-events:none;
+  }
+  .hero-small::before,.hero-small::after{display:none;}
+  .hero-nav button{width:48px;height:44px;font-size:24px;border-radius:15px;}
+  .hero-nav .m{font-size:20px;}
+  .hero .lbl{font-size:14.5px;margin-top:12px;}
+  .hero .big{font-size:42px;}
+  .hero-detail{font-size:12.5px;}
+  .hero-box{padding:12px 14px;border-radius:18px;}
+  .hero-box .hl{font-size:14px;}
+  .hero-box .v{font-size:19px;}
+  .hero-boxes.three .v{font-size:15px;}
+  .hero-foot{font-size:13px;}
+
+  /* home fills the phone screen: tiles stretch to the bottom */
+  #view-home.active{display:flex;flex-direction:column;min-height:calc(100dvh - 76px);}
+  #view-home .tiles{flex:1;grid-auto-rows:1fr;align-content:stretch;}
+  .tiles{gap:12px;}
+  .tile{
+    border-radius:24px;padding:16px 6px 14px;gap:6px;justify-content:center;
+    font-size:15.5px;min-height:128px;
+    box-shadow:0 4px 14px rgba(58,46,57,0.07);
+  }
+  .tile .ti{width:66px;height:66px;border-radius:22px;font-size:34px;margin-bottom:6px;}
+  .tile .ts{font-size:13px;}
+
+  /* sub pages: bigger text + touch targets */
+  .back-btn{font-size:16px;padding:10px 18px;}
+  .gear-btn{width:46px;height:46px;font-size:22px;}
+  .view-title{font-size:22px;margin:2px 0 14px;}
+  .form-card,.month-summary{border-radius:22px;padding:18px;}
+  .form-card h2{font-size:17px;}
+  .field label{font-size:14px;}
+  /* 16px+ stops iPhone from zooming in when typing */
+  .field input,.field select,.filter-bar input,.filter-bar select{font-size:16px;padding:12px;border-radius:12px;}
+  .chip{font-size:14px;padding:8px 14px;}
+  .btn{font-size:16px;padding:13px 22px;border-radius:14px;}
+  .type-toggle button{font-size:16px;padding:11px 22px;}
+  .scope-toggle button{font-size:14.5px;padding:10px 14px;}
+  .filter-bar{gap:8px;}
+  .filter-bar #filterSearch{flex:1 1 100%;}
+  .filter-bar #filterType{flex:1;}
+  .entry{padding:12px 14px;border-radius:18px;margin-bottom:8px;}
+  .entry .icon{width:46px;height:46px;border-radius:15px;font-size:24px;}
+  .entry .cat{font-size:15.5px;}
+  .entry .note{font-size:13px;}
+  .entry .amt{font-size:15.5px;}
+  .entry .edit,.entry .del{font-size:18px;padding:6px 8px;}
+  .entry{grid-template-columns:auto 1fr auto auto !important;gap:8px 10px;}
+  .entry .row-actions{grid-column:auto !important;flex-direction:column;gap:0;}
+  .entry .amt{white-space:normal;text-align:right;max-width:120px;line-height:1.35;}
+  #printBtn{padding:9px 14px;font-size:14px;}
+  .day-heading .d{font-size:15.5px;}
+  .day-heading .net{font-size:13.5px;}
+  .month-summary .ms-title{font-size:15px;flex-wrap:wrap;gap:4px 10px;}
+  .month-summary .ms-total{font-size:14px;}
+  .ms-row{padding:8px 6px;}
+  .ms-row .ms-cat{flex-basis:130px;font-size:14px;}
+  .ms-row .ms-amt{font-size:13px;}
+  .ms-row .ms-bar-wrap{height:10px;}
+  .yr-row .mn{font-size:14.5px;}
+  .yr-row .nt{font-size:13.5px;}
+  .ms-hint{font-size:13px;margin-top:6px;}
+  .empty{font-size:15px;}
+  .empty .cute{font-size:60px;}
+
+  /* login */
+  .login-card{border-radius:26px;padding:34px 24px 24px;}
+  .login-card h1{font-size:22px;}
+  .login-card .sub{font-size:14px;}
+
   @media (max-width:520px){
-    .book-header{padding-right:24px;padding-top:28px;}
+    .book-header{padding:0 64px 0 2px;}
     .sticker.s3,.sticker.s4{display:none;}
     .sticker.s2{right:56px;}
   }
