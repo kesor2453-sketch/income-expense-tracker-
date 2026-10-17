@@ -499,7 +499,24 @@
   .login-card .sticker{top:-22px;right:16px;font-size:44px;rotate:10deg;}
 
   /* ===== App-style pages + bottom nav ===== */
-  #appRoot{padding-bottom:80px;}
+  #appRoot{padding-bottom:10px;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-bottom:12px;min-height:40px;
+  }
+  .topbar .who{font-size:13px;color:var(--ink-soft);display:flex;align-items:center;}
+  .topbar .who[hidden],.topbar .back-btn[hidden]{display:none;}
+  .back-btn{
+    font-family:var(--khmer-font);font-size:14px;font-weight:700;
+    background:#fff;color:var(--margin-red);border:none;border-radius:14px;
+    padding:9px 16px;box-shadow:0 2px 8px rgba(58,46,57,0.08);cursor:pointer;
+  }
+  .back-btn:active{transform:scale(.95);}
+  .gear-btn{
+    margin-left:auto;width:42px;height:42px;border:none;border-radius:14px;
+    background:#fff;font-size:20px;box-shadow:0 2px 8px rgba(58,46,57,0.08);cursor:pointer;
+  }
+  .gear-btn:active{transform:scale(.92);}
   .view{display:none;}
   .view.active{display:block;animation:fadeUp .22s ease;}
   @keyframes fadeUp{from{opacity:0;translate:0 8px;}to{opacity:1;translate:0 0;}}
@@ -593,7 +610,7 @@
   .bottom-nav button.active span{filter:none;opacity:1;transform:scale(1.15);}
 
   .toast{
-    position:fixed;left:50%;bottom:96px;z-index:60;
+    position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));z-index:60;
     translate:-50% 16px;opacity:0;pointer-events:none;
     background:var(--ink);color:#fff;
     padding:10px 20px;border-radius:999px;font-size:13.5px;
@@ -637,12 +654,13 @@
 
 <div class="wrap" id="appRoot" style="display:none;">
 
-  <div class="user-bar no-print">
-    <span><span class="sync-dot" id="syncDot"></span><span id="userLabel"></span></span>
-    <span>
-      <button id="changeUserBtn">ប្តូរឈ្មោះ</button>
-      <button id="logoutBtn">ចាកចេញ</button>
-    </span>
+  <div class="topbar no-print">
+    <button type="button" class="back-btn" id="backBtn" data-go="home" hidden>‹ ដើម</button>
+    <span class="who" id="whoLabel"><span class="sync-dot" id="syncDot"></span><span id="userLabel"></span></span>
+    <button type="button" class="gear-btn" data-go="settings" aria-label="ការកំណត់">⚙️</button>
+    <!-- ប៊ូតុងលាក់ — ប្រើដោយទំព័រ ការកំណត់ -->
+    <button id="changeUserBtn" hidden></button>
+    <button id="logoutBtn" hidden></button>
   </div>
 
 <section class="view" id="view-home">
@@ -686,10 +704,10 @@
   <div class="tiles">
     <button class="tile" data-go="add" data-type="income"><span class="ti" style="background:#DCF8EA">💵</span>ចំណូល<span class="ts" id="tIncome">$0</span></button>
     <button class="tile" data-go="add" data-type="expense"><span class="ti" style="background:#FFE3EA">🛍️</span>ចំណាយ<span class="ts" id="tExpense">$0</span></button>
+    <button class="tile" data-go="history" data-preset="clear"><span class="ti" style="background:#EEF2F5">📋</span>ប្រវត្តិ<span class="ts" id="tHist">0</span></button>
     <button class="tile" data-go="report" data-preset="month"><span class="ti" style="background:#E3F1FF">📅</span>សង្ខេបខែ<span class="ts" id="tNet">$0</span></button>
     <button class="tile" data-go="year"><span class="ti" style="background:#E8E3FF">📊</span>សង្ខេបឆ្នាំ<span class="ts" id="tYear">ឆ្នាំ</span></button>
     <button class="tile" data-go="history" data-preset="save"><span class="ti" style="background:#FFF0D6">🐷</span>សន្សំប្រាក់<span class="ts" id="tSave">$0</span></button>
-    <button class="tile" data-go="settings"><span class="ti" style="background:#EEF2F5">⚙️</span>ការកំណត់<span class="ts" id="tRate">$1 = 4,000៛</span></button>
   </div>
 </section>
 
@@ -820,12 +838,6 @@
   <div class="ms-hint no-print">👆 ចុចលើប្រភេទណាមួយ ដើម្បីមើលប្រតិបត្តិការលម្អិត</div>
 </section>
 
-<nav class="bottom-nav no-print" id="bottomNav">
-  <button type="button" data-go="home"><span>🏠</span>ដើម</button>
-  <button type="button" data-go="add"><span>➕</span>បន្ថែម</button>
-  <button type="button" data-go="history"><span>📋</span>ប្រវត្តិ</button>
-  <button type="button" data-go="report"><span>📊</span>សង្ខេប</button>
-</nav>
 
 </div>
 
@@ -1390,7 +1402,8 @@ function render(){
   $("tNet").textContent = fmtAmount(incTotal - expTotal, "USD");
   $("tYear").textContent = "ឆ្នាំ " + khNum(selYear);
   $("tSave").textContent = fmtAmount(toUSD(saveU, saveK), "USD");
-  $("tRate").textContent = "$1 = " + KHR_RATE.toLocaleString("en-US") + "៛";
+  const histCount = entries.filter(e => e.date && e.date.startsWith(selMonth)).length;
+  $("tHist").textContent = khNum(histCount) + " ដង";
 
   // ឈ្មោះប៊ូតុង "ខែ" ក្នុងប្រវត្តិ/សង្ខេប តាមខែដែលកំពុងមើល
   const isThisMonth = selMonth === today.slice(0,7);
@@ -1596,7 +1609,11 @@ $("setChangeUser").addEventListener("click", ()=> $("changeUserBtn").click());
 $("setLogout").addEventListener("click", ()=> $("logoutBtn").click());
 
 function applyPreset(p){
-  if(p === "save"){
+  if(p === "clear"){
+    $("filterSearch").value = "";
+    $("filterType").value = "all";
+    setLedgerScope("month");
+  } else if(p === "save"){
     $("filterSearch").value = "សន្សំ";
     $("filterType").value = "expense";
     setLedgerScope("all");
@@ -1609,7 +1626,8 @@ function applyPreset(p){
 function showView(v, push = true){
   if(!VIEWS.includes(v)) v = "home";
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "view-" + v));
-  document.querySelectorAll("#bottomNav button").forEach(b => b.classList.toggle("active", b.dataset.go === v));
+  $("backBtn").hidden = (v === "home");
+  $("whoLabel").hidden = (v !== "home");
   if(push && location.hash !== "#" + v) history.pushState(null, "", "#" + v);
   window.scrollTo(0, 0);
 }
