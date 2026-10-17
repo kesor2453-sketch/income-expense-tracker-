@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>សៀវភៅចំណូល-ចំណាយប្រចាំថ្ងៃ</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="theme-color" content="#FF9F1C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -497,6 +498,66 @@
   .login-card{position:relative;border:none;border-left:6px solid var(--margin-red);box-shadow:0 6px 20px rgba(255,107,154,0.18);}
   .login-card .sticker{top:-22px;right:16px;font-size:44px;rotate:10deg;}
 
+  /* ===== App-style pages + bottom nav ===== */
+  #appRoot{padding-bottom:80px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fadeUp .22s ease;}
+  @keyframes fadeUp{from{opacity:0;translate:0 8px;}to{opacity:1;translate:0 0;}}
+  .view-title{font-size:18px;margin:4px 0 14px;}
+
+  .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .tile{
+    background:#fff;border:none;border-radius:20px;
+    padding:20px 10px 16px;
+    box-shadow:0 3px 10px rgba(58,46,57,0.07);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    font-family:var(--khmer-font);font-size:14px;font-weight:600;color:var(--ink);
+    cursor:pointer;transition:transform .12s;
+  }
+  .tile:active{transform:scale(.95);}
+  .tile .ti{
+    width:60px;height:60px;border-radius:20px;
+    display:flex;align-items:center;justify-content:center;font-size:30px;
+  }
+
+  .report-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .ms-hint{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:-4px;}
+
+  .bottom-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    display:flex;justify-content:space-around;gap:4px;
+    padding:6px 10px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,0.97);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border-radius:22px 22px 0 0;
+    box-shadow:0 -4px 18px rgba(58,46,57,0.10);
+  }
+  .bottom-nav button{
+    flex:1;max-width:110px;
+    background:none;border:none;border-radius:16px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:6px 0;
+    font-family:var(--khmer-font);font-size:11.5px;color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .bottom-nav button span{font-size:23px;line-height:1.15;filter:grayscale(.7);opacity:.7;transition:transform .15s;}
+  .bottom-nav button.active{background:#FFF0F4;color:var(--margin-red);font-weight:700;}
+  .bottom-nav button.active span{filter:none;opacity:1;transform:scale(1.15);}
+
+  .toast{
+    position:fixed;left:50%;bottom:96px;z-index:60;
+    translate:-50% 16px;opacity:0;pointer-events:none;
+    background:var(--ink);color:#fff;
+    padding:10px 20px;border-radius:999px;font-size:13.5px;
+    transition:opacity .25s, translate .25s;
+  }
+  .toast.show{opacity:1;translate:-50% 0;}
+
+  @media print{
+    .view{display:block !important;}
+    .bottom-nav,.tiles,.toast{display:none !important;}
+  }
+
   @media (max-width:520px){
     .book-header{padding-right:24px;padding-top:28px;}
     .sticker.s3,.sticker.s4{display:none;}
@@ -536,6 +597,7 @@
     </span>
   </div>
 
+<section class="view" id="view-home">
   <div class="book-header">
     <div class="tab">📒 សៀវភៅផ្ទាល់ខ្លួន</div>
     <span class="sticker s1">🐷</span>
@@ -567,6 +629,15 @@
     </div>
   </div>
 
+  <div class="tiles">
+    <button class="tile" data-go="add" data-type="income"><span class="ti" style="background:#DCF8EA">💵</span>បន្ថែមចំណូល</button>
+    <button class="tile" data-go="add" data-type="expense"><span class="ti" style="background:#FFE3EA">🛍️</span>បន្ថែមចំណាយ</button>
+    <button class="tile" data-go="history"><span class="ti" style="background:#E3F1FF">📋</span>ប្រវត្តិ</button>
+    <button class="tile" data-go="report"><span class="ti" style="background:#FFF0D6">📊</span>សង្ខេបតាមប្រភេទ</button>
+  </div>
+</section>
+
+<section class="view" id="view-add">
   <div class="form-card">
     <h2>✏️ បន្ថែមប្រតិបត្តិការថ្មី</h2>
     <div class="type-toggle" id="typeToggle">
@@ -611,6 +682,10 @@
     </div>
   </div>
 
+</section>
+
+<section class="view" id="view-history">
+  <h2 class="view-title">📋 ប្រវត្តិប្រតិបត្តិការ</h2>
   <div class="filter-bar no-print">
     <div class="scope-toggle" id="scopeToggle">
       <button type="button" data-scope="today" class="active">☀️ ថ្ងៃនេះ</button>
@@ -627,13 +702,38 @@
     <button class="btn btn-secondary" id="printBtn">🖨️ បោះពុម្ព</button>
   </div>
 
-  <div class="month-summary" id="monthSummary"></div>
-
   <div id="ledger">
     <div class="loading">កំពុងផ្ទុកទិន្នន័យ...</div>
   </div>
+</section>
+
+<section class="view" id="view-report">
+  <h2 class="view-title">📊 សង្ខេបតាមប្រភេទ</h2>
+  <div class="report-controls no-print">
+    <div class="scope-toggle" id="reportScopeToggle">
+      <button type="button" data-rscope="today">☀️ ថ្ងៃនេះ</button>
+      <button type="button" data-rscope="month" class="active">📅 ខែនេះ</button>
+      <button type="button" data-rscope="all">📚 ទាំងអស់</button>
+    </div>
+    <div class="scope-toggle" id="reportTypeToggle">
+      <button type="button" data-rtype="expense" class="active">🛍️ ចំណាយ</button>
+      <button type="button" data-rtype="income">💵 ចំណូល</button>
+    </div>
+  </div>
+  <div class="month-summary" id="monthSummary"></div>
+  <div class="ms-hint no-print">👆 ចុចលើប្រភេទណាមួយ ដើម្បីមើលប្រតិបត្តិការលម្អិត</div>
+</section>
+
+<nav class="bottom-nav no-print" id="bottomNav">
+  <button type="button" data-go="home"><span>🏠</span>ដើម</button>
+  <button type="button" data-go="add"><span>➕</span>បន្ថែម</button>
+  <button type="button" data-go="history"><span>📋</span>ប្រវត្តិ</button>
+  <button type="button" data-go="report"><span>📊</span>សង្ខេប</button>
+</nav>
 
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const INCOME_CATS = ["ប្រាក់ខែ","ចំណូលបន្ថែម","ជំនួយគ្រួសារ","ការវិនិយោគ/ការជួញដូរ","ផ្សេងៗ"];
@@ -681,6 +781,8 @@ let entries = [];
 let currentType = "income";
 let editingId = null;
 let ledgerScope = "today"; // "today" | "month" | "all"
+let reportScope = "month";  // ទំព័រសង្ខេប
+let reportType = "expense"; // "expense" | "income"
 
 const CUSTOM_NOTES_KEY = "tracker_custom_notes_v1";
 let customNotes = loadCustomNotes();
@@ -900,6 +1002,7 @@ function showApp(){
   $("appRoot").style.display = "block";
   $("userLabel").textContent = currentUser.username;
   render();
+  showView(location.hash.slice(1) || "home", false);
 }
 
 async function tryRestoreSession(){
@@ -955,6 +1058,7 @@ function addEntry(){
     addCustomNote(category, customText);
   }
 
+  const wasEditing = !!editingId;
   if(editingId){
     const idx = entries.findIndex(e => e.id === editingId);
     if(idx !== -1){
@@ -974,6 +1078,8 @@ function addEntry(){
 
   saveEntries();
   render();
+  showToast(wasEditing ? "✅ បានរក្សាទុកការកែប្រែ" : (currentType === "income" ? "💚 បានបន្ថែមចំណូល" : "💸 បានបន្ថែមចំណាយ"));
+  if(wasEditing) showView("history");
 }
 
 function startEdit(id){
@@ -992,7 +1098,7 @@ function startEdit(id){
   $("addBtn").textContent = "✓ រក្សាទុកការកែប្រែ";
   $("cancelBtn").style.display = "inline-block";
 
-  document.querySelector(".form-card").scrollIntoView({behavior:"smooth", block:"start"});
+  showView("add");
   $("fAmount").focus();
 }
 
@@ -1008,6 +1114,7 @@ $("cancelBtn").addEventListener("click", ()=>{
   $("fNote").value = "";
   $("fDate").value = todayStr();
   renderNoteChips();
+  showView("history");
 });
 
 $("addBtn").addEventListener("click", addEntry);
@@ -1104,8 +1211,9 @@ function renderMonthSummary(scope, typeFilter){
     row.addEventListener("click", ()=>{
       const cat = row.querySelector(".ms-cat").dataset.cat;
       $("filterSearch").value = cat;
-      render();
-      $("ledger").scrollIntoView({behavior:"smooth", block:"start"});
+      $("filterType").value = reportType;
+      setLedgerScope(reportScope);
+      showView("history");
     });
   });
 }
@@ -1175,7 +1283,7 @@ function render(){
   });
 
   // ចំណូល/ចំណាយតាមប្រភេទ៖ ដើរតាមម៉ឺនុយថ្ងៃនេះ/ខែនេះ/ប្រវត្តិទាំងអស់ និងជម្រើសចំណូល/ចំណាយ
-  renderMonthSummary(ledgerScope, typeFilter);
+  renderMonthSummary(reportScope, reportType);
 
   // group by date desc
   const groups = {};
@@ -1264,15 +1372,63 @@ function escapeHtml(str){
 }
 
 $("fCategory").addEventListener("change", renderNoteChips);
-$("scopeToggle").addEventListener("click",(e)=>{
-  const btn = e.target.closest("button");
-  if(!btn) return;
-  ledgerScope = btn.dataset.scope;
+function setLedgerScope(scope){
+  ledgerScope = scope;
   document.querySelectorAll("#scopeToggle button").forEach(b=>{
     b.classList.toggle("active", b.dataset.scope === ledgerScope);
   });
   render();
+}
+$("scopeToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  setLedgerScope(btn.dataset.scope);
 });
+
+/* ===== ទំព័រសង្ខេប ===== */
+$("reportScopeToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  reportScope = btn.dataset.rscope;
+  document.querySelectorAll("#reportScopeToggle button").forEach(b=> b.classList.toggle("active", b === btn));
+  render();
+});
+$("reportTypeToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("button");
+  if(!btn) return;
+  reportType = btn.dataset.rtype;
+  document.querySelectorAll("#reportTypeToggle button").forEach(b=> b.classList.toggle("active", b === btn));
+  render();
+});
+
+/* ===== ប្តូរទំព័រ (ប៊ូតុងខាងក្រោម + ប៊ូតុងធំៗនៅទំព័រដើម) ===== */
+const VIEWS = ["home","add","history","report"];
+function showView(v, push = true){
+  if(!VIEWS.includes(v)) v = "home";
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "view-" + v));
+  document.querySelectorAll("#bottomNav button").forEach(b => b.classList.toggle("active", b.dataset.go === v));
+  if(push && location.hash !== "#" + v) history.pushState(null, "", "#" + v);
+  window.scrollTo(0, 0);
+}
+// ប៊ូតុង Back របស់ទូរស័ព្ទ ត្រឡប់ទៅទំព័រមុន
+window.addEventListener("popstate", ()=> showView(location.hash.slice(1) || "home", false));
+
+document.addEventListener("click",(e)=>{
+  const b = e.target.closest("[data-go]");
+  if(!b) return;
+  if(b.dataset.type && !editingId) setType(b.dataset.type);
+  showView(b.dataset.go);
+  if(b.dataset.go === "add") setTimeout(()=> $("fAmount").focus(), 60);
+});
+
+let toastTimer = null;
+function showToast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove("show"), 1800);
+}
 $("filterType").addEventListener("change", render);
 $("filterSearch").addEventListener("input", render);
 $("printBtn").addEventListener("click", ()=> window.print());
