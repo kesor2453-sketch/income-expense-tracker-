@@ -7,27 +7,27 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<meta name="theme-color" content="#B98A2E">
+<meta name="theme-color" content="#FF9F1C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ចំណូល-ចំណាយ">
 <meta name="mobile-web-app-capable" content="yes">
 <style>
   :root{
-    --paper:#F5F2EA;
-    --paper-line:#DED6C2;
-    --ink:#26241F;
-    --ink-soft:#6b6555;
-    --margin-red:#B0413E;
-    --income:#2F6F4E;
-    --income-bg:#E7F0EA;
-    --expense:#B0413E;
-    --expense-bg:#F5E7E4;
-    --gold:#B98A2E;
-    --gold-bg:#F3E9D2;
+    --paper:#FFF7F0;
+    --paper-line:#F8E6DA;
+    --ink:#3A2E39;
+    --ink-soft:#8A7484;
+    --margin-red:#FF6B9A;
+    --income:#12A26A;
+    --income-bg:#DCF8EA;
+    --expense:#F0506E;
+    --expense-bg:#FFE3EA;
+    --gold:#FF9F1C;
+    --gold-bg:#FFF0D6;
     --card:#FFFFFF;
-    --border:#E1D9C6;
-    --radius:10px;
+    --border:#F3DCCB;
+    --radius:16px;
     --khmer-font:"Khmer OS Battambang","Khmer OS","Noto Sans Khmer","Leelawadee UI","Khmer UI",sans-serif;
     --mono:ui-monospace,SFMono-Regular,"IBM Plex Mono",Menlo,Consolas,monospace;
   }
@@ -37,8 +37,11 @@
     min-height:100vh;
     padding:28px 16px 60px;
     background-image:
+      radial-gradient(circle at 8% 12%, #FFD6E4 0, transparent 28%),
+      radial-gradient(circle at 92% 30%, #D8F3FF 0, transparent 26%),
+      radial-gradient(circle at 15% 85%, #E4FBD8 0, transparent 26%),
       linear-gradient(var(--paper-line) 1px, transparent 1px);
-    background-size: 100% 40px;
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 40px;
     background-attachment:local;
   }
   .wrap{max-width:820px;margin:0 auto;}
@@ -441,13 +444,72 @@
     background:var(--income);margin-right:5px;
   }
   .sync-dot.off{background:var(--expense);}
+
+  /* ===== Cute & colorful ===== */
+  .book-header{
+    background:linear-gradient(135deg,#FFE3EC 0%,#FFF3D1 50%,#DDF7EA 100%);
+    border:none;
+    border-left:6px solid var(--margin-red);
+    padding-right:130px;
+    box-shadow:0 4px 14px rgba(255,107,154,0.15);
+  }
+  .book-header .tab{background:linear-gradient(90deg,#FF6B9A,#FF9F1C);border-radius:8px 8px 0 0;}
+  .sticker{
+    position:absolute;
+    font-size:30px;
+    line-height:1;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,0.15));
+    animation:bob 3s ease-in-out infinite;
+    pointer-events:none;
+    user-select:none;
+  }
+  .sticker.s1{top:-16px;right:18px;rotate:12deg;font-size:38px;}
+  .sticker.s2{bottom:-10px;right:64px;rotate:-10deg;animation-delay:.7s;}
+  .sticker.s3{top:14px;right:96px;font-size:22px;rotate:-6deg;animation-delay:1.4s;}
+  .sticker.s4{bottom:10px;right:14px;font-size:22px;rotate:8deg;animation-delay:2s;}
+  @keyframes bob{0%,100%{translate:0 0;}50%{translate:0 -6px;}}
+  @media (prefers-reduced-motion:reduce){.sticker{animation:none;}}
+
+  .sum-card{border:none;box-shadow:0 3px 10px rgba(58,46,57,0.06);position:relative;overflow:hidden;}
+  .sum-card.carry{background:linear-gradient(140deg,#FFF3D1,#FFFFFF 70%);}
+  .sum-card.month{background:linear-gradient(140deg,#E3F1FF,#FFFFFF 70%);border-top:3px solid #4D9DFF;}
+  .sum-card.total{background:linear-gradient(140deg,#FFE3EC,#FFFFFF 70%);border-top:3px solid var(--margin-red);}
+  .sum-card .big-emoji{
+    position:absolute;right:10px;top:8px;font-size:30px;opacity:.9;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+  }
+
+  .form-card,.month-summary{border:none;box-shadow:0 3px 10px rgba(58,46,57,0.06);}
+  .btn{border-radius:12px;}
+  .btn-add{background:linear-gradient(90deg,#FF6B9A,#FF9F1C);box-shadow:0 3px 8px rgba(255,107,154,0.3);}
+  .btn-add:hover{background:linear-gradient(90deg,#FF5A8C,#FF8F00);}
+  .type-toggle,.scope-toggle{border-radius:12px;}
+  .scope-toggle button.active{background:linear-gradient(90deg,#FF9F1C,#FFC233);}
+  .chip.active{background:linear-gradient(90deg,#FF6B9A,#FF9F1C);border-color:transparent;}
+
+  .entry{border:none;border-radius:14px;box-shadow:0 2px 6px rgba(58,46,57,0.05);}
+  .entry .icon{
+    width:40px;height:40px;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:21px;line-height:1;
+  }
+  .empty .cute{display:block;font-size:46px;margin-bottom:8px;animation:bob 3s ease-in-out infinite;}
+  .login-card{position:relative;border:none;border-left:6px solid var(--margin-red);box-shadow:0 6px 20px rgba(255,107,154,0.18);}
+  .login-card .sticker{top:-22px;right:16px;font-size:44px;rotate:10deg;}
+
+  @media (max-width:520px){
+    .book-header{padding-right:24px;padding-top:28px;}
+    .sticker.s3,.sticker.s4{display:none;}
+    .sticker.s2{right:56px;}
+  }
 </style>
 </head>
 <body>
 
 <div class="login-wrap" id="loginScreen">
   <div class="login-card">
-    <h1 id="loginTitle">សៀវភៅចំណូល-ចំណាយ</h1>
+    <span class="sticker">🐷</span>
+    <h1 id="loginTitle">សៀវភៅចំណូល-ចំណាយ 💖</h1>
     <div class="sub" id="loginSub">វាយឈ្មោះអ្នកប្រើ ដើម្បីចូល (គណនីថ្មីនឹងបង្កើតដោយស្វ័យប្រវត្តិ)</div>
 
     <div id="loginFields">
@@ -460,7 +522,7 @@
     <div class="err" id="authErr"></div>
     <div class="msg-ok" id="authOk"></div>
 
-    <button class="btn btn-add" id="authSubmitBtn">ចូលប្រើ</button>
+    <button class="btn btn-add" id="authSubmitBtn">🚀 ចូលប្រើ</button>
   </div>
 </div>
 
@@ -475,34 +537,41 @@
   </div>
 
   <div class="book-header">
-    <div class="tab">សៀវភៅផ្ទាល់ខ្លួន</div>
+    <div class="tab">📒 សៀវភៅផ្ទាល់ខ្លួន</div>
+    <span class="sticker s1">🐷</span>
+    <span class="sticker s2">💰</span>
+    <span class="sticker s3">✨</span>
+    <span class="sticker s4">🌸</span>
     <h1>ចំណូល - ចំណាយប្រចាំថ្ងៃ</h1>
     <div class="sub">កត់ត្រា និងតាមដានលុយចូល-លុយចេញរបស់អ្នកជារៀងរាល់ថ្ងៃ</div>
   </div>
 
   <div class="summary" id="summary">
-    <div class="sum-card balance">
+    <div class="sum-card balance carry">
+      <span class="big-emoji">🐷</span>
       <div class="label">លុយសល់ពីខែមុន</div>
       <div class="val" id="carryoverBalance">$0.00</div>
     </div>
-    <div class="sum-card">
+    <div class="sum-card month">
+      <span class="big-emoji">📅</span>
       <div class="label">ចំណូល/ចំណាយ ខែនេះ</div>
       <div class="val" style="font-size:14px; line-height:1.6;">
-        <div>ចំណូល: <span id="monthIncomeVal" style="color:var(--income)">$0.00</span></div>
-        <div>ចំណាយ: <span id="monthExpenseVal" style="color:var(--expense)">$0.00</span></div>
+        <div>💚 ចំណូល: <span id="monthIncomeVal" style="color:var(--income)">$0.00</span></div>
+        <div>💸 ចំណាយ: <span id="monthExpenseVal" style="color:var(--expense)">$0.00</span></div>
       </div>
     </div>
-    <div class="sum-card balance">
+    <div class="sum-card balance total">
+      <span class="big-emoji">💎</span>
       <div class="label">សមតុល្យសរុប</div>
       <div class="val" id="totalBalance">$0.00</div>
     </div>
   </div>
 
   <div class="form-card">
-    <h2>បន្ថែមប្រតិបត្តិការថ្មី</h2>
+    <h2>✏️ បន្ថែមប្រតិបត្តិការថ្មី</h2>
     <div class="type-toggle" id="typeToggle">
-      <button type="button" data-type="income" class="active">ចំណូល</button>
-      <button type="button" data-type="expense">ចំណាយ</button>
+      <button type="button" data-type="income" class="active">💵 ចំណូល</button>
+      <button type="button" data-type="expense">🛍️ ចំណាយ</button>
     </div>
 
     <div class="grid2">
@@ -538,15 +607,15 @@
 
     <div class="btn-row">
       <button class="btn btn-secondary" id="cancelBtn" style="display:none;">បោះបង់</button>
-      <button class="btn btn-add" id="addBtn">＋ បន្ថែម</button>
+      <button class="btn btn-add" id="addBtn">✨ បន្ថែម</button>
     </div>
   </div>
 
   <div class="filter-bar no-print">
     <div class="scope-toggle" id="scopeToggle">
-      <button type="button" data-scope="today" class="active">ថ្ងៃនេះ</button>
-      <button type="button" data-scope="month">ខែនេះ</button>
-      <button type="button" data-scope="all">ប្រវត្តិទាំងអស់</button>
+      <button type="button" data-scope="today" class="active">☀️ ថ្ងៃនេះ</button>
+      <button type="button" data-scope="month">📅 ខែនេះ</button>
+      <button type="button" data-scope="all">📚 ប្រវត្តិទាំងអស់</button>
     </div>
     <select id="filterType">
       <option value="all">ទាំងអស់</option>
@@ -555,7 +624,7 @@
     </select>
     <input type="text" id="filterSearch" placeholder="ស្វែងរកចំណាំ / ប្រភេទ...">
     <div class="spacer"></div>
-    <button class="btn btn-secondary" id="printBtn">បោះពុម្ព</button>
+    <button class="btn btn-secondary" id="printBtn">🖨️ បោះពុម្ព</button>
   </div>
 
   <div class="month-summary" id="monthSummary"></div>
@@ -587,6 +656,26 @@ const NOTE_SUGGESTIONS = {
   "សន្សំ": ["ដាក់សន្សំធនាគារ","ទិញមាស"],
   "ផ្សេងៗ": []
 };
+
+/* ===== Icon & ពណ៌ សម្រាប់ប្រភេទនីមួយៗ ===== */
+const CAT_STYLE = {
+  "ប្រាក់ខែ":               {icon:"💼", bg:"#DCF8EA"},
+  "ចំណូលបន្ថែម":            {icon:"🩺", bg:"#D8F3FF"},
+  "ជំនួយគ្រួសារ":            {icon:"🎁", bg:"#FFE3EC"},
+  "ការវិនិយោគ/ការជួញដូរ":    {icon:"📈", bg:"#E8E3FF"},
+  "អាហារ":                 {icon:"🍜", bg:"#FFF0D6"},
+  "ធ្វើដំណើរ/សាំង":          {icon:"🛵", bg:"#D8F3FF"},
+  "ជួលផ្ទះ/ក្រុមហ៊ុន":        {icon:"🏠", bg:"#FFE8D9"},
+  "អគ្គិសនី/ទឹក/អ៊ីនធឺណិត":  {icon:"💡", bg:"#FFF8C9"},
+  "សុខភាព":                {icon:"💊", bg:"#FFE3EA"},
+  "គ្រួសារ/កូន":             {icon:"🧸", bg:"#FFE3EC"},
+  "សិក្សា":                 {icon:"📚", bg:"#E3F1FF"},
+  "សម្លៀកបំពាក់":            {icon:"👗", bg:"#F6E3FF"},
+  "កម្សាន្ត":               {icon:"🎉", bg:"#FFF0D6"},
+  "សន្សំ":                  {icon:"🐷", bg:"#FFE3EC"},
+  "ផ្សេងៗ":                 {icon:"🌈", bg:"#EEF2F5"}
+};
+function catStyle(cat){ return CAT_STYLE[cat] || {icon:"🪙", bg:"#EEF2F5"}; }
 
 let entries = [];
 let currentType = "income";
@@ -667,7 +756,7 @@ function populateCategories(){
   const list = currentType === "income" ? INCOME_CATS : EXPENSE_CATS;
   list.forEach(c => {
     const opt = document.createElement("option");
-    opt.value = c; opt.textContent = c;
+    opt.value = c; opt.textContent = catStyle(c).icon + "  " + c;
     sel.appendChild(opt);
   });
   renderNoteChips();
@@ -909,7 +998,7 @@ function startEdit(id){
 
 function stopEdit(){
   editingId = null;
-  $("addBtn").textContent = "＋ បន្ថែម";
+  $("addBtn").textContent = "✨ បន្ថែម";
   $("cancelBtn").style.display = "none";
 }
 
@@ -973,7 +1062,7 @@ function renderMonthSummary(scope, typeFilter){
   if(scopeEntries.length === 0){
     wrap.innerHTML = `
       <div class="ms-title"><span>${titleLabel}</span></div>
-      <div class="ms-empty">មិនទាន់មាន${typeLabel}សម្រាប់ចន្លោះពេលនេះទេ</div>`;
+      <div class="ms-empty">🐣 មិនទាន់មាន${typeLabel}សម្រាប់ចន្លោះពេលនេះទេ</div>`;
     return;
   }
 
@@ -998,7 +1087,7 @@ function renderMonthSummary(scope, typeFilter){
     const pct = maxVal ? Math.max(4, Math.round((val/maxVal)*100)) : 0;
     rows += `
       <div class="ms-row">
-        <span class="ms-cat">${escapeHtml(cat)}</span>
+        <span class="ms-cat" data-cat="${escapeHtml(cat)}">${catStyle(cat).icon} ${escapeHtml(cat)}</span>
         <span class="ms-bar-wrap" style="background:${barBg}"><span class="ms-bar" style="width:${pct}%; background:${barColor}"></span></span>
         <span class="ms-amt">${fmtMixed(t.USD, t.KHR)}</span>
       </div>`;
@@ -1013,7 +1102,7 @@ function renderMonthSummary(scope, typeFilter){
 
   wrap.querySelectorAll(".ms-row").forEach(row=>{
     row.addEventListener("click", ()=>{
-      const cat = row.querySelector(".ms-cat").textContent;
+      const cat = row.querySelector(".ms-cat").dataset.cat;
       $("filterSearch").value = cat;
       render();
       $("ledger").scrollIntoView({behavior:"smooth", block:"start"});
@@ -1105,7 +1194,7 @@ function render(){
       : ledgerScope === "month"
         ? "មិនទាន់មានប្រតិបត្តិការក្នុងខែនេះទេ។"
         : "មិនទាន់មានប្រតិបត្តិការទេ។";
-    ledger.innerHTML = `<div class="empty">${emptyMsg}</div>`;
+    ledger.innerHTML = `<div class="empty"><span class="cute">🐣</span>${emptyMsg}</div>`;
     return;
   }
 
@@ -1135,7 +1224,7 @@ function render(){
 
     const heading = document.createElement("div");
     heading.className = "day-heading";
-    heading.innerHTML = `<span class="d">${khmerDate(date)}</span>
+    heading.innerHTML = `<span class="d">🗓️ ${khmerDate(date)}</span>
       <span class="net" style="color:${netTotal>=0?'var(--income)':'var(--expense)'}">
         សុទ្ធ: ${fmtMixed(netUSD, netKHR)}
       </span>`;
@@ -1144,10 +1233,11 @@ function render(){
     dayEntries.forEach(e=>{
       const amtText = fmtAmount(e.amount, e.currency)
         + (e.currency === "KHR" ? " (" + fmtAmount(toUSD(0, e.amount),"USD") + ")" : "");
+      const cs = catStyle(e.category);
       const row = document.createElement("div");
       row.className = "entry";
       row.innerHTML = `
-        <span class="dot ${e.type}"></span>
+        <span class="icon" style="background:${cs.bg}">${cs.icon}</span>
         <span class="desc">
           <div class="cat">${escapeHtml(e.category)}</div>
           ${e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : ""}
