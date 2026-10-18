@@ -2,7 +2,7 @@
 <html lang="km">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>សៀវភៅចំណូលចំណាយ</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -34,7 +34,10 @@
     --font:"Kantumruy Pro","Khmer OS Battambang","Noto Sans Khmer","Khmer UI",sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html{-webkit-text-size-adjust:100%;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  /* តម្រូវតាមអេក្រង់ — គ្មានរំកិលឆ្វេងស្តាំ គ្មានពង្រីក */
+  html,body{width:100%;max-width:100%;overflow-x:hidden;touch-action:manipulation;overscroll-behavior-x:none;}
+  img,svg{max-width:100%;}
   body{
     margin:0;background:var(--bg);color:var(--ink);
     font-family:var(--font);font-variant-numeric:tabular-nums;
@@ -1059,6 +1062,17 @@ function render(){
   renderYear();
   renderSavings();
 }
+
+/* បិទការបង្រួម/ពង្រីក (pinch & double-tap) — iPhone មិនគោរព user-scalable=no ទេ */
+["gesturestart","gesturechange","gestureend"].forEach(ev =>
+  document.addEventListener(ev, e => e.preventDefault(), { passive:false }));
+document.addEventListener("touchmove", e => { if(e.touches.length > 1) e.preventDefault(); }, { passive:false });
+let lastTouchEnd = 0;
+document.addEventListener("touchend", e => {
+  const now = Date.now();
+  if(now - lastTouchEnd < 300 && !e.target.closest("input,textarea,select")) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive:false });
 
 tryRestoreSession();
 </script>
