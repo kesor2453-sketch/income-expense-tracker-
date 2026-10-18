@@ -312,7 +312,20 @@
   .note-item:last-child{border-bottom:none;}
   .note-item span{flex:1;min-width:0;}
   .note-item button{border:none;background:var(--exp-bg);color:var(--exp);width:38px;height:38px;border-radius:12px;font-size:15px;}
-  .add-row{display:flex;gap:8px;}
+  .add-row{display:flex;gap:8px;align-items:center;}
+  .add-row .bub{width:48px;height:48px;font-size:24px;}
+  .cat-item{padding:6px 6px 6px 8px;gap:10px;}
+  .cat-item .bub{flex:0 0 38px;width:38px;height:38px;font-size:19px;border-radius:12px;}
+  .add-row button{min-height:48px;}
+  .add-row .bub{flex:0 0 48px;}
+  .note-item button:disabled{opacity:.35;}
+  .mini-label{display:block;font-size:13.5px;color:var(--soft);margin:2px 2px 6px;}
+  .emoji-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .emoji-row button{
+    width:40px;height:40px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);
+    font-size:20px;line-height:1;padding:0;
+  }
+  .emoji-row button.on{border-color:var(--green);background:#E9F1EE;}
   .add-row input{
     flex:1;min-width:0;font-family:var(--font);font-size:16px;padding:12px 14px;
     border:1.5px solid var(--line);border-radius:14px;outline:none;min-height:48px;
@@ -349,6 +362,10 @@
   .login .card{padding:22px 18px;}
   .login .sub{color:var(--soft);font-size:14px;margin:0 2px 16px;}
   .err{color:var(--exp);font-size:13.5px;min-height:18px;margin:-4px 2px 10px;}
+  .auth-title{font-size:19px;font-weight:700;margin:0 2px 6px;}
+  .auth-links{text-align:center;margin-top:12px;}
+  .text-btn{border:none;background:none;color:var(--green);font-size:15px;font-weight:600;padding:8px 10px;}
+  .auth-hint{text-align:center;color:var(--soft);font-size:13px;margin-top:4px;}
   .sync{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--inc);margin-right:6px;}
   .sync.off{background:var(--exp);}
 </style>
@@ -359,14 +376,68 @@
   <!-- ================= LOGIN ================= -->
   <div class="login" id="loginScreen">
     <h1 class="app-title">សៀវភៅចំណូលចំណាយ</h1>
-    <div class="card">
-      <div class="sub">វាយឈ្មោះអ្នកប្រើ ដើម្បីចូល (គណនីថ្មីនឹងបង្កើតដោយស្វ័យប្រវត្តិ)</div>
+    <!-- ចូលប្រើ -->
+    <div class="card" id="pLogin">
       <div class="field">
         <label for="authUsername">ឈ្មោះអ្នកប្រើ</label>
-        <input type="text" id="authUsername" autocomplete="username" placeholder="ឧ. linda_hmv">
+        <input type="text" id="authUsername" autocomplete="username" autocapitalize="none" placeholder="ឧ. linda_hmv">
+      </div>
+      <div class="field">
+        <label for="authPin">លេខកូដ</label>
+        <input type="password" id="authPin" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" placeholder="••••">
       </div>
       <div class="err" id="authErr"></div>
       <button class="btn" id="authSubmitBtn">ចូលប្រើ</button>
+      <div class="auth-links">
+        <button type="button" class="text-btn" id="toForgot">ភ្លេចលេខកូដ?</button>
+      </div>
+      <div class="auth-hint">អ្នកប្រើថ្មី៖ វាយឈ្មោះដែលចង់បាន រួចចុច ចូលប្រើ ដើម្បីបង្កើតគណនី</div>
+    </div>
+
+    <!-- បង្កើតគណនី / កំណត់លេខកូដលើកដំបូង -->
+    <div class="card" id="pSetup" hidden>
+      <div class="auth-title" id="setupTitle"></div>
+      <div class="sub" id="setupSub"></div>
+      <div class="field">
+        <label for="setupPhone">លេខទូរស័ព្ទ</label>
+        <input type="tel" id="setupPhone" inputmode="tel" autocomplete="tel" placeholder="ឧ. 012 345 678">
+      </div>
+      <div class="field">
+        <label for="setupPin">លេខកូដថ្មី (យ៉ាងតិច ៤ ខ្ទង់)</label>
+        <input type="password" id="setupPin" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" placeholder="••••">
+      </div>
+      <div class="field">
+        <label for="setupPin2">វាយលេខកូដម្តងទៀត</label>
+        <input type="password" id="setupPin2" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" placeholder="••••">
+      </div>
+      <div class="err" id="setupErr"></div>
+      <button class="btn" id="setupBtn">រក្សាទុក ហើយចូលប្រើ</button>
+      <div class="auth-links"><button type="button" class="text-btn" data-auth="login">‹ ត្រឡប់ក្រោយ</button></div>
+    </div>
+
+    <!-- ភ្លេចលេខកូដ -->
+    <div class="card" id="pForgot" hidden>
+      <div class="auth-title">ភ្លេចលេខកូដ</div>
+      <div class="sub">បំពេញឈ្មោះ និងលេខទូរស័ព្ទដែលបានចុះឈ្មោះ រួចបង្កើតលេខកូដថ្មី</div>
+      <div class="field">
+        <label for="fgUser">ឈ្មោះអ្នកប្រើ</label>
+        <input type="text" id="fgUser" autocomplete="username" autocapitalize="none">
+      </div>
+      <div class="field">
+        <label for="fgPhone">លេខទូរស័ព្ទ</label>
+        <input type="tel" id="fgPhone" inputmode="tel" autocomplete="tel" placeholder="ឧ. 012 345 678">
+      </div>
+      <div class="field">
+        <label for="fgPin">លេខកូដថ្មី (យ៉ាងតិច ៤ ខ្ទង់)</label>
+        <input type="password" id="fgPin" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" placeholder="••••">
+      </div>
+      <div class="field">
+        <label for="fgPin2">វាយលេខកូដម្តងទៀត</label>
+        <input type="password" id="fgPin2" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" placeholder="••••">
+      </div>
+      <div class="err" id="fgErr"></div>
+      <button class="btn" id="fgBtn">បង្កើតលេខកូដថ្មី</button>
+      <div class="auth-links"><button type="button" class="text-btn" data-auth="login">‹ ត្រឡប់ទៅចូលប្រើ</button></div>
     </div>
   </div>
 
@@ -556,6 +627,52 @@
     <!-- SETTINGS -->
     <section class="view" id="view-settings">
       <div class="card">
+        <div class="field" style="margin-bottom:12px">
+          <label>គណនី</label>
+          <div style="font-weight:700;font-size:17px;padding:0 2px"><span class="sync" id="syncDot"></span><span id="setUser"></span></div>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn ghost" id="changeUser">ប្តូរឈ្មោះ</button>
+          <button type="button" class="btn ghost" id="pinToggle">🔒 ប្តូរលេខកូដ</button>
+        </div>
+        <div id="pinBox" hidden style="margin-top:14px">
+          <div class="field">
+            <label for="pinOld">លេខកូដចាស់</label>
+            <input type="password" id="pinOld" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password">
+          </div>
+          <div class="field">
+            <label for="pinNew">លេខកូដថ្មី (យ៉ាងតិច ៤ ខ្ទង់)</label>
+            <input type="password" id="pinNew" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label for="pinNew2">វាយលេខកូដថ្មីម្តងទៀត</label>
+            <input type="password" id="pinNew2" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password">
+          </div>
+          <div class="err" id="pinErr"></div>
+          <button type="button" class="btn" id="pinSave">រក្សាទុកលេខកូដថ្មី</button>
+        </div>
+        <button type="button" class="btn danger" id="logout" style="margin-top:10px">ចាកចេញ</button>
+      </div>
+
+      <div class="card">
+        <div class="field" style="margin-bottom:10px">
+          <label>ប្រភេទ — បន្ថែម ឬលុប</label>
+          <div class="seg" id="cType">
+            <button type="button" data-t="expense" class="on">ចំណាយ</button>
+            <button type="button" data-t="income">ចំណូល</button>
+          </div>
+        </div>
+        <div class="note-list" id="cList"></div>
+        <label class="mini-label">ជ្រើស icon សម្រាប់ប្រភេទថ្មី</label>
+        <div class="emoji-row" id="cEmoji"></div>
+        <div class="add-row">
+          <span class="bub" id="cIconPreview" style="background:#E9ECEB">🏷️</span>
+          <input type="text" id="cInput" placeholder="ប្រភេទថ្មី...">
+          <button type="button" id="cAdd">＋ បន្ថែម</button>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="field" style="margin-bottom:10px">
           <label>ចំណាំរហ័ស (ស្រេចចិត្ត) — បន្ថែម ឬលុប</label>
           <div class="seg" id="nType">
@@ -578,16 +695,6 @@
           <input type="number" id="setRate" min="1" step="1" inputmode="numeric">
         </div>
         <button type="button" class="btn" id="saveRate">រក្សាទុកអត្រា</button>
-      </div>
-      <div class="card">
-        <div class="field" style="margin-bottom:12px">
-          <label>គណនី</label>
-          <div style="font-weight:700;font-size:17px;padding:0 2px"><span class="sync" id="syncDot"></span><span id="setUser"></span></div>
-        </div>
-        <div class="btn-row">
-          <button type="button" class="btn ghost" id="changeUser">ប្តូរឈ្មោះ</button>
-          <button type="button" class="btn danger" id="logout">ចាកចេញ</button>
-        </div>
       </div>
     </section>
 
@@ -637,7 +744,11 @@ const CAT_STYLE = {
   "សន្សំ":                  {icon:"🐷", bg:"#F3EAD6"},
   "ផ្សេងៗ":                 {icon:"🌈", bg:"#E9ECEB"}
 };
-const catStyle = c => CAT_STYLE[c] || {icon:"🪙", bg:"#E9ECEB"};
+function catStyle(c){
+  if(CAT_STYLE[c]) return CAT_STYLE[c];
+  const mine = [...((userCats.income || {}).added || []), ...((userCats.expense || {}).added || [])].find(x => x.name === c);
+  return { icon: mine ? mine.icon : "🪙", bg: "#E9ECEB" };
+}
 
 /* ================= ជំនួយ ================= */
 const $ = id => document.getElementById(id);
@@ -734,6 +845,32 @@ const GOAL_TARGET_KEY = "tracker_goal_targets_v1";
 let goalTargets = {};
 const saveGoalTargets = () => lsSet(userKey(GOAL_TARGET_KEY), JSON.stringify(goalTargets));
 
+// ប្រភេទរបស់អ្នកប្រើ {income:{added:[{name,icon}], hidden:[]}, expense:{...}}
+const CATS_KEY = "tracker_user_cats_v1";
+let userCats = {};
+const saveUserCats = () => lsSet(userKey(CATS_KEY), JSON.stringify(userCats));
+const ucat = type => (userCats[type] = userCats[type] || { added: [], hidden: [] });
+function catsFor(type){
+  const u = ucat(type);
+  const base = (type === "income" ? INCOME_CATS : EXPENSE_CATS).filter(c => !u.hidden.includes(c));
+  u.added.forEach(a => { if(!base.includes(a.name)) base.push(a.name); });
+  return base;
+}
+function addCat(type, name, icon){
+  const u = ucat(type);
+  if(u.hidden.includes(name)){ u.hidden = u.hidden.filter(c => c !== name); saveUserCats(); return true; }
+  if(catsFor(type).includes(name) || name === SAVE_CAT) return false;
+  u.added.push({ name, icon: icon || "🏷️" });
+  saveUserCats();
+  return true;
+}
+function removeCat(type, name){
+  const u = ucat(type);
+  if(u.added.some(a => a.name === name)) u.added = u.added.filter(a => a.name !== name);
+  if((type === "income" ? INCOME_CATS : EXPENSE_CATS).includes(name) && !u.hidden.includes(name)) u.hidden.push(name);
+  saveUserCats();
+}
+
 // ផ្ទុកចំណាំរបស់អ្នកប្រើដែលកំពុងចូល
 function loadUserNotes(){
   const ck = userKey(CUSTOM_NOTES_KEY), hk = userKey(HIDDEN_NOTES_KEY);
@@ -743,10 +880,11 @@ function loadUserNotes(){
   customNotes = readJSON(ck);
   hiddenNotes = readJSON(hk);
   goalTargets = readJSON(userKey(GOAL_TARGET_KEY));
+  userCats = readJSON(userKey(CATS_KEY));
 }
 // ពេលប្តូរឈ្មោះ → យកចំណាំទៅជាមួយ
 function moveUserNotes(oldName, newName){
-  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY, GOAL_TARGET_KEY].forEach(base=>{
+  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY, GOAL_TARGET_KEY, CATS_KEY].forEach(base=>{
     const v = lsGet(base + "__" + oldName);
     if(v !== null){ lsSet(base + "__" + newName, v); lsDel(base + "__" + oldName); }
   });
@@ -792,42 +930,126 @@ async function apiCall(action, extra){
   return res.json();
 }
 
-$("authSubmitBtn").addEventListener("click", async ()=>{
+/* ===== ចូលប្រើ ដោយលេខកូដ =====
+   server ឆ្លើយ៖ {success, token, entries}
+             ឬ {success:false, code:"NEED_SETUP", isNew} (អ្នកប្រើថ្មី / អ្នកប្រើចាស់គ្មានលេខកូដ)
+             ឬ {success:false, code:"WRONG_PIN" | "PIN_REQUIRED" | "PHONE_MISMATCH" | "BAD_TOKEN", message} */
+const PIN_RE = /^\d{4,12}$/;
+// លេខទូរស័ព្ទ៖ យកតែលេខ, 855xxxx → 0xxxx
+function normPhone(p){
+  let d = String(p || "").replace(/\D/g, "");
+  if(d.startsWith("855")) d = "0" + d.slice(3);
+  return d;
+}
+const validPhone = p => /^0\d{7,9}$/.test(p);
+let setupUser = "";
+
+function showAuth(panel){
+  ["pLogin","pSetup","pForgot"].forEach(id => $(id).hidden = (id !== panel));
+  ["authErr","setupErr","fgErr"].forEach(id => $(id).textContent = "");
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("[data-auth]").forEach(b => b.addEventListener("click", ()=> showAuth("pLogin")));
+$("toForgot").addEventListener("click", ()=>{
+  $("fgUser").value = $("authUsername").value.trim();
+  ["fgPhone","fgPin","fgPin2"].forEach(id => $(id).value = "");
+  showAuth("pForgot");
+  ($("fgUser").value ? $("fgPhone") : $("fgUser")).focus();
+});
+
+function enterApp(username, r){
+  currentUser = { username: (r.username || username).toLowerCase(), token: r.token || "" };
+  lsSet(SESSION_KEY, JSON.stringify(currentUser));
+  entries = r.entries || [];
+  ["authPin","setupPin","setupPin2","fgPin","fgPin2"].forEach(id => $(id).value = "");
+  showApp();
+}
+function openSetup(username, isNew){
+  setupUser = username;
+  $("setupTitle").textContent = isNew ? "បង្កើតគណនីថ្មី" : "កំណត់លេខកូដ";
+  $("setupSub").textContent = isNew
+    ? "គណនី «" + username + "» មិនទាន់មានទេ។ បំពេញលេខទូរស័ព្ទ និងបង្កើតលេខកូដ ដើម្បីបង្កើតគណនី។"
+    : "គណនី «" + username + "» មិនទាន់មានលេខកូដទេ។ សូមបំពេញលេខទូរស័ព្ទ និងបង្កើតលេខកូដ ដើម្បីការពារទិន្នន័យរបស់អ្នក។";
+  ["setupPhone","setupPin","setupPin2"].forEach(id => $(id).value = "");
+  showAuth("pSetup");
+  $("setupPhone").focus();
+}
+async function busy(btn, fn){
+  btn.disabled = true;
+  try { await fn(); } finally { btn.disabled = false; }
+}
+
+$("authSubmitBtn").addEventListener("click", ()=> busy($("authSubmitBtn"), async ()=>{
   const uname = $("authUsername").value.trim();
+  const pin = $("authPin").value.trim();
   $("authErr").textContent = "";
   if(!uname){ $("authErr").textContent = "សូមបំពេញឈ្មោះអ្នកប្រើ"; return; }
-  $("authSubmitBtn").disabled = true;
   try{
-    const r = await apiCall("login", { username: uname });
-    if(!r.success){ $("authErr").textContent = r.message || "មានបញ្ហា"; }
-    else{
-      currentUser = { username: uname.toLowerCase() };
-      lsSet(SESSION_KEY, JSON.stringify(currentUser));
-      entries = r.entries || [];
-      showApp();
-    }
+    const r = await apiCall("login", { username: uname, pin });
+    if(r.success) return enterApp(uname, r);
+    if(r.code === "NEED_SETUP") return openSetup(uname, !!r.isNew);
+    $("authErr").textContent =
+      r.code === "WRONG_PIN" ? "លេខកូដមិនត្រឹមត្រូវទេ" :
+      r.code === "PIN_REQUIRED" ? "សូមបញ្ចូលលេខកូដ" : (r.message || "មានបញ្ហា");
+    $("authPin").value = "";
+    $("authPin").focus();
   }catch(err){
     $("authErr").textContent = "មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message;
   }
-  $("authSubmitBtn").disabled = false;
-});
-$("authUsername").addEventListener("keydown", e => { if(e.key === "Enter") $("authSubmitBtn").click(); });
+}));
+$("authUsername").addEventListener("keydown", e => { if(e.key === "Enter") $("authPin").focus(); });
+$("authPin").addEventListener("keydown", e => { if(e.key === "Enter") $("authSubmitBtn").click(); });
+
+$("setupBtn").addEventListener("click", ()=> busy($("setupBtn"), async ()=>{
+  const phone = normPhone($("setupPhone").value), pin = $("setupPin").value.trim(), pin2 = $("setupPin2").value.trim();
+  const err = $("setupErr");
+  if(!validPhone(phone)){ err.textContent = "លេខទូរស័ព្ទមិនត្រឹមត្រូវ (ឧ. 012345678)"; return; }
+  if(!PIN_RE.test(pin)){ err.textContent = "លេខកូដត្រូវជាលេខ យ៉ាងតិច ៤ ខ្ទង់"; return; }
+  if(pin !== pin2){ err.textContent = "លេខកូដទាំងពីរមិនដូចគ្នាទេ"; return; }
+  err.textContent = "";
+  try{
+    const r = await apiCall("setup", { username: setupUser, pin, phone });
+    if(r.success){ toast("បានកំណត់លេខកូដ"); return enterApp(setupUser, r); }
+    err.textContent = r.message || "មិនអាចរក្សាទុកបានទេ";
+  }catch(e){ err.textContent = "មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + e.message; }
+}));
+
+$("fgBtn").addEventListener("click", ()=> busy($("fgBtn"), async ()=>{
+  const uname = $("fgUser").value.trim();
+  const phone = normPhone($("fgPhone").value), pin = $("fgPin").value.trim(), pin2 = $("fgPin2").value.trim();
+  const err = $("fgErr");
+  if(!uname){ err.textContent = "សូមបំពេញឈ្មោះអ្នកប្រើ"; return; }
+  if(!validPhone(phone)){ err.textContent = "លេខទូរស័ព្ទមិនត្រឹមត្រូវ"; return; }
+  if(!PIN_RE.test(pin)){ err.textContent = "លេខកូដត្រូវជាលេខ យ៉ាងតិច ៤ ខ្ទង់"; return; }
+  if(pin !== pin2){ err.textContent = "លេខកូដទាំងពីរមិនដូចគ្នាទេ"; return; }
+  err.textContent = "";
+  try{
+    const r = await apiCall("resetPin", { username: uname, phone, pin });
+    if(r.success){ toast("បានបង្កើតលេខកូដថ្មី"); return enterApp(uname, r); }
+    err.textContent = r.code === "PHONE_MISMATCH" ? "ឈ្មោះ ឬលេខទូរស័ព្ទមិនត្រូវគ្នាទេ" : (r.message || "មានបញ្ហា");
+  }catch(e){ err.textContent = "មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + e.message; }
+}));
 
 async function tryRestoreSession(){
   const raw = lsGet(SESSION_KEY);
   if(!raw) return;
+  let saved;
+  try { saved = JSON.parse(raw); } catch(e){ lsDel(SESSION_KEY); return; }
+  $("authUsername").value = saved.username || "";
+  if(!saved.token){ $("authPin").focus(); return; }   // session ចាស់ គ្មាន token → ត្រូវវាយលេខកូដ
   try{
-    const saved = JSON.parse(raw);
-    const r = await apiCall("login", { username: saved.username });
+    const r = await apiCall("login", { username: saved.username, token: saved.token });
     if(r.success){ currentUser = saved; entries = r.entries || []; showApp(); }
-    else lsDel(SESSION_KEY);
+    else if(r.code === "NEED_SETUP") openSetup(saved.username, false);
+    else { lsSet(SESSION_KEY, JSON.stringify({ username: saved.username })); }
   }catch(err){ console.error("Session restore failed", err); }
 }
 
 async function saveEntries(){
   if(!currentUser) return;
   try{
-    const r = await apiCall("save", { username: currentUser.username, entries });
+    const r = await apiCall("save", { username: currentUser.username, token: currentUser.token, entries });
+    if(r.code === "BAD_TOKEN"){ alert("សូមចូលប្រើម្តងទៀត"); forceLogout(); return; }
     $("syncDot").classList.toggle("off", !r.success);
     if(!r.success) alert("រក្សាទុកមិនបានទេ៖ " + (r.message || "unknown error"));
   }catch(err){
@@ -853,7 +1075,7 @@ function showView(v, push = true){
   if(!VIEW_SECTION[v]) v = "home";
   if(v === "form" && !form) v = "home";
   currentView = v;
-  if(v === "settings"){ renderNoteSettings(); $("setRate").value = KHR_RATE; $("setUser").textContent = currentUser ? currentUser.username : ""; }
+  if(v === "settings"){ renderCatSettings(); renderNoteSettings(); $("setRate").value = KHR_RATE; $("setUser").textContent = currentUser ? currentUser.username : ""; }
 
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "view-" + VIEW_SECTION[v]));
   $("subbar").hidden = (v === "home");
@@ -949,7 +1171,7 @@ function renderEntries(container, list, emptyMsg){
 /* ================= ទំព័របញ្ចូល ================= */
 const LAST_CAT_KEY = "tracker_last_cat_v1_";
 function openForm(type, cat, entry, presetNote){
-  const cats = type === "income" ? INCOME_CATS : EXPENSE_CATS;
+  const cats = catsFor(type);
   if(!cat){
     const last = lsGet(LAST_CAT_KEY + type);
     cat = cats.includes(last) ? last : cats[0];
@@ -981,7 +1203,9 @@ function renderForm(){
   // ម៉ឺនុយប្រភេទ (នៅខាងលើ)
   const pick = $("fCatPick");
   pick.innerHTML = "";
-  (form.type === "income" ? INCOME_CATS : EXPENSE_CATS).forEach(c=>{
+  const gridCats = catsFor(form.type);
+  if(!gridCats.includes(form.cat)) gridCats.push(form.cat);   // ពេលកែ ប្រភេទដែលបានលុប
+  gridCats.forEach(c=>{
     const b = document.createElement("button");
     b.type = "button";
     b.className = c === form.cat ? "on" : "";
@@ -1344,9 +1568,63 @@ $("sFold").addEventListener("click", ()=>{
 });
 
 /* ================= ការកំណត់ ================= */
-let nType = "expense", nCat = EXPENSE_CATS[0];
+const CAT_EMOJIS = ["🏷️","🛒","☕","🍺","🍰","🎮","📱","💻","🚗","⛽","🏥","💄","💇","🐶","🎁","✈️","🧾","🏦","💰","👶","🏋️","📦","🔧","🙏"];
+let cType = "expense", cIcon = CAT_EMOJIS[0];
+function renderCatSettings(){
+  const list = $("cList");
+  list.innerHTML = "";
+  const cats = catsFor(cType);
+  cats.forEach(c=>{
+    const cs = catStyle(c);
+    const row = document.createElement("div");
+    row.className = "note-item cat-item";
+    row.innerHTML = `<span class="bub" style="background:${cs.bg}">${cs.icon}</span><span></span>
+      <button type="button" aria-label="លុប"${cats.length <= 1 ? " disabled" : ""}>✕</button>`;
+    row.children[1].textContent = c;
+    row.querySelector("button").addEventListener("click", ()=>{
+      if(cats.length <= 1) return;
+      if(!confirm("លុបប្រភេទ «" + c + "» ចេញពីម៉ឺនុយ?\n(ប្រតិបត្តិការចាស់ៗ នៅតែរក្សាទុក)")) return;
+      removeCat(cType, c);
+      renderCatSettings();
+      renderNoteSettings();
+      toast("បានលុប «" + c + "»");
+    });
+    list.appendChild(row);
+  });
+
+  const er = $("cEmoji");
+  er.innerHTML = "";
+  CAT_EMOJIS.forEach(em=>{
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = em === cIcon ? "on" : "";
+    b.textContent = em;
+    b.addEventListener("click", ()=>{ cIcon = em; renderCatSettings(); });
+    er.appendChild(b);
+  });
+  $("cIconPreview").textContent = cIcon;
+}
+$("cType").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  cType = b.dataset.t;
+  document.querySelectorAll("#cType button").forEach(x => x.classList.toggle("on", x === b));
+  renderCatSettings();
+});
+function addCatFromSettings(){
+  const n = $("cInput").value.trim();
+  if(!n){ $("cInput").focus(); return; }
+  if(addCat(cType, n, cIcon)) toast("បានបន្ថែមប្រភេទ «" + n + "»"); else toast("ប្រភេទនេះមានរួចហើយ");
+  $("cInput").value = "";
+  renderCatSettings();
+  renderNoteSettings();
+}
+$("cAdd").addEventListener("click", addCatFromSettings);
+$("cInput").addEventListener("keydown", e => { if(e.key === "Enter") addCatFromSettings(); });
+
+let nType = "expense", nCat = "";
 function renderNoteSettings(){
-  const cats = nType === "income" ? INCOME_CATS : EXPENSE_CATS;
+  const cats = catsFor(nType);
   if(!cats.includes(nCat)) nCat = cats[0];
   const pick = $("nCatPick");
   pick.innerHTML = "";
@@ -1409,27 +1687,65 @@ $("changeUser").addEventListener("click", async ()=>{
   if(!t){ alert("សូមបញ្ចូលឈ្មោះមួយ"); return; }
   if(t.toLowerCase() === currentUser.username) return;
   try{
-    const r = await apiCall("changeUsername", { username: currentUser.username, newUsername: t });
+    const r = await apiCall("changeUsername", { username: currentUser.username, token: currentUser.token, newUsername: t });
     if(!r.success){ alert(r.message || "មិនអាចប្តូរបានទេ"); return; }
     const oldName = currentUser.username;
     currentUser.username = r.newUsername || t.toLowerCase();
+    if(r.token) currentUser.token = r.token;
     moveUserNotes(oldName, currentUser.username);
     lsSet(SESSION_KEY, JSON.stringify(currentUser));
     $("setUser").textContent = currentUser.username;
     toast("ប្តូរឈ្មោះជោគជ័យ");
   }catch(err){ alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message); }
 });
+$("pinToggle").addEventListener("click", ()=>{
+  $("pinBox").hidden = !$("pinBox").hidden;
+  ["pinOld","pinNew","pinNew2"].forEach(id => $(id).value = "");
+  $("pinErr").textContent = "";
+  if(!$("pinBox").hidden) $("pinOld").focus();
+});
+$("pinSave").addEventListener("click", ()=> busy($("pinSave"), async ()=>{
+  const o = $("pinOld").value.trim(), n = $("pinNew").value.trim(), n2 = $("pinNew2").value.trim();
+  const err = $("pinErr");
+  if(!o){ err.textContent = "សូមបញ្ចូលលេខកូដចាស់"; return; }
+  if(!PIN_RE.test(n)){ err.textContent = "លេខកូដត្រូវជាលេខ យ៉ាងតិច ៤ ខ្ទង់"; return; }
+  if(n !== n2){ err.textContent = "លេខកូដថ្មីទាំងពីរមិនដូចគ្នាទេ"; return; }
+  err.textContent = "";
+  try{
+    const r = await apiCall("changePin", { username: currentUser.username, token: currentUser.token, oldPin: o, pin: n });
+    if(!r.success){ err.textContent = r.code === "WRONG_PIN" ? "លេខកូដចាស់មិនត្រឹមត្រូវ" : (r.message || "មានបញ្ហា"); return; }
+    if(r.token){ currentUser.token = r.token; lsSet(SESSION_KEY, JSON.stringify(currentUser)); }
+    $("pinBox").hidden = true;
+    toast("🔒 បានប្តូរលេខកូដ");
+  }catch(e){ err.textContent = "មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + e.message; }
+}));
+
+function forceLogout(){
+  const name = currentUser ? currentUser.username : "";
+  currentUser = null;
+  customNotes = {}; hiddenNotes = {}; goalTargets = {}; userCats = {};
+  entries = [];
+  lsSet(SESSION_KEY, JSON.stringify({ username: name }));   // ចងចាំឈ្មោះ តែមិនចងចាំ token
+  history.replaceState(null, "", location.pathname + location.search);
+  $("appRoot").hidden = true;
+  $("loginScreen").hidden = false;
+  $("authUsername").value = name;
+  showAuth("pLogin");
+}
 $("logout").addEventListener("click", ()=>{
   if(!confirm("ចាកចេញពីគណនី?")) return;
   currentUser = null;
   customNotes = {};
   hiddenNotes = {};
   goalTargets = {};
+  userCats = {};
   entries = [];
   lsDel(SESSION_KEY);
   history.replaceState(null, "", location.pathname + location.search);
   $("appRoot").hidden = true;
   $("loginScreen").hidden = false;
+  $("authPin").value = "";
+  showAuth("pLogin");
 });
 
 /* ================= ផ្សេងៗ ================= */
