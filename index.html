@@ -718,6 +718,67 @@
   .login-card h1{font-size:22px;}
   .login-card .sub{font-size:14px;}
 
+
+  /* ===== Quick add (above menu) ===== */
+  .quick-add{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  .qa{
+    border:none;border-radius:22px;padding:16px 10px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-family:var(--khmer-font);font-size:18px;font-weight:700;color:#fff;
+    transition:transform .12s;
+  }
+  .qa span{
+    width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.28);
+    display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;
+  }
+  .qa:active{transform:scale(.96);}
+  .qa-in{background:linear-gradient(135deg,#2BCB91,#12A26A);box-shadow:0 5px 14px rgba(18,162,106,0.30);}
+  .qa-out{background:linear-gradient(135deg,#FF7E98,#F0506E);box-shadow:0 5px 14px rgba(240,80,110,0.30);}
+
+  /* menu: 4 small icons in one row */
+  .tiles{grid-template-columns:repeat(4,1fr);gap:10px;}
+  .tile{aspect-ratio:auto;max-height:none;padding:12px 2px 10px;border-radius:20px;font-size:13px;gap:2px;}
+  .tile .ti{width:46px;height:46px;border-radius:15px;font-size:24px;margin-bottom:4px;}
+  .tile .ts{font-size:11px;}
+
+  /* ===== Add form: fast entry ===== */
+  .type-toggle.big{
+    width:100%;display:grid;grid-template-columns:1fr 1fr;
+    border:none;background:#F6EEE9;padding:4px;border-radius:16px;margin-bottom:14px;
+  }
+  .type-toggle.big button{border-radius:12px;background:transparent;font-size:16px;padding:11px;}
+  .type-toggle.big button.active[data-type="income"]{background:#12A26A;color:#fff;}
+  .type-toggle.big button.active[data-type="expense"]{background:#F0506E;color:#fff;}
+  .amount-box{
+    display:flex;align-items:center;gap:10px;
+    background:#FFF6F2;border-radius:18px;padding:8px 10px 8px 14px;margin-bottom:16px;
+  }
+  .amount-box input{
+    flex:1;min-width:0;border:none;background:transparent;outline:none;
+    font-family:var(--mono);font-size:34px;font-weight:800;color:var(--ink);padding:4px 0;
+  }
+  .cur-toggle{display:flex;background:#fff;border-radius:13px;padding:3px;gap:2px;flex-shrink:0;}
+  .cur-toggle button{
+    border:none;background:none;width:44px;height:42px;border-radius:10px;cursor:pointer;
+    font-size:19px;font-weight:700;color:var(--ink-soft);
+  }
+  .cur-toggle button.active{background:var(--gold);color:#fff;}
+  .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .cat-btn{
+    border:2px solid transparent;background:#FFF6F2;border-radius:16px;cursor:pointer;
+    padding:8px 2px 6px;min-width:0;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-family:var(--khmer-font);font-size:11.5px;line-height:1.35;color:var(--ink);
+  }
+  .cat-btn .ci{font-size:25px;line-height:1.2;}
+  .cat-btn .cn{
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    text-align:center;word-break:break-word;
+  }
+  .cat-btn.active{border-color:var(--margin-red);background:#FFF0F4;font-weight:700;}
+  .add-card .field{margin-bottom:14px;}
+  .add-card .btn-row .btn-add{flex:1;padding:15px;font-size:17px;}
+
   @media (max-width:520px){
     .book-header{padding:0 64px 0 2px;}
     .sticker.s3,.sticker.s4{display:none;}
@@ -796,9 +857,12 @@
     </div>
   </div>
 
+  <div class="quick-add">
+    <button type="button" class="qa qa-in" data-go="add" data-type="income"><span>＋</span>ចំណូល</button>
+    <button type="button" class="qa qa-out" data-go="add" data-type="expense"><span>－</span>ចំណាយ</button>
+  </div>
+
   <div class="tiles">
-    <button class="tile" data-go="add" data-type="income"><span class="ti" style="background:#DCF8EA">💵</span>ចំណូល<span class="ts" id="tIncome">$0</span></button>
-    <button class="tile" data-go="add" data-type="expense"><span class="ti" style="background:#FFE3EA">🛍️</span>ចំណាយ<span class="ts" id="tExpense">$0</span></button>
     <button class="tile" data-go="history" data-preset="clear"><span class="ti" style="background:#EEF2F5">📋</span>ប្រវត្តិ<span class="ts" id="tHist">0</span></button>
     <button class="tile" data-go="report" data-preset="month"><span class="ti" style="background:#E3F1FF">📅</span>សង្ខេបខែ<span class="ts" id="tNet">$0</span></button>
     <button class="tile" data-go="year"><span class="ti" style="background:#E8E3FF">📊</span>សង្ខេបឆ្នាំ<span class="ts" id="tYear">ឆ្នាំ</span></button>
@@ -847,47 +911,44 @@
 </section>
 
 <section class="view" id="view-add">
-  <div class="form-card">
-    <h2>✏️ បន្ថែមប្រតិបត្តិការថ្មី</h2>
-    <div class="type-toggle" id="typeToggle">
+  <div class="form-card add-card">
+    <div class="type-toggle big" id="typeToggle">
       <button type="button" data-type="income" class="active">💵 ចំណូល</button>
       <button type="button" data-type="expense">🛍️ ចំណាយ</button>
     </div>
 
-    <div class="grid2">
-      <div class="field">
-        <label>កាលបរិច្ឆេទ</label>
-        <input type="date" id="fDate">
+    <div class="amount-box">
+      <input type="number" id="fAmount" min="0" step="0.01" inputmode="decimal" placeholder="0" aria-label="ចំនួនទឹកប្រាក់">
+      <div class="cur-toggle" id="curToggle">
+        <button type="button" data-cur="USD" class="active">$</button>
+        <button type="button" data-cur="KHR">៛</button>
       </div>
-      <div class="field">
-        <label>ប្រភេទ</label>
-        <select id="fCategory"></select>
-      </div>
+      <select id="fCurrency" hidden>
+        <option value="USD">$</option>
+        <option value="KHR">៛</option>
+      </select>
     </div>
 
     <div class="field">
-      <label>ចំណាំ (ស្រេចចិត្ត — អាចជ្រើសបានច្រើន)</label>
-      <div class="chip-row" id="noteChips"></div>
-      <input type="text" id="fNote" placeholder="សរសេរបន្ថែម (ស្រេចចិត្ត)...">
+      <label>ប្រភេទ</label>
+      <div class="cat-grid" id="catGrid"></div>
+      <select id="fCategory" hidden></select>
     </div>
 
-    <div class="amount-row">
-      <div class="field">
-        <label>ចំនួនទឹកប្រាក់</label>
-        <input type="number" id="fAmount" min="0" step="0.01" placeholder="0.00">
-      </div>
-      <div class="field currency">
-        <label>រូបិយប័ណ្ណ</label>
-        <select id="fCurrency">
-          <option value="USD">$</option>
-          <option value="KHR">៛</option>
-        </select>
-      </div>
+    <div class="field">
+      <label>ចំណាំ (ស្រេចចិត្ត)</label>
+      <div class="chip-row" id="noteChips"></div>
+      <input type="text" id="fNote" placeholder="សរសេរបន្ថែម...">
+    </div>
+
+    <div class="field">
+      <label>📅 កាលបរិច្ឆេទ</label>
+      <input type="date" id="fDate">
     </div>
 
     <div class="btn-row">
       <button class="btn btn-secondary" id="cancelBtn" style="display:none;">បោះបង់</button>
-      <button class="btn btn-add" id="addBtn">✨ បន្ថែម</button>
+      <button class="btn btn-add" id="addBtn">✨ រក្សាទុក</button>
     </div>
   </div>
 
@@ -1085,7 +1146,34 @@ function populateCategories(){
   renderNoteChips();
 }
 
+function renderCatGrid(){
+  const sel = $("fCategory");
+  const grid = $("catGrid");
+  grid.innerHTML = "";
+  [...sel.options].forEach(o=>{
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cat-btn" + (o.value === sel.value ? " active" : "");
+    btn.innerHTML = `<span class="ci">${catStyle(o.value).icon}</span><span class="cn"></span>`;
+    btn.querySelector(".cn").textContent = o.value;
+    btn.addEventListener("click", ()=>{ sel.value = o.value; renderNoteChips(); });
+    grid.appendChild(btn);
+  });
+  // រូបិយប័ណ្ណ
+  const cur = $("fCurrency").value;
+  document.querySelectorAll("#curToggle button").forEach(b => b.classList.toggle("active", b.dataset.cur === cur));
+}
+
+$("curToggle").addEventListener("click",(e)=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  $("fCurrency").value = b.dataset.cur;
+  document.querySelectorAll("#curToggle button").forEach(x => x.classList.toggle("active", x === b));
+  $("fAmount").focus();
+});
+
 function renderNoteChips(){
+  renderCatGrid();
   selectedChips.clear();
   const wrap = $("noteChips");
   wrap.innerHTML = "";
@@ -1316,6 +1404,7 @@ function startEdit(id){
   $("fNote").value = entry.note || "";
   $("fAmount").value = entry.amount;
   $("fCurrency").value = entry.currency;
+  renderCatGrid();
 
   $("addBtn").textContent = "✓ រក្សាទុកការកែប្រែ";
   $("cancelBtn").style.display = "inline-block";
@@ -1326,7 +1415,7 @@ function startEdit(id){
 
 function stopEdit(){
   editingId = null;
-  $("addBtn").textContent = "✨ បន្ថែម";
+  $("addBtn").textContent = "✨ រក្សាទុក";
   $("cancelBtn").style.display = "none";
 }
 
@@ -1492,8 +1581,6 @@ function render(){
       if(e.currency === "KHR") saveK += Number(e.amount)||0; else saveU += Number(e.amount)||0;
     }
   });
-  $("tIncome").textContent = fmtAmount(incTotal, "USD");
-  $("tExpense").textContent = fmtAmount(expTotal, "USD");
   $("tNet").textContent = fmtAmount(incTotal - expTotal, "USD");
   $("tYear").textContent = "ឆ្នាំ " + khNum(selYear);
   $("tSave").textContent = fmtAmount(toUSD(saveU, saveK), "USD");
