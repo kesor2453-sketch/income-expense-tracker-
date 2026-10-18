@@ -211,7 +211,8 @@
 
   .field{margin-bottom:14px;}
   .field > label{display:block;font-size:14px;color:var(--soft);margin:0 2px 6px;font-weight:500;}
-  .field input[type=text],.field input[type=date],.field input[type=number],.field input[type=search]{
+  .field input[type=text],.field input[type=date],.field input[type=number],.field input[type=search],
+  .field input[type=password],.field input[type=tel]{
     width:100%;font-family:var(--font);font-size:16px;color:var(--ink);
     padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);
     outline:none;-webkit-appearance:none;appearance:none;min-height:48px;
@@ -365,7 +366,8 @@
   .auth-title{font-size:19px;font-weight:700;margin:0 2px 6px;}
   .auth-links{text-align:center;margin-top:12px;}
   .text-btn{border:none;background:none;color:var(--green);font-size:15px;font-weight:600;padding:8px 10px;}
-  .auth-hint{text-align:center;color:var(--soft);font-size:13px;margin-top:4px;}
+  .auth-hint{text-align:center;color:var(--soft);font-size:13px;line-height:1.7;margin-top:6px;padding-top:10px;border-top:1px solid var(--line-soft);}
+  .auth-hint b{color:var(--ink);}
   .sync{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--inc);margin-right:6px;}
   .sync.off{background:var(--exp);}
 </style>
@@ -391,7 +393,10 @@
       <div class="auth-links">
         <button type="button" class="text-btn" id="toForgot">ភ្លេចលេខកូដ?</button>
       </div>
-      <div class="auth-hint">អ្នកប្រើថ្មី៖ វាយឈ្មោះដែលចង់បាន រួចចុច ចូលប្រើ ដើម្បីបង្កើតគណនី</div>
+      <div class="auth-hint">
+        <b>អ្នកប្រើចាស់</b> ដែលមិនទាន់មានលេខកូដ៖ វាយតែឈ្មោះ (ទុកលេខកូដទទេ) រួចចុច ចូលប្រើ<br>
+        <b>អ្នកប្រើថ្មី</b>៖ វាយឈ្មោះដែលចង់បាន រួចចុច ចូលប្រើ
+      </div>
     </div>
 
     <!-- បង្កើតគណនី / កំណត់លេខកូដលើកដំបូង -->
@@ -1036,7 +1041,15 @@ async function tryRestoreSession(){
   let saved;
   try { saved = JSON.parse(raw); } catch(e){ lsDel(SESSION_KEY); return; }
   $("authUsername").value = saved.username || "";
-  if(!saved.token){ $("authPin").focus(); return; }   // session ចាស់ គ្មាន token → ត្រូវវាយលេខកូដ
+  if(!saved.token){
+    // ធ្លាប់ចូលលើទូរស័ព្ទនេះ មុនពេលមានលេខកូដ → បើគណនីមិនទាន់មានលេខកូដ បើកផ្ទាំងកំណត់ភ្លាម
+    try{
+      const r = await apiCall("login", { username: saved.username });
+      if(r.code === "NEED_SETUP") return openSetup(saved.username, !!r.isNew);
+    }catch(e){}
+    $("authPin").focus();
+    return;
+  }
   try{
     const r = await apiCall("login", { username: saved.username, token: saved.token });
     if(r.success){ currentUser = saved; entries = r.entries || []; showApp(); }
