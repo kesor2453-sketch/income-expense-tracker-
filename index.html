@@ -178,13 +178,14 @@
     border:1.5px solid var(--line);background:var(--card);color:var(--ink);
     border-radius:12px;padding:8px 12px;font-size:13.5px;font-weight:600;
   }
-  .cat-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:-4px 0 14px;}
+  .cat-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
   .cat-pick button{
     border:1.5px solid var(--line);background:var(--card);border-radius:14px;
     padding:8px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;
     font-size:11.5px;line-height:1.35;color:var(--ink);min-width:0;
   }
-  .cat-pick button span:first-child{font-size:22px;}
+  .cat-pick button{font-size:12px;padding:9px 2px 7px;}
+  .cat-pick button span:first-child{font-size:24px;}
   .cat-pick button span:last-child{
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:center;
   }
@@ -238,6 +239,18 @@
   .bar-row .bw{flex:1;height:9px;border-radius:5px;background:var(--line-soft);overflow:hidden;}
   .bar-row .bw span{display:block;height:100%;border-radius:5px;}
   .bar-row .ba{font-size:13.5px;font-weight:600;white-space:nowrap;}
+
+  /* note totals under each category */
+  .bar-group{padding:4px 0;border-bottom:1px solid var(--line-soft);}
+  .bar-group:last-child{border-bottom:none;}
+  .note-row{
+    display:flex;align-items:center;gap:8px;
+    padding:4px 4px 4px 30px;border-radius:8px;font-size:13.5px;color:var(--soft);
+  }
+  .note-row:active{background:#F5F7F6;}
+  .note-row .nk{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .note-row .nc{font-size:12.5px;background:var(--line-soft);border-radius:999px;padding:1px 8px;}
+  .note-row .na{font-weight:600;color:var(--ink);white-space:nowrap;}
 
   /* year rows */
   .yr-row{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line-soft);}
@@ -316,11 +329,11 @@
       </div>
 
       <div class="tiles">
-        <button type="button" class="tile" data-go="income">
+        <button type="button" class="tile" data-add="income">
           <span class="ic inc"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
           ចំណូល<span class="v" id="tInc">$0</span>
         </button>
-        <button type="button" class="tile" data-go="expense">
+        <button type="button" class="tile" data-add="expense">
           <span class="ic exp"><svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></span>
           ចំណាយ<span class="v" id="tExp">$0</span>
         </button>
@@ -343,28 +356,13 @@
       </div>
     </section>
 
-    <!-- INCOME / EXPENSE : category menu -->
-    <section class="view" id="view-cat">
-      <div class="type-sum" id="catSum">
-        <div class="l" id="catSumLbl"></div>
-        <div class="v" id="catSumVal">$0</div>
-        <div class="det" id="catSumDet"></div>
-      </div>
-      <div class="sec-label"><span>ជ្រើសរើសប្រភេទ</span></div>
-      <div class="cat-list" id="catList"></div>
-      <div class="sec-label"><span id="catEntriesLbl">ប្រតិបត្តិការខែនេះ</span></div>
-      <div id="catEntries"></div>
-    </section>
-
     <!-- FORM -->
     <section class="view" id="view-form">
       <div class="card">
-        <div class="form-head">
-          <span class="bub" id="fBub"></span>
-          <span class="nm"><b id="fCatName"></b><span class="badge" id="fBadge"></span></span>
-          <button type="button" class="link-btn" id="fChangeCat">ប្តូរ</button>
+        <div class="field" style="margin-bottom:12px">
+          <label>ប្រភេទ</label>
+          <div class="cat-pick" id="fCatPick"></div>
         </div>
-        <div class="cat-pick" id="fCatPick" hidden></div>
 
         <div class="amount-box">
           <input type="number" id="fAmount" min="0" step="0.01" inputmode="decimal" placeholder="0" aria-label="ចំនួនទឹកប្រាក់">
@@ -387,6 +385,14 @@
 
         <button type="button" class="btn" id="fSave">រក្សាទុក</button>
       </div>
+
+      <div class="sec-label"><span id="fListLbl">ប្រតិបត្តិការ</span><span id="fListSum"></span></div>
+      <div class="seg" id="fRange" style="margin-bottom:8px">
+        <button type="button" data-r="today" class="on">ថ្ងៃនេះ</button>
+        <button type="button" data-r="month">ខែនេះ</button>
+        <button type="button" data-r="all">ទាំងអស់</button>
+      </div>
+      <div id="fEntries"></div>
     </section>
 
     <!-- MONTH SUMMARY -->
@@ -409,7 +415,7 @@
       </div>
 
       <div class="card">
-        <div class="seg" id="mType" style="margin-bottom:10px">
+        <div class="seg" id="mType" style="margin-bottom:6px">
           <button type="button" data-t="expense" class="on">ចំណាយ</button>
           <button type="button" data-t="income">ចំណូល</button>
         </div>
@@ -583,7 +589,6 @@ const inMonth = (e, ym) => e.date && e.date.slice(0,7) === ym;
 let entries = [];
 let currentUser = null;
 let selMonth = todayStr().slice(0,7);
-let catType = "income";
 let monthType = "expense";
 let form = null;           // {type, cat, id, cur, chips:Set}
 let currentView = "home";
@@ -661,14 +666,13 @@ function showApp(){
 }
 
 /* ================= ប្តូរទំព័រ ================= */
-const VIEW_SECTION = { home:"home", income:"cat", expense:"cat", form:"form", month:"month", year:"year", savings:"savings", settings:"settings" };
-const VIEW_TITLE = { income:"ចំណូល", expense:"ចំណាយ", month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", savings:"សន្សំប្រាក់", settings:"ការកំណត់" };
+const VIEW_SECTION = { home:"home", form:"form", month:"month", year:"year", savings:"savings", settings:"settings" };
+const VIEW_TITLE = { month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", savings:"សន្សំប្រាក់", settings:"ការកំណត់" };
 
 function showView(v, push = true){
   if(!VIEW_SECTION[v]) v = "home";
   if(v === "form" && !form) v = "home";
   currentView = v;
-  if(v === "income" || v === "expense"){ catType = v; renderCatPage(); }
   if(v === "settings"){ $("setRate").value = KHR_RATE; $("setUser").textContent = currentUser ? currentUser.username : ""; }
 
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "view-" + VIEW_SECTION[v]));
@@ -691,6 +695,8 @@ window.addEventListener("popstate", ()=>{
 });
 $("backBtn").addEventListener("click", goBack);
 document.addEventListener("click", e=>{
+  const add = e.target.closest("[data-add]");
+  if(add){ openForm(add.dataset.add); return; }
   const b = e.target.closest("[data-go]");
   if(b) showView(b.dataset.go);
 });
@@ -716,38 +722,6 @@ function renderHome(){
 }
 $("hPrev").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, -1); render(); });
 $("hNext").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, 1); render(); });
-
-/* ================= ទំព័រ ចំណូល / ចំណាយ (ម៉ឺនុយប្រភេទ) ================= */
-function renderCatPage(){
-  const type = catType;
-  const cats = type === "income" ? INCOME_CATS : EXPENSE_CATS;
-  const mE = entries.filter(e => inMonth(e, selMonth) && e.type === type);
-  const tot = sumOf(mE);
-
-  $("catSum").className = "type-sum " + type;
-  $("catSumLbl").textContent = (type === "income" ? "ចំណូល" : "ចំណាយ") + " " + monthLabel(selMonth);
-  $("catSumVal").textContent = fmtUSD(tot.t);
-  $("catSumDet").textContent = detail(tot);
-  $("catEntriesLbl").textContent = "ប្រតិបត្តិការ " + monthLabel(selMonth);
-
-  const list = $("catList");
-  list.innerHTML = "";
-  cats.forEach(c=>{
-    const s = sumOf(mE.filter(e => e.category === c));
-    const cs = catStyle(c);
-    const row = document.createElement("button");
-    row.type = "button";
-    row.className = "cat-row";
-    row.innerHTML = `<span class="bub" style="background:${cs.bg}">${cs.icon}</span>
-      <span class="nm">${esc(c)}</span>
-      <span class="am">${s.t ? fmtUSD(s.t) : ""}</span>
-      <span class="chev">›</span>`;
-    row.addEventListener("click", ()=> openForm(type, c));
-    list.appendChild(row);
-  });
-
-  renderEntries($("catEntries"), mE, "មិនទាន់មាន" + (type === "income" ? "ចំណូល" : "ចំណាយ") + "ក្នុងខែនេះទេ — ចុចលើប្រភេទខាងលើ ដើម្បីបញ្ចូល");
-}
 
 /* ================= បញ្ជីប្រតិបត្តិការ ================= */
 function renderEntries(container, list, emptyMsg){
@@ -787,29 +761,28 @@ function renderEntries(container, list, emptyMsg){
 }
 
 /* ================= ទំព័របញ្ចូល ================= */
+const LAST_CAT_KEY = "tracker_last_cat_v1_";
 function openForm(type, cat, entry){
+  const cats = type === "income" ? INCOME_CATS : EXPENSE_CATS;
+  if(!cat){
+    const last = lsGet(LAST_CAT_KEY + type);
+    cat = cats.includes(last) ? last : cats[0];
+  }
   const lastCur = lsGet(LAST_CUR_KEY) === "KHR" ? "KHR" : "USD";
   form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set() };
   $("fAmount").value = entry ? entry.amount : "";
   $("fNote").value = entry ? (entry.note || "") : "";
   const thisMonth = todayStr().slice(0,7);
   $("fDate").value = entry ? entry.date : (selMonth === thisMonth ? todayStr() : selMonth + "-01");
-  $("fCatPick").hidden = true;
   renderForm();
   showView("form");
   if(!entry) setTimeout(()=> $("fAmount").focus(), 80);
 }
 
 function renderForm(){
-  const cs = catStyle(form.cat);
-  $("fBub").style.background = cs.bg;
-  $("fBub").textContent = cs.icon;
-  $("fCatName").textContent = form.cat;
-  $("fBadge").className = "badge " + form.type;
-  $("fBadge").textContent = form.type === "income" ? "ចំណូល" : "ចំណាយ";
   document.querySelectorAll("#fCur button").forEach(b => b.classList.toggle("on", b.dataset.cur === form.cur));
 
-  // ប្តូរប្រភេទ
+  // ម៉ឺនុយប្រភេទ (នៅខាងលើ)
   const pick = $("fCatPick");
   pick.innerHTML = "";
   (form.type === "income" ? INCOME_CATS : EXPENSE_CATS).forEach(c=>{
@@ -817,9 +790,11 @@ function renderForm(){
     b.type = "button";
     b.className = c === form.cat ? "on" : "";
     b.innerHTML = `<span>${catStyle(c).icon}</span><span>${esc(c)}</span>`;
-    b.addEventListener("click", ()=>{ form.cat = c; form.chips.clear(); pick.hidden = true; renderForm(); });
+    b.addEventListener("click", ()=>{ form.cat = c; form.chips.clear(); renderForm(); });
     pick.appendChild(b);
   });
+
+  renderFormEntries();
 
   // ចំណាំរហ័ស
   const wrap = $("fChips");
@@ -848,7 +823,30 @@ function renderForm(){
   });
 }
 
-$("fChangeCat").addEventListener("click", ()=>{ $("fCatPick").hidden = !$("fCatPick").hidden; });
+/* បញ្ជីប្រតិបត្តិការ ក្នុងទំព័របញ្ចូល — ថ្ងៃនេះ / ខែនេះ / ទាំងអស់ */
+let fRange = "today";
+function renderFormEntries(){
+  if(!form) return;
+  const today = todayStr();
+  const typeName = form.type === "income" ? "ចំណូល" : "ចំណាយ";
+  const isThisMonth = selMonth === today.slice(0,7);
+  document.querySelector('#fRange [data-r="month"]').textContent = isThisMonth ? "ខែនេះ" : "ខែ" + monthName(selMonth);
+  const list = entries.filter(e => e.type === form.type && (
+    fRange === "today" ? e.date === today :
+    fRange === "month" ? inMonth(e, selMonth) : true));
+  $("fListLbl").textContent = typeName;
+  $("fListSum").textContent = list.length ? "សរុប " + fmtUSD(sumOf(list).t) : "";
+  const label = fRange === "today" ? "ថ្ងៃនេះ" : fRange === "month" ? "ក្នុងខែនេះ" : "";
+  renderEntries($("fEntries"), list, "មិនទាន់មាន" + typeName + label + "ទេ");
+}
+$("fRange").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  fRange = b.dataset.r;
+  document.querySelectorAll("#fRange button").forEach(x => x.classList.toggle("on", x === b));
+  renderFormEntries();
+});
+
 $("fCur").addEventListener("click", e=>{
   const b = e.target.closest("button");
   if(!b) return;
@@ -879,6 +877,7 @@ function saveForm(){
     entries.push(Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7) }, data));
   }
   lsSet(LAST_CUR_KEY, form.cur);
+  lsSet(LAST_CAT_KEY + form.type, form.cat);
   // បើបញ្ចូលក្នុងខែផ្សេង ប្តូរទៅខែនោះ ដើម្បីមើលឃើញ
   selMonth = date.slice(0,7);
 
@@ -913,13 +912,38 @@ function renderMonth(){
   const bars = $("mBars");
   bars.innerHTML = rows.length ? "" : `<div class="empty">មិនទាន់មាន${monthType === "income" ? "ចំណូល" : "ចំណាយ"}ក្នុងខែនេះទេ</div>`;
   rows.forEach(r=>{
+    const g = document.createElement("div");
+    g.className = "bar-group";
     const d = document.createElement("div");
     d.className = "bar-row";
     d.innerHTML = `<span class="bn">${catStyle(r.c).icon} ${esc(r.c)}</span>
       <span class="bw"><span style="width:${Math.max(3, r.s.t / max * 100)}%;background:${color}"></span></span>
       <span class="ba">${fmtUSD(r.s.t)}</span>`;
     d.addEventListener("click", ()=>{ $("mSearch").value = r.c; renderMonthEntries(); });
-    bars.appendChild(d);
+    g.appendChild(d);
+
+    // ចំណាំដូចគ្នា → បូកចូលគ្នា
+    const notes = {};
+    let blank = [];
+    by[r.c].forEach(e=>{
+      const k = (e.note || "").trim();
+      if(k) (notes[k] = notes[k] || []).push(e); else blank.push(e);
+    });
+    const keys = Object.keys(notes);
+    if(keys.length){
+      const nRows = keys.map(k => ({ k, s: sumOf(notes[k]), n: notes[k].length }));
+      if(blank.length) nRows.push({ k: "", s: sumOf(blank), n: blank.length });
+      nRows.sort((a,b)=> b.s.t - a.s.t).forEach(nr=>{
+        const nd = document.createElement("div");
+        nd.className = "note-row";
+        nd.innerHTML = `<span class="nk">${nr.k ? esc(nr.k) : "(គ្មានចំណាំ)"}</span>
+          <span class="nc">${khNum(nr.n)} ដង</span>
+          <span class="na">${fmtUSD(nr.s.t)}</span>`;
+        if(nr.k) nd.addEventListener("click", ()=>{ $("mSearch").value = nr.k; renderMonthEntries(); });
+        g.appendChild(nd);
+      });
+    }
+    bars.appendChild(g);
   });
 
   renderMonthEntries();
@@ -1030,7 +1054,7 @@ function toast(msg){
 
 function render(){
   renderHome();
-  renderCatPage();
+  renderFormEntries();
   renderMonth();
   renderYear();
   renderSavings();
