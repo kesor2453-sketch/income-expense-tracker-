@@ -663,16 +663,15 @@
   .hero-foot{font-size:13px;}
 
   /* home fills the phone screen: tiles stretch to the bottom */
-  #view-home.active{display:flex;flex-direction:column;min-height:calc(100dvh - 76px);}
-  #view-home .tiles{flex:1;grid-auto-rows:1fr;align-content:stretch;}
   .tiles{gap:12px;}
   .tile{
-    border-radius:24px;padding:16px 6px 14px;gap:6px;justify-content:center;
-    font-size:15.5px;min-height:128px;
+    aspect-ratio:1 / 1;max-height:124px;
+    border-radius:24px;padding:10px 6px;gap:3px;justify-content:center;
+    font-size:15px;line-height:1.35;
     box-shadow:0 4px 14px rgba(58,46,57,0.07);
   }
-  .tile .ti{width:66px;height:66px;border-radius:22px;font-size:34px;margin-bottom:6px;}
-  .tile .ts{font-size:13px;}
+  .tile .ti{width:50px;height:50px;border-radius:17px;font-size:27px;margin-bottom:4px;flex-shrink:0;}
+  .tile .ts{font-size:12.5px;}
 
   /* sub pages: bigger text + touch targets */
   .back-btn{font-size:16px;padding:10px 18px;}
