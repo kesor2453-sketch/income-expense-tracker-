@@ -664,14 +664,32 @@ let currentView = "home";
 
 const CUSTOM_NOTES_KEY = "tracker_custom_notes_v1";
 const LAST_CUR_KEY = "tracker_last_cur_v1";
+/* ចំណាំរហ័ស រក្សាទុកដាច់ដោយឡែក តាមអ្នកប្រើនីមួយៗ */
+const userKey = base => base + "__" + (currentUser ? currentUser.username : "");
+function readJSON(k){ try { return JSON.parse(lsGet(k) || "{}") || {}; } catch(e){ return {}; } }
 let customNotes = {};
-try { customNotes = JSON.parse(lsGet(CUSTOM_NOTES_KEY) || "{}") || {}; } catch(e){ customNotes = {}; }
-const saveCustomNotes = () => lsSet(CUSTOM_NOTES_KEY, JSON.stringify(customNotes));
+const saveCustomNotes = () => lsSet(userKey(CUSTOM_NOTES_KEY), JSON.stringify(customNotes));
 // ចំណាំលំនាំដើមដែលបានលុបចេញ
 const HIDDEN_NOTES_KEY = "tracker_hidden_notes_v1";
 let hiddenNotes = {};
-try { hiddenNotes = JSON.parse(lsGet(HIDDEN_NOTES_KEY) || "{}") || {}; } catch(e){ hiddenNotes = {}; }
-const saveHiddenNotes = () => lsSet(HIDDEN_NOTES_KEY, JSON.stringify(hiddenNotes));
+const saveHiddenNotes = () => lsSet(userKey(HIDDEN_NOTES_KEY), JSON.stringify(hiddenNotes));
+
+// ផ្ទុកចំណាំរបស់អ្នកប្រើដែលកំពុងចូល
+function loadUserNotes(){
+  const ck = userKey(CUSTOM_NOTES_KEY), hk = userKey(HIDDEN_NOTES_KEY);
+  // ចំណាំចាស់ (មុនបំបែកតាមអ្នកប្រើ) → ផ្ទេរទៅអ្នកប្រើដំបូងដែលចូល
+  if(lsGet(ck) === null && lsGet(CUSTOM_NOTES_KEY) !== null){ lsSet(ck, lsGet(CUSTOM_NOTES_KEY)); lsDel(CUSTOM_NOTES_KEY); }
+  if(lsGet(hk) === null && lsGet(HIDDEN_NOTES_KEY) !== null){ lsSet(hk, lsGet(HIDDEN_NOTES_KEY)); lsDel(HIDDEN_NOTES_KEY); }
+  customNotes = readJSON(ck);
+  hiddenNotes = readJSON(hk);
+}
+// ពេលប្តូរឈ្មោះ → យកចំណាំទៅជាមួយ
+function moveUserNotes(oldName, newName){
+  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY].forEach(base=>{
+    const v = lsGet(base + "__" + oldName);
+    if(v !== null){ lsSet(base + "__" + newName, v); lsDel(base + "__" + oldName); }
+  });
+}
 
 function notesFor(cat){
   const hidden = hiddenNotes[cat] || [];
@@ -758,6 +776,7 @@ async function saveEntries(){
 }
 
 function showApp(){
+  loadUserNotes();
   $("loginScreen").hidden = true;
   $("appRoot").hidden = false;
   render();
@@ -1211,7 +1230,9 @@ $("changeUser").addEventListener("click", async ()=>{
   try{
     const r = await apiCall("changeUsername", { username: currentUser.username, newUsername: t });
     if(!r.success){ alert(r.message || "មិនអាចប្តូរបានទេ"); return; }
+    const oldName = currentUser.username;
     currentUser.username = r.newUsername || t.toLowerCase();
+    moveUserNotes(oldName, currentUser.username);
     lsSet(SESSION_KEY, JSON.stringify(currentUser));
     $("setUser").textContent = currentUser.username;
     toast("ប្តូរឈ្មោះជោគជ័យ");
@@ -1220,6 +1241,8 @@ $("changeUser").addEventListener("click", async ()=>{
 $("logout").addEventListener("click", ()=>{
   if(!confirm("ចាកចេញពីគណនី?")) return;
   currentUser = null;
+  customNotes = {};
+  hiddenNotes = {};
   entries = [];
   lsDel(SESSION_KEY);
   history.replaceState(null, "", location.pathname + location.search);
