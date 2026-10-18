@@ -259,6 +259,26 @@
   .note-row .nk{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .note-row .nc{font-size:12.5px;background:var(--line-soft);border-radius:999px;padding:1px 8px;}
   .note-row .na{font-weight:600;color:var(--ink);white-space:nowrap;}
+  .note-row .tg{width:14px;color:var(--faint);font-size:12px;text-align:center;}
+  .note-entry{
+    display:flex;align-items:center;gap:8px;width:100%;
+    padding:6px 8px 6px 46px;border:none;background:none;text-align:left;
+    font-size:13.5px;color:var(--ink);border-radius:8px;
+  }
+  .note-entry:active{background:#EEF2F0;}
+  .note-entry .nd{flex:1;min-width:0;color:var(--soft);}
+  .note-entry .nv{font-weight:600;white-space:nowrap;}
+  .note-entry .nv small{font-weight:400;color:var(--soft);}
+  .note-entry .ne{color:var(--faint);font-size:13px;width:16px;text-align:center;}
+
+  /* fold button (តាមខែ) */
+  .fold-btn{
+    display:flex;align-items:center;justify-content:space-between;width:100%;
+    background:var(--card);border:1.5px solid var(--line);border-radius:18px;
+    padding:14px 16px;margin:4px 0 12px;font-size:16px;font-weight:700;color:var(--ink);
+  }
+  .fold-btn:active{background:#F5F7F6;}
+  .fold-tg{font-size:14px;font-weight:600;color:var(--green);}
 
   /* quick-note settings */
   .note-head{font-weight:700;font-size:16px;margin:0 2px 8px;}
@@ -471,8 +491,10 @@
         </div>
         <div id="yBars"></div>
       </div>
-      <div class="sec-label"><span>តាមខែ</span><span style="font-weight:400">ចុចលើខែ ដើម្បីមើលលម្អិត</span></div>
-      <div class="card" id="yList" style="padding:6px 12px"></div>
+      <button type="button" class="fold-btn" id="yFold" aria-expanded="false">
+        <span>📅 តាមខែ</span><span class="fold-tg" id="yFoldTg">បង្ហាញ ▸</span>
+      </button>
+      <div class="card" id="yList" style="padding:6px 12px" hidden></div>
     </section>
 
     <!-- SAVINGS -->
@@ -974,6 +996,7 @@ function renderMonth(){
 /* ===== សរុបតាមប្រភេទ + ចំណាំ (ប្រើទាំង សង្ខេបខែ និង សង្ខេបឆ្នាំ) ===== */
 const openMonthCats = new Set();
 const openYearCats = new Set();
+const openNoteKeys = new Set();
 function renderBreakdown(container, list, type, openSet, periodLabel, onNote){
   const by = {};
   list.forEach(e => { (by[e.category] = by[e.category] || []).push(e); });
@@ -1006,16 +1029,38 @@ function renderBreakdown(container, list, type, openSet, periodLabel, onNote){
         const k = (e.note || "").trim();
         if(k) (notes[k] = notes[k] || []).push(e); else blank.push(e);
       });
-      const nRows = Object.keys(notes).map(k => ({ k, s: sumOf(notes[k]), n: notes[k].length }));
-      if(blank.length) nRows.push({ k: "", s: sumOf(blank), n: blank.length });
+      const nRows = Object.keys(notes).map(k => ({ k, s: sumOf(notes[k]), n: notes[k].length, list: notes[k] }));
+      if(blank.length) nRows.push({ k: "", s: sumOf(blank), n: blank.length, list: blank });
       nRows.sort((a,b)=> b.s.t - a.s.t).forEach(nr=>{
+        const key = r.c + "|" + nr.k;
+        const noteOpen = !onNote && openNoteKeys.has(key);
         const nd = document.createElement("div");
         nd.className = "note-row";
         nd.innerHTML = `<span class="nk">${nr.k ? esc(nr.k) : "(គ្មានចំណាំ)"}</span>
           <span class="nc">${khNum(nr.n)} ដង</span>
-          <span class="na">${fmtUSD(nr.s.t)}</span>`;
-        if(nr.k && onNote) nd.addEventListener("click", ()=> onNote(nr.k));
+          <span class="na">${fmtUSD(nr.s.t)}</span>${onNote ? "" : `<span class="tg">${noteOpen ? "▾" : "▸"}</span>`}`;
+        if(onNote){
+          if(nr.k) nd.addEventListener("click", ()=> onNote(nr.k));
+        } else {
+          // ចុចលើចំណាំ → បង្ហាញគ្រប់ដង (ថ្ងៃ + ចំនួនលុយ)
+          nd.addEventListener("click", ()=>{
+            if(openNoteKeys.has(key)) openNoteKeys.delete(key); else openNoteKeys.add(key);
+            renderBreakdown(container, list, type, openSet, periodLabel, onNote);
+          });
+        }
         g.appendChild(nd);
+
+        if(noteOpen){
+          [...nr.list].sort((a,b)=> b.date.localeCompare(a.date)).forEach(e=>{
+            const it = document.createElement("button");
+            it.type = "button";
+            it.className = "note-entry";
+            const conv = e.currency === "KHR" ? ` <small>(${fmtUSD((Number(e.amount)||0) / KHR_RATE)})</small>` : "";
+            it.innerHTML = `<span class="nd">${khDate(e.date)}</span><span class="nv">${fmtAmt(e.amount, e.currency)}${conv}</span><span class="ne">✎</span>`;
+            it.addEventListener("click", ()=> openForm(e.type, e.category, e));
+            g.appendChild(it);
+          });
+        }
       });
     }
     container.appendChild(g);
@@ -1071,6 +1116,12 @@ function renderYear(){
   });
 }
 let yearType = "expense";
+$("yFold").addEventListener("click", ()=>{
+  const open = $("yList").hidden;
+  $("yList").hidden = !open;
+  $("yFold").setAttribute("aria-expanded", String(open));
+  $("yFoldTg").textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
+});
 $("yType").addEventListener("click", e=>{
   const b = e.target.closest("button");
   if(!b) return;
