@@ -271,6 +271,26 @@
   .note-entry .nv small{font-weight:400;color:var(--soft);}
   .note-entry .ne{color:var(--faint);font-size:13px;width:16px;text-align:center;}
 
+  /* savings goals */
+  .goal{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:14px 14px 12px;margin-bottom:12px;}
+  .goal.done{border-color:#B9D7C4;background:#F4FAF6;}
+  .g-top{display:flex;align-items:center;gap:10px;}
+  .g-nm{flex:1;min-width:0;font-weight:700;font-size:17px;}
+  .g-btn{border:none;background:var(--line-soft);color:var(--soft);width:36px;height:36px;border-radius:11px;font-size:14px;}
+  .g-amt{margin:10px 2px 6px;font-size:14px;color:var(--soft);display:flex;align-items:baseline;gap:4px;}
+  .g-amt b{font-size:22px;color:var(--ink);}
+  .g-pct{margin-left:auto;font-weight:700;color:#A87A2E;}
+  .goal.done .g-pct{color:var(--inc);}
+  .g-bar{height:10px;border-radius:6px;background:var(--line-soft);overflow:hidden;}
+  .g-bar span{display:block;height:100%;border-radius:6px;background:#C9973B;}
+  .goal.done .g-bar span{background:var(--inc);}
+  .g-left{font-size:13px;color:var(--soft);margin:6px 2px 0;}
+  .g-add{
+    width:100%;margin-top:12px;border:none;border-radius:14px;padding:12px;
+    background:#F3EAD6;color:#7A5618;font-size:15.5px;font-weight:700;
+  }
+  .g-add:active{filter:brightness(.95);}
+
   /* fold button (តាមខែ) */
   .fold-btn{
     display:flex;align-items:center;justify-content:space-between;width:100%;
@@ -504,9 +524,24 @@
         <div class="v" id="sTotal">$0</div>
         <div class="det" id="sDet"></div>
       </div>
-      <div style="margin:14px 0 4px"><button type="button" class="btn" id="sAdd">＋ ដាក់ប្រាក់សន្សំ</button></div>
-      <div class="sec-label"><span>ប្រវត្តិសន្សំ</span></div>
-      <div id="sEntries"></div>
+      <div class="sec-label"><span>គោលដៅសន្សំ</span><span style="font-weight:400">ចុចលើគោលដៅ ដើម្បីដាក់សន្សំ</span></div>
+      <div id="goalList"></div>
+
+      <div class="card">
+        <div class="field" style="margin-bottom:10px">
+          <label for="gName">បង្កើតគោលដៅថ្មី (ចំនួនលុយ ស្រេចចិត្ត)</label>
+          <input type="text" id="gName" placeholder="ឧ. ទិញផ្ទះ, ទិញទូរស័ព្ទ...">
+        </div>
+        <div class="add-row">
+          <input type="number" id="gTarget" min="0" step="0.01" inputmode="decimal" placeholder="ចំនួន $">
+          <button type="button" id="gAdd">＋ បង្កើត</button>
+        </div>
+      </div>
+
+      <button type="button" class="fold-btn" id="sFold">
+        <span>📋 ប្រវត្តិសន្សំ</span><span class="fold-tg" id="sFoldTg">បង្ហាញ ▸</span>
+      </button>
+      <div id="sEntries" hidden></div>
     </section>
 
     <!-- SETTINGS -->
@@ -571,7 +606,7 @@ const NOTE_SUGGESTIONS = {
   "សិក្សា": ["ថ្លៃសិក្សា","សៀវភៅ/សម្ភារៈសិក្សា","វគ្គបណ្តុះបណ្តាល"],
   "សម្លៀកបំពាក់": ["សម្លៀកបំពាក់","ស្បែកជើង"],
   "កម្សាន្ត": ["ភាពយន្ត","ដំណើរកំសាន្ត","ជួបជុំមិត្តភ័ក្តិ"],
-  "សន្សំ": ["ដាក់សន្សំធនាគារ","ទិញមាស"],
+  "សន្សំ": [],   // គោលដៅសន្សំ បង្កើតដោយអ្នកប្រើម្នាក់ៗ
   "ផ្សេងៗ": []
 };
 
@@ -674,6 +709,11 @@ const HIDDEN_NOTES_KEY = "tracker_hidden_notes_v1";
 let hiddenNotes = {};
 const saveHiddenNotes = () => lsSet(userKey(HIDDEN_NOTES_KEY), JSON.stringify(hiddenNotes));
 
+// ចំនួនគោលដៅសន្សំ {ឈ្មោះគោលដៅ: $}
+const GOAL_TARGET_KEY = "tracker_goal_targets_v1";
+let goalTargets = {};
+const saveGoalTargets = () => lsSet(userKey(GOAL_TARGET_KEY), JSON.stringify(goalTargets));
+
 // ផ្ទុកចំណាំរបស់អ្នកប្រើដែលកំពុងចូល
 function loadUserNotes(){
   const ck = userKey(CUSTOM_NOTES_KEY), hk = userKey(HIDDEN_NOTES_KEY);
@@ -682,10 +722,11 @@ function loadUserNotes(){
   if(lsGet(hk) === null && lsGet(HIDDEN_NOTES_KEY) !== null){ lsSet(hk, lsGet(HIDDEN_NOTES_KEY)); lsDel(HIDDEN_NOTES_KEY); }
   customNotes = readJSON(ck);
   hiddenNotes = readJSON(hk);
+  goalTargets = readJSON(userKey(GOAL_TARGET_KEY));
 }
 // ពេលប្តូរឈ្មោះ → យកចំណាំទៅជាមួយ
 function moveUserNotes(oldName, newName){
-  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY].forEach(base=>{
+  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY, GOAL_TARGET_KEY].forEach(base=>{
     const v = lsGet(base + "__" + oldName);
     if(v !== null){ lsSet(base + "__" + newName, v); lsDel(base + "__" + oldName); }
   });
@@ -881,14 +922,14 @@ function renderEntries(container, list, emptyMsg){
 
 /* ================= ទំព័របញ្ចូល ================= */
 const LAST_CAT_KEY = "tracker_last_cat_v1_";
-function openForm(type, cat, entry){
+function openForm(type, cat, entry, presetNote){
   const cats = type === "income" ? INCOME_CATS : EXPENSE_CATS;
   if(!cat){
     const last = lsGet(LAST_CAT_KEY + type);
     cat = cats.includes(last) ? last : cats[0];
   }
   const lastCur = lsGet(LAST_CUR_KEY) === "KHR" ? "KHR" : "USD";
-  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set() };
+  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []) };
   $("fAmount").value = entry ? entry.amount : "";
   $("fNote").value = entry ? (entry.note || "") : "";
   const thisMonth = todayStr().slice(0,7);
@@ -988,7 +1029,7 @@ function saveForm(){
   const wasEdit = !!form.id;
   saveEntries();
   render();
-  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
+  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : form.cat === "សន្សំ" ? "🐷 បានដាក់សន្សំ" : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
   goBack();
 }
 $("fSave").addEventListener("click", saveForm);
@@ -1153,14 +1194,98 @@ $("yNext").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, 12); 
 
 /* ================= សន្សំប្រាក់ ================= */
 const savingsEntries = () => entries.filter(e => e.category === "សន្សំ" && e.type === "expense");
+const SAVE_CAT = "សន្សំ";
+function goalIcon(name){
+  const rules = [["ផ្ទះ","🏠"],["ដី","🏡"],["ទូរស័ព្ទ","📱"],["កុំព្យូទ័រ","💻"],["ឡាន","🚗"],["ម៉ូតូ","🛵"],
+    ["មាស","🪙"],["ធនាគារ","🏦"],["សិក្សា","🎓"],["រៀន","🎓"],["ដំណើរ","✈️"],["កម្សាន្ត","✈️"],
+    ["រៀបការ","💍"],["កូន","🧸"],["ពេទ្យ","💊"],["សុខភាព","💊"],["អាជីវកម្ម","🏪"],["បន្ទាន់","🆘"]];
+  const hit = rules.find(([k]) => name.includes(k));
+  return hit ? hit[1] : "🎯";
+}
+// គោលដៅ = ចំណាំរបស់ប្រភេទ សន្សំ (តាមអ្នកប្រើ) + ចំណាំដែលមានក្នុងប្រតិបត្តិការរួចហើយ
+function goalNames(){
+  const out = notesFor(SAVE_CAT);
+  savingsEntries().forEach(e => { const k = (e.note || "").trim(); if(k && !out.includes(k)) out.push(k); });
+  return out;
+}
+
 function renderSavings(){
   const list = savingsEntries();
   const s = sumOf(list);
   $("sTotal").textContent = fmtUSD(s.t);
   $("sDet").textContent = detail(s);
+
+  const wrap = $("goalList");
+  wrap.innerHTML = "";
+  const names = goalNames();
+  const unassigned = list.filter(e => !(e.note || "").trim());
+  if(!names.length && !unassigned.length){
+    wrap.innerHTML = `<div class="empty">មិនទាន់មានគោលដៅទេ — បង្កើតគោលដៅដំបូងនៅខាងក្រោម (ឧ. ទិញផ្ទះ)</div>`;
+  }
+  const cards = names.map(n => ({ n, s: sumOf(list.filter(e => (e.note || "").trim() === n)), target: Number(goalTargets[n]) || 0 }));
+  if(unassigned.length) cards.push({ n: "", s: sumOf(unassigned), target: 0 });
+
+  cards.forEach(g=>{
+    const pct = g.target ? Math.min(100, g.s.t / g.target * 100) : 0;
+    const done = g.target && g.s.t >= g.target;
+    const card = document.createElement("div");
+    card.className = "goal" + (done ? " done" : "");
+    card.innerHTML = `
+      <div class="g-top">
+        <span class="bub" style="background:#F3EAD6">${g.n ? goalIcon(g.n) : "🐷"}</span>
+        <span class="g-nm"></span>
+        ${g.n ? `<button type="button" class="g-btn" data-act="target" aria-label="កំណត់ចំនួនគោលដៅ">✎</button>
+                 <button type="button" class="g-btn" data-act="del" aria-label="លុបគោលដៅ">✕</button>` : ""}
+      </div>
+      <div class="g-amt"><b>${fmtUSD(g.s.t)}</b>${g.target ? `<span> / ${fmtUSD(g.target)}</span><span class="g-pct">${done ? "✓ សម្រេច" : Math.floor(pct) + "%"}</span>` : ""}</div>
+      ${g.target ? `<div class="g-bar"><span style="width:${Math.max(2, pct)}%"></span></div>
+        <div class="g-left">${done ? "🎉 សន្សំបានគ្រប់ហើយ!" : "នៅខ្វះ " + fmtUSD(g.target - g.s.t)}</div>` : ""}
+      ${g.n ? `<button type="button" class="g-add">＋ ដាក់សន្សំ</button>` : ""}`;
+    card.querySelector(".g-nm").textContent = g.n || "មិនបានកំណត់គោលដៅ";
+    if(g.n){
+      card.querySelector(".g-add").addEventListener("click", ()=> openForm("expense", SAVE_CAT, null, g.n));
+      card.querySelector('[data-act="target"]').addEventListener("click", ()=>{
+        const v = prompt("ចំនួនត្រូវសន្សំ សម្រាប់ «" + g.n + "» ($)\n(ទុកទទេ = គ្មានចំនួនគោលដៅ)", g.target || "");
+        if(v === null) return;
+        const num = parseFloat(v);
+        if(num > 0) goalTargets[g.n] = num; else delete goalTargets[g.n];
+        saveGoalTargets();
+        renderSavings();
+      });
+      card.querySelector('[data-act="del"]').addEventListener("click", ()=>{
+        const has = list.some(e => (e.note || "").trim() === g.n);
+        if(!confirm(has
+          ? "លុបគោលដៅ «" + g.n + "» ចេញពីម៉ឺនុយ?\n(ប្រាក់ដែលបានសន្សំរួច នៅតែរក្សាទុក)"
+          : "លុបគោលដៅ «" + g.n + "»?")) return;
+        removeNote(SAVE_CAT, g.n);
+        delete goalTargets[g.n];
+        saveGoalTargets();
+        renderSavings();
+      });
+    }
+    wrap.appendChild(card);
+  });
+
   renderEntries($("sEntries"), list, "មិនទាន់មានការសន្សំទេ");
 }
-$("sAdd").addEventListener("click", ()=> openForm("expense", "សន្សំ"));
+
+function addGoal(){
+  const n = $("gName").value.trim();
+  if(!n){ $("gName").focus(); return; }
+  const t = parseFloat($("gTarget").value);
+  const isNew = addNote(SAVE_CAT, n);
+  if(t > 0){ goalTargets[n] = t; saveGoalTargets(); }
+  $("gName").value = ""; $("gTarget").value = "";
+  renderSavings();
+  toast(isNew ? "បានបង្កើតគោលដៅ «" + n + "»" : "គោលដៅនេះមានរួចហើយ");
+}
+$("gAdd").addEventListener("click", addGoal);
+$("gTarget").addEventListener("keydown", e => { if(e.key === "Enter") addGoal(); });
+$("sFold").addEventListener("click", ()=>{
+  const open = $("sEntries").hidden;
+  $("sEntries").hidden = !open;
+  $("sFoldTg").textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
+});
 
 /* ================= ការកំណត់ ================= */
 let nType = "expense", nCat = EXPENSE_CATS[0];
@@ -1243,6 +1368,7 @@ $("logout").addEventListener("click", ()=>{
   currentUser = null;
   customNotes = {};
   hiddenNotes = {};
+  goalTargets = {};
   entries = [];
   lsDel(SESSION_KEY);
   history.replaceState(null, "", location.pathname + location.search);
