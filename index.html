@@ -1213,7 +1213,10 @@ function openForm(type, cat, entry, presetNote){
     cat = cats.includes(last) ? last : cats[0];
   }
   const lastCur = lsGet(LAST_CUR_KEY) === "KHR" ? "KHR" : "USD";
-  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []) };
+  // កែពីបញ្ជីក្នុងទំព័របញ្ចូល → ក្រោយរក្សាទុក ត្រឡប់មកទំព័របញ្ចូលនោះវិញ
+  const returnTo = (entry && currentView === "form" && form && !form.id)
+    ? { type: form.type, cat: form.cat, cur: form.cur, date: $("fDate").value } : null;
+  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []), returnTo };
   $("fAmount").value = entry ? entry.amount : "";
   $("fNote").value = entry ? (entry.note || "") : "";
   const thisMonth = todayStr().slice(0,7);
@@ -1343,7 +1346,23 @@ function saveForm(){
   saveEntries();
   render();
   toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
-  goBack();
+  if(wasEdit){
+    const back = form.returnTo;
+    if(!back){ goBack(); return; }
+    form = { type: back.type, cat: back.cat, id: null, cur: back.cur, chips: new Set() };
+    $("fAmount").value = ""; $("fNote").value = ""; $("fDate").value = back.date || todayStr();
+    renderForm();
+    $("subTitle").textContent = formTitle();
+    return;
+  }
+
+  // បញ្ចូលថ្មី → នៅទំព័រដដែល ដើម្បីបញ្ចូលបន្តទៀត (រក្សាប្រភេទ ថ្ងៃខែ និងរូបិយប័ណ្ណ)
+  form.id = null;
+  form.chips = new Set();
+  $("fAmount").value = "";
+  $("fNote").value = "";
+  renderForm();
+  setTimeout(()=> $("fAmount").focus(), 60);
 }
 $("fSave").addEventListener("click", saveForm);
 $("fAmount").addEventListener("keydown", e => { if(e.key === "Enter") saveForm(); });
