@@ -886,21 +886,46 @@ const LAST_CUR_KEY = "tracker_last_cur_v1";
 const userKey = base => base + "__" + (currentUser ? currentUser.username : "");
 function readJSON(k){ try { return JSON.parse(lsGet(k) || "{}") || {}; } catch(e){ return {}; } }
 let customNotes = {};
-const saveCustomNotes = () => lsSet(userKey(CUSTOM_NOTES_KEY), JSON.stringify(customNotes));
+const saveCustomNotes = () => { lsSet(userKey(CUSTOM_NOTES_KEY), JSON.stringify(customNotes)); pushSettings(); };
 // ចំណាំលំនាំដើមដែលបានលុបចេញ
 const HIDDEN_NOTES_KEY = "tracker_hidden_notes_v1";
 let hiddenNotes = {};
-const saveHiddenNotes = () => lsSet(userKey(HIDDEN_NOTES_KEY), JSON.stringify(hiddenNotes));
+const saveHiddenNotes = () => { lsSet(userKey(HIDDEN_NOTES_KEY), JSON.stringify(hiddenNotes)); pushSettings(); };
 
 // ចំនួនគោលដៅសន្សំ {ឈ្មោះគោលដៅ: $}
 const GOAL_TARGET_KEY = "tracker_goal_targets_v1";
 let goalTargets = {};
-const saveGoalTargets = () => lsSet(userKey(GOAL_TARGET_KEY), JSON.stringify(goalTargets));
+const saveGoalTargets = () => { lsSet(userKey(GOAL_TARGET_KEY), JSON.stringify(goalTargets)); pushSettings(); };
 
 // ប្រភេទរបស់អ្នកប្រើ {income:{added:[{name,icon}], hidden:[]}, expense:{...}}
 const CATS_KEY = "tracker_user_cats_v1";
 let userCats = {};
-const saveUserCats = () => lsSet(userKey(CATS_KEY), JSON.stringify(userCats));
+const saveUserCats = () => { lsSet(userKey(CATS_KEY), JSON.stringify(userCats)); pushSettings(); };
+
+/* ===== ការកំណត់ តាមគណនី (រក្សាទុកក្នុង Google Sheet) =====
+   ប្រភេទ ចំណាំ គោលដៅសន្សំ អត្រាប្តូរប្រាក់ → ចូលពីទូរស័ព្ទណាក៏ដូចគ្នា */
+let serverHasSettings = true;
+let pushTimer = null;
+function pushSettings(){
+  if(!currentUser || !currentUser.token) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(async ()=>{
+    try{
+      await apiCall("saveSettings", { username: currentUser.username, token: currentUser.token,
+        settings: { cats: userCats, notes: customNotes, hidden: hiddenNotes, goals: goalTargets, rate: KHR_RATE } });
+    }catch(e){ console.error("saveSettings failed", e); }
+  }, 600);
+}
+// ការកំណត់ពី server → សរសេរចូលទូរស័ព្ទ (ឈ្នះលើទិន្នន័យក្នុងទូរស័ព្ទ)
+function applyServerSettings(st){
+  serverHasSettings = !!st;
+  if(!st) return;
+  lsSet(userKey(CATS_KEY), JSON.stringify(st.cats || {}));
+  lsSet(userKey(CUSTOM_NOTES_KEY), JSON.stringify(st.notes || {}));
+  lsSet(userKey(HIDDEN_NOTES_KEY), JSON.stringify(st.hidden || {}));
+  lsSet(userKey(GOAL_TARGET_KEY), JSON.stringify(st.goals || {}));
+  if(Number(st.rate) > 0){ KHR_RATE = Number(st.rate); lsSet(RATE_KEY, String(KHR_RATE)); }
+}
 const ucat = type => (userCats[type] = userCats[type] || { added: [], hidden: [] });
 function catsFor(type){
   const u = ucat(type);
@@ -1013,6 +1038,7 @@ function enterApp(username, r){
   currentUser = { username: (r.username || username).toLowerCase(), token: r.token || "" };
   lsSet(SESSION_KEY, JSON.stringify(currentUser));
   entries = r.entries || [];
+  applyServerSettings(r.settings);
   ["authPin","setupPin","setupPin2","fgPin","fgPin2"].forEach(id => $(id).value = "");
   showApp();
 }
@@ -1099,7 +1125,7 @@ async function tryRestoreSession(){
   }
   try{
     const r = await apiCall("login", { username: saved.username, token: saved.token });
-    if(r.success){ currentUser = saved; entries = r.entries || []; showApp(); }
+    if(r.success){ currentUser = saved; entries = r.entries || []; applyServerSettings(r.settings); showApp(); }
     else if(r.code === "NEED_SETUP") openSetup(saved.username, false);
     else { lsSet(SESSION_KEY, JSON.stringify({ username: saved.username })); }
   }catch(err){ console.error("Session restore failed", err); }
@@ -1120,6 +1146,8 @@ async function saveEntries(){
 
 function showApp(){
   loadUserNotes();
+  // គណនីមិនទាន់មានការកំណត់ក្នុង Sheet → បញ្ជូនការកំណត់ពីទូរស័ព្ទនេះឡើង (លើកដំបូង)
+  if(!serverHasSettings){ serverHasSettings = true; pushSettings(); }
   $("loginScreen").hidden = true;
   $("appRoot").hidden = false;
   render();
@@ -1815,6 +1843,7 @@ $("saveRate").addEventListener("click", ()=>{
   if(!(r > 0)){ $("setRate").focus(); return; }
   KHR_RATE = r;
   lsSet(RATE_KEY, String(r));
+  pushSettings();
   render();
   toast("$1 = " + r.toLocaleString("en-US") + "៛");
 });
