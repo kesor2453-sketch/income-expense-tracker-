@@ -89,7 +89,15 @@
   .hfoot b{font-weight:700;}
 
   /* ---------- Home tiles ---------- */
-  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .tiles .tile{grid-column:span 2;}
+  .tiles .tile.wide{
+    grid-column:span 3;flex-direction:row;justify-content:flex-start;gap:10px;
+    padding:12px 12px;text-align:left;
+  }
+  .tile.wide .ic{width:46px;height:46px;border-radius:15px;margin:0;flex-shrink:0;}
+  .tile.wide .ic svg{width:23px;height:23px;}
+  .tile.wide .wt{display:flex;flex-direction:column;min-width:0;line-height:1.4;}
   .tile{
     background:var(--card);border:1.5px solid var(--line);border-radius:24px;
     padding:18px 4px 16px;min-width:0;line-height:1.45;text-align:center;
@@ -114,6 +122,36 @@
   .ic.sav{background:#F3EAD6;color:#A87A2E;}
   .ic.set{background:#DCE1DF;color:#4F5B57;}
   .ic.all{background:#EDE3F3;color:#6E4A8A;}
+  .ic.debt{background:#E6E4F3;color:#4E4A8A;}
+
+  /* debts */
+  .debt-sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .dbox{
+    border:2px solid var(--line);background:var(--card);border-radius:20px;padding:12px 14px;text-align:left;
+    display:flex;flex-direction:column;gap:2px;color:var(--ink);
+  }
+  .dbox .l{font-size:14px;color:var(--soft);font-weight:600;}
+  .dbox .v{font-size:22px;font-weight:700;}
+  .dbox.owe .v{color:var(--exp);}
+  .dbox.lent .v{color:var(--inc);}
+  .dbox.owe.on{border-color:var(--exp);background:#FBF1EF;}
+  .dbox.lent.on{border-color:var(--inc);background:#F1F8F3;}
+  .debt-card .d-last{font-size:12.5px;color:var(--soft);white-space:nowrap;}
+  .debt-card.owe .g-amt b{color:var(--exp);}
+  .debt-card.lent .g-amt b{color:var(--inc);}
+  .debt-card.done .g-amt b{color:var(--soft);}
+  .debt-card .g-bar span{background:#6E6AB0;}
+  .debt-card .g-pct{color:var(--soft);font-weight:600;}
+  .debt-card .g-add{background:#E6E4F3;color:#3E3A7A;}
+  .debt-card .g-acts{grid-template-columns:1fr 1fr;}
+  .tile.wide .wt{font-size:15px;}
+  .debt-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .debt-seg button{
+    border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:11px 6px;
+    font-size:15px;font-weight:600;color:var(--ink);
+  }
+  .debt-seg button.on[data-k="borrow"],.debt-seg button.on[data-k="collect"]{background:var(--inc);border-color:var(--inc);color:#fff;}
+  .debt-seg button.on[data-k="repay"],.debt-seg button.on[data-k="lend"]{background:var(--exp);border-color:var(--exp);color:#fff;}
 
   /* ---------- Generic cards ---------- */
   .card{background:var(--card);border:1.5px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px;}
@@ -516,6 +554,14 @@
           <span class="ic sav"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v4c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 10v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4M5 14v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4"/></svg></span>
           សន្សំប្រាក់<span class="v" id="tSave">$0</span>
         </button>
+        <button type="button" class="tile wide" data-go="debt">
+          <span class="ic debt"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg></span>
+          <span class="wt">ជំពាក់/សងលុយ<span class="v" id="tDebt"></span></span>
+        </button>
+        <button type="button" class="tile wide" data-go="settings">
+          <span class="ic set"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span class="wt">ការកំណត់<span class="v" id="tSet"></span></span>
+        </button>
       </div>
     </section>
 
@@ -525,6 +571,12 @@
         <div class="field" style="margin-bottom:12px" id="fCatField">
           <label>ប្រភេទ</label>
           <div class="cat-pick" id="fCatPick"></div>
+        </div>
+        <div class="debt-seg" id="fDebtMode" hidden>
+          <button type="button" data-k="borrow">🤝 ខ្ចីគេ</button>
+          <button type="button" data-k="repay">💸 សងគេ</button>
+          <button type="button" data-k="lend">📤 ឲ្យគេខ្ចី</button>
+          <button type="button" data-k="collect">📥 គេសងមកវិញ</button>
         </div>
         <div class="seg save-seg" id="fSaveMode" style="margin-bottom:14px" hidden>
           <button type="button" data-t="expense">🐷 ដាក់សន្សំ</button>
@@ -540,7 +592,7 @@
         </div>
 
         <div class="field">
-          <label>ចំណាំ (ស្រេចចិត្ត)</label>
+          <label id="fNoteLbl">ចំណាំ (ស្រេចចិត្ត)</label>
           <div class="chips" id="fChips"></div>
           <input type="text" id="fNote" placeholder="សរសេរបន្ថែម...">
         </div>
@@ -643,6 +695,25 @@
         <span>📊 តាមឆ្នាំ</span><span class="fold-tg" id="aFoldTg">បង្ហាញ ▸</span>
       </button>
       <div class="card" id="aList" style="padding:6px 12px" hidden></div>
+    </section>
+
+    <!-- DEBTS -->
+    <section class="view" id="view-debt">
+      <div class="debt-sum" id="dSum">
+        <button type="button" class="dbox owe on" data-d="owe"><span class="l">ខ្ញុំជំពាក់គេ</span><span class="v" id="dOwe">$0</span></button>
+        <button type="button" class="dbox lent" data-d="lent"><span class="l">គេជំពាក់ខ្ញុំ</span><span class="v" id="dLent">$0</span></button>
+      </div>
+      <button type="button" class="btn" id="dNew" style="margin:12px 0 2px"></button>
+      <div class="sec-label"><span id="dListLbl"></span></div>
+      <div id="dList"></div>
+      <button type="button" class="fold-btn" id="dDoneFold" hidden>
+        <span id="dDoneLbl">✓ សងរួច</span><span class="fold-tg" id="dDoneTg">បង្ហាញ ▸</span>
+      </button>
+      <div id="dDone" hidden></div>
+      <button type="button" class="fold-btn" id="dHistFold">
+        <span>📋 ប្រវត្តិ ខ្ចី / សង</span><span class="fold-tg" id="dHistTg">បង្ហាញ ▸</span>
+      </button>
+      <div id="dHist" hidden></div>
     </section>
 
     <!-- SAVINGS -->
@@ -794,6 +865,7 @@ const CAT_STYLE = {
   "សម្លៀកបំពាក់":            {icon:"👗", bg:"#EFE4F3"},
   "កម្សាន្ត":               {icon:"🎉", bg:"#F6EBDA"},
   "សន្សំ":                  {icon:"🐷", bg:"#F3EAD6"},
+  "ជំពាក់":                 {icon:"🤝", bg:"#E6E4F3"},
   "ផ្សេងៗ":                 {icon:"🌈", bg:"#E9ECEB"}
 };
 function catStyle(c){
@@ -865,7 +937,31 @@ const inMonth = (e, ym) => e.date && e.date.slice(0,7) === ym;
    ដាក់សន្សំ = type "expense" + category "សន្សំ" ; ដកចេញ = type "income" + category "សន្សំ" */
 const SAVE_CAT = "សន្សំ";
 const isSave = e => e.category === SAVE_CAT;
-const flowEntries = () => entries.filter(e => !isSave(e));
+
+/* ជំពាក់ / សងលុយ — ទុកដាច់ដោយឡែក មិនគិតក្នុងចំណូល/ចំណាយ
+   e.debt: "borrow" ខ្ចីគេ | "repay" សងគេ | "lend" ឲ្យគេខ្ចី | "collect" គេសងមកវិញ ; e.note = ឈ្មោះមនុស្ស */
+const DEBT_CAT = "ជំពាក់";
+const isDebt = e => e.category === DEBT_CAT;
+const DEBT_KIND = {
+  borrow:  { type: "income",  dir: "owe",  sign: +1, label: "ខ្ចីពី",       icon: "🤝" },
+  repay:   { type: "expense", dir: "owe",  sign: -1, label: "សងទៅ",       icon: "💸" },
+  lend:    { type: "expense", dir: "lent", sign: +1, label: "ឲ្យខ្ចី",      icon: "📤" },
+  collect: { type: "income",  dir: "lent", sign: -1, label: "សងមកវិញពី", icon: "📥" }
+};
+const debtEntries = () => entries.filter(e => isDebt(e) && DEBT_KIND[e.debt]);
+// សមតុល្យ ជំពាក់ សម្រាប់ទិសមួយ (owe / lent)
+function debtBal(list, dir){
+  let t = 0, added = 0, paid = 0;
+  list.forEach(e=>{
+    const k = DEBT_KIND[e.debt];
+    if(!k || k.dir !== dir) return;
+    const v = (Number(e.amount) || 0) / (e.currency === "KHR" ? KHR_RATE : 1);
+    if(k.sign > 0) added += v; else paid += v;
+  });
+  t = added - paid;
+  return { t, added, paid };
+}
+const flowEntries = () => entries.filter(e => !isSave(e) && !isDebt(e));
 // សមតុល្យសន្សំ = ដាក់ − ដក
 function saveBal(list){
   const dep = sumOf(list.filter(e => e.type === "expense")), wd = sumOf(list.filter(e => e.type === "income"));
@@ -936,7 +1032,7 @@ function catsFor(type){
 function addCat(type, name, icon){
   const u = ucat(type);
   if(u.hidden.includes(name)){ u.hidden = u.hidden.filter(c => c !== name); saveUserCats(); return true; }
-  if(catsFor(type).includes(name) || name === SAVE_CAT) return false;
+  if(catsFor(type).includes(name) || name === SAVE_CAT || name === DEBT_CAT) return false;
   u.added.push({ name, icon: icon || "🏷️" });
   saveUserCats();
   return true;
@@ -1156,8 +1252,8 @@ function showApp(){
 }
 
 /* ================= ប្តូរទំព័រ ================= */
-const VIEW_SECTION = { home:"home", form:"form", month:"month", year:"year", all:"all", savings:"savings", settings:"settings" };
-const VIEW_TITLE = { month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", all:"សង្ខេបទាំងអស់", savings:"សន្សំប្រាក់", settings:"ការកំណត់" };
+const VIEW_SECTION = { home:"home", form:"form", month:"month", year:"year", all:"all", savings:"savings", debt:"debt", settings:"settings" };
+const VIEW_TITLE = { month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", all:"សង្ខេបទាំងអស់", savings:"សន្សំប្រាក់", debt:"ជំពាក់ / សងលុយ", settings:"ការកំណត់" };
 
 function showView(v, push = true){
   if(!VIEW_SECTION[v]) v = "home";
@@ -1208,6 +1304,9 @@ function renderHome(){
   $("tYear").textContent = "ឆ្នាំ " + khNum(selMonth.slice(0,4));
   $("tSave").textContent = fmtUSD(saveBal(savingsEntries()).t);
   $("tAll").textContent = fmtUSD(signedSum(flowEntries()).t);
+  const dl = debtEntries(), owe = debtBal(dl, "owe").t, lent = debtBal(dl, "lent").t;
+  $("tDebt").textContent = owe > 0.004 ? "ជំពាក់ " + fmtUSD(owe) : lent > 0.004 ? "គេជំពាក់ " + fmtUSD(lent) : "គ្មានបំណុល";
+  $("tSet").textContent = "$1 = " + KHR_RATE.toLocaleString("en-US") + "៛";
 }
 $("hPrev").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, -1); render(); });
 $("hNext").addEventListener("click", ()=>{ selMonth = shiftMonth(selMonth, 1); render(); });
@@ -1235,13 +1334,14 @@ function renderEntries(container, list, emptyMsg){
     const cs = catStyle(e.category);
     const conv = e.currency === "KHR" ? `<small>${fmtUSD((Number(e.amount)||0) / KHR_RATE)}</small>` : "";
     const sv = isSave(e);
-    const label = sv ? (e.type === "expense" ? "ដាក់សន្សំ" : "ដកប្រាក់សន្សំ") : e.category;
+    const dk = isDebt(e) ? DEBT_KIND[e.debt] : null;
+    const label = dk ? dk.label + " " + (e.note || "") : sv ? (e.type === "expense" ? "ដាក់សន្សំ" : "ដកប្រាក់សន្សំ") : e.category;
     const sign = sv ? (e.type === "expense" ? "+" : "−") : (e.type === "income" ? "+" : "−");
     const cls = sv ? (e.type === "expense" ? "save-in" : "save-out") : e.type;
     const row = document.createElement("div");
     row.className = "entry";
-    row.innerHTML = `<span class="bub" style="background:${cs.bg}">${sv && e.type === "income" ? "📤" : cs.icon}</span>
-      <span class="tx"><div class="c">${esc(label)}</div>${e.note ? `<div class="n">${esc(e.note)}</div>` : ""}</span>
+    row.innerHTML = `<span class="bub" style="background:${cs.bg}">${dk ? dk.icon : sv && e.type === "income" ? "📤" : cs.icon}</span>
+      <span class="tx"><div class="c">${esc(label)}</div>${e.note && !dk ? `<div class="n">${esc(e.note)}</div>` : ""}</span>
       <span class="a ${cls}">${sign}${fmtAmt(e.amount, e.currency)}${conv}</span>
       <span class="acts"><button type="button" aria-label="កែប្រែ">✎</button><button type="button" aria-label="លុប">✕</button></span>`;
     const [editB, delB] = row.querySelectorAll(".acts button");
@@ -1259,7 +1359,10 @@ function renderEntries(container, list, emptyMsg){
 
 /* ================= ទំព័របញ្ចូល ================= */
 const LAST_CAT_KEY = "tracker_last_cat_v1_";
-function openForm(type, cat, entry, presetNote){
+function openDebtForm(kind, name){
+  openForm(DEBT_KIND[kind].type, DEBT_CAT, null, name || null, kind);
+}
+function openForm(type, cat, entry, presetNote, presetKind){
   const cats = catsFor(type);
   if(!cat){
     const last = lsGet(LAST_CAT_KEY + type);
@@ -1268,10 +1371,12 @@ function openForm(type, cat, entry, presetNote){
   const lastCur = lsGet(LAST_CUR_KEY) === "KHR" ? "KHR" : "USD";
   // កែពីបញ្ជីក្នុងទំព័របញ្ចូល → ក្រោយរក្សាទុក ត្រឡប់មកទំព័របញ្ចូលនោះវិញ
   const returnTo = (entry && currentView === "form" && form && !form.id)
-    ? { type: form.type, cat: form.cat, cur: form.cur, date: $("fDate").value } : null;
-  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []), returnTo };
+    ? { type: form.type, cat: form.cat, cur: form.cur, debt: form.debt, date: $("fDate").value } : null;
+  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []), returnTo,
+           debt: entry ? entry.debt : (presetKind || null) };
+  if(cat === DEBT_CAT && entry){ form.chips = new Set(entry.note ? [entry.note] : []); }
   $("fAmount").value = entry ? entry.amount : "";
-  $("fNote").value = entry ? (entry.note || "") : "";
+  $("fNote").value = entry && cat !== DEBT_CAT ? (entry.note || "") : "";
   const thisMonth = todayStr().slice(0,7);
   $("fDate").value = entry ? entry.date : (selMonth === thisMonth ? todayStr() : selMonth + "-01");
   renderForm();
@@ -1282,13 +1387,19 @@ function openForm(type, cat, entry, presetNote){
 function formTitle(){
   if(form.id) return "កែប្រែ";
   if((form.cat === SAVE_CAT)) return form.type === "expense" ? "ដាក់ប្រាក់សន្សំ" : "ដកប្រាក់សន្សំ";
+  if(form.cat === DEBT_CAT) return { borrow:"ខ្ចីលុយគេ", repay:"សងលុយគេ", lend:"ឲ្យគេខ្ចីលុយ", collect:"គេសងលុយមកវិញ" }[form.debt] || "ជំពាក់ / សងលុយ";
   return "បញ្ចូល" + (form.type === "income" ? "ចំណូល" : "ចំណាយ");
 }
 function renderForm(){
   document.querySelectorAll("#fCur button").forEach(b => b.classList.toggle("on", b.dataset.cur === form.cur));
   const sv = (form.cat === SAVE_CAT);
-  $("fCatField").hidden = sv;
+  const db = (form.cat === DEBT_CAT);
+  $("fCatField").hidden = sv || db;
   $("fSaveMode").hidden = !sv;
+  $("fDebtMode").hidden = !db;
+  document.querySelectorAll("#fDebtMode button").forEach(b => b.classList.toggle("on", b.dataset.k === form.debt));
+  $("fNoteLbl").textContent = db ? "ឈ្មោះអ្នក (ចាំបាច់)" : "ចំណាំ (ស្រេចចិត្ត)";
+  $("fNote").placeholder = db ? "ឈ្មោះថ្មី..." : "សរសេរបន្ថែម...";
   document.querySelectorAll("#fSaveMode button").forEach(b => b.classList.toggle("on", b.dataset.t === form.type));
   if(currentView === "form") $("subTitle").textContent = formTitle();
 
@@ -1311,12 +1422,19 @@ function renderForm(){
   // ចំណាំរហ័ស (គ្រប់គ្រងនៅ ការកំណត់)
   const wrap = $("fChips");
   wrap.innerHTML = "";
-  (sv ? goalNames() : notesFor(form.cat)).forEach(n=>{
+  (db ? debtPeople(DEBT_KIND[form.debt] ? DEBT_KIND[form.debt].dir : null) : sv ? goalNames() : notesFor(form.cat)).forEach(n=>{
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip" + (form.chips.has(n) ? " on" : "");
     chip.textContent = n;
     chip.addEventListener("click", ()=>{
+      if(db){   // ជ្រើសបានតែម្នាក់
+        const was = form.chips.has(n);
+        form.chips.clear();
+        if(!was){ form.chips.add(n); $("fNote").value = ""; }
+        wrap.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", form.chips.has(c.textContent)));
+        return;
+      }
       if(form.chips.has(n)) form.chips.delete(n); else form.chips.add(n);
       chip.classList.toggle("on");
     });
@@ -1330,15 +1448,16 @@ function renderFormEntries(){
   if(!form) return;
   const today = todayStr();
   const sv = (form.cat === SAVE_CAT);
-  const typeName = sv ? "ប្រាក់សន្សំ" : form.type === "income" ? "ចំណូល" : "ចំណាយ";
+  const db = (form.cat === DEBT_CAT);
+  const typeName = db ? "ការខ្ចី / សង" : sv ? "ប្រាក់សន្សំ" : form.type === "income" ? "ចំណូល" : "ចំណាយ";
   const isThisMonth = selMonth === today.slice(0,7);
   document.querySelector('#fRange [data-r="month"]').textContent = isThisMonth ? "ខែនេះ" : "ខែ" + monthName(selMonth);
-  const base = sv ? savingsEntries() : flowEntries().filter(e => e.type === form.type);
+  const base = db ? debtEntries() : sv ? savingsEntries() : flowEntries().filter(e => e.type === form.type);
   const list = base.filter(e =>
     fRange === "today" ? e.date === today :
     fRange === "month" ? inMonth(e, selMonth) : true);
   $("fListLbl").textContent = typeName;
-  $("fListSum").textContent = list.length ? (sv ? "សុទ្ធ " + fmtUSD(saveBal(list).t) : "សរុប " + fmtUSD(sumOf(list).t)) : "";
+  $("fListSum").textContent = list.length && !db ? (sv ? "សុទ្ធ " + fmtUSD(saveBal(list).t) : "សរុប " + fmtUSD(sumOf(list).t)) : "";
   const label = fRange === "today" ? "ថ្ងៃនេះ" : fRange === "month" ? "ក្នុងខែនេះ" : "";
   renderEntries($("fEntries"), list, "មិនទាន់មាន" + typeName + label + "ទេ");
 }
@@ -1348,6 +1467,20 @@ $("fRange").addEventListener("click", e=>{
   fRange = b.dataset.r;
   document.querySelectorAll("#fRange button").forEach(x => x.classList.toggle("on", x === b));
   renderFormEntries();
+});
+
+$("fDebtMode").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  const prevDir = DEBT_KIND[form.debt] ? DEBT_KIND[form.debt].dir : null;
+  form.debt = b.dataset.k;
+  form.type = DEBT_KIND[form.debt].type;
+  if(DEBT_KIND[form.debt].dir !== prevDir){   // ប្តូរទិស → ឈ្មោះដែលបានជ្រើស អាចមិនមាន
+    const keep = [...form.chips][0];
+    form.chips = new Set(keep && debtPeople(DEBT_KIND[form.debt].dir).includes(keep) ? [keep] : []);
+  }
+  renderForm();
+  $("fAmount").focus();
 });
 
 $("fSaveMode").addEventListener("click", e=>{
@@ -1370,11 +1503,23 @@ function saveForm(){
   const amount = parseFloat($("fAmount").value);
   if(!(amount > 0)){ $("fAmount").focus(); toast("សូមបញ្ចូលចំនួនទឹកប្រាក់"); return; }
   const typed = $("fNote").value.trim();
-  const note = [...form.chips, typed].filter(Boolean).join(", ");
+  const isD = form.cat === DEBT_CAT;
+  const note = isD ? (typed || [...form.chips][0] || "") : [...form.chips, typed].filter(Boolean).join(", ");
   const date = $("fDate").value || todayStr();
 
+  if(isD){
+    if(!DEBT_KIND[form.debt]){ toast("សូមជ្រើស ខ្ចី ឬសង"); return; }
+    if(!note){ $("fNote").focus(); toast("សូមបញ្ចូលឈ្មោះអ្នក"); return; }
+    const k = DEBT_KIND[form.debt];
+    if(k.sign < 0){   // សង → មិនគួរលើសបំណុល
+      const have = debtBal(debtEntries().filter(e => e.id !== form.id && (e.note || "").trim() === note), k.dir).t;
+      const want = amount / (form.cur === "KHR" ? KHR_RATE : 1);
+      if(want > have + 0.004 && !confirm("សងលើសចំនួនជំពាក់ (" + fmtUSD(have) + ")។ បន្តទៀត?")) return;
+    }
+  }
+
   // ចងចាំចំណាំថ្មី ជាប៊ូតុងរហ័ស
-  if(typed && !form.id) addNote(form.cat, typed);
+  if(typed && !form.id && !isD) addNote(form.cat, typed);
 
   if((form.cat === SAVE_CAT) && form.type === "income"){
     const goalList = savingsEntries().filter(e => e.id !== form.id && (!note || (e.note || "").trim() === note));
@@ -1384,6 +1529,7 @@ function saveForm(){
   }
 
   const data = { date, type: form.type, category: form.cat, note, amount, currency: form.cur };
+  if(isD) data.debt = form.debt;
   if(form.id){
     const i = entries.findIndex(e => e.id === form.id);
     if(i !== -1) entries[i] = Object.assign({}, entries[i], data);
@@ -1391,18 +1537,18 @@ function saveForm(){
     entries.push(Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7) }, data));
   }
   lsSet(LAST_CUR_KEY, form.cur);
-  if(!(form.cat === SAVE_CAT)) lsSet(LAST_CAT_KEY + form.type, form.cat);
+  if(form.cat !== SAVE_CAT && form.cat !== DEBT_CAT) lsSet(LAST_CAT_KEY + form.type, form.cat);
   // បើបញ្ចូលក្នុងខែផ្សេង ប្តូរទៅខែនោះ ដើម្បីមើលឃើញ
   selMonth = date.slice(0,7);
 
   const wasEdit = !!form.id;
   saveEntries();
   render();
-  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
+  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : isD ? DEBT_KIND[form.debt].icon + " បានកត់ត្រា" : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
   if(wasEdit){
     const back = form.returnTo;
     if(!back){ goBack(); return; }
-    form = { type: back.type, cat: back.cat, id: null, cur: back.cur, chips: new Set() };
+    form = { type: back.type, cat: back.cat, id: null, cur: back.cur, debt: back.debt, chips: new Set() };
     $("fAmount").value = ""; $("fNote").value = ""; $("fDate").value = back.date || todayStr();
     renderForm();
     $("subTitle").textContent = formTitle();
@@ -1411,7 +1557,7 @@ function saveForm(){
 
   // បញ្ចូលថ្មី → នៅទំព័រដដែល ដើម្បីបញ្ចូលបន្តទៀត (រក្សាប្រភេទ ថ្ងៃខែ និងរូបិយប័ណ្ណ)
   form.id = null;
-  form.chips = new Set();
+  form.chips = isD ? new Set([note]) : new Set();
   $("fAmount").value = "";
   $("fNote").value = "";
   renderForm();
@@ -1629,6 +1775,81 @@ $("aFold").addEventListener("click", ()=>{
   const open = $("aList").hidden;
   $("aList").hidden = !open;
   $("aFoldTg").textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
+});
+
+/* ================= ជំពាក់ / សងលុយ ================= */
+let debtDir = "owe";
+// ឈ្មោះមនុស្សទាំងអស់ (ក្នុងទិសមួយ ឬទាំងពីរ) — ថ្មីៗមុនគេ
+function debtPeople(dir){
+  const list = debtEntries().filter(e => !dir || DEBT_KIND[e.debt].dir === dir)
+    .sort((a,b)=> b.date.localeCompare(a.date));
+  const out = [];
+  list.forEach(e => { const n = (e.note || "").trim(); if(n && !out.includes(n)) out.push(n); });
+  return out;
+}
+function renderDebts(){
+  const all = debtEntries();
+  $("dOwe").textContent = fmtUSD(debtBal(all, "owe").t);
+  $("dLent").textContent = fmtUSD(debtBal(all, "lent").t);
+  document.querySelectorAll("#dSum .dbox").forEach(b => b.classList.toggle("on", b.dataset.d === debtDir));
+  const owe = debtDir === "owe";
+  $("dNew").textContent = owe ? "🤝 ＋ ខ្ចីលុយគេ (ថ្មី)" : "📤 ＋ ឲ្យគេខ្ចីលុយ (ថ្មី)";
+  $("dListLbl").textContent = owe ? "អ្នកដែលខ្ញុំជំពាក់" : "អ្នកដែលជំពាក់ខ្ញុំ";
+
+  const people = debtPeople(debtDir).map(n=>{
+    const pl = all.filter(e => (e.note || "").trim() === n);
+    const b = debtBal(pl, debtDir);
+    return { n, b, last: pl.filter(e => DEBT_KIND[e.debt].dir === debtDir).map(e => e.date).sort().pop() };
+  });
+  const active = people.filter(p => Math.abs(p.b.t) > 0.004);
+  const done = people.filter(p => Math.abs(p.b.t) <= 0.004);
+
+  const card = p=>{
+    const pct = p.b.added ? Math.min(100, p.b.paid / p.b.added * 100) : 0;
+    const settled = Math.abs(p.b.t) <= 0.004;
+    const c = document.createElement("div");
+    c.className = "goal debt-card" + (settled ? " done" : "") + (owe ? " owe" : " lent");
+    c.innerHTML = `
+      <div class="g-top"><span class="bub" style="background:#E6E4F3">👤</span><span class="g-nm"></span>
+        <span class="d-last">${p.last ? khDate(p.last) : ""}</span></div>
+      <div class="g-amt"><b>${fmtUSD(p.b.t)}</b><span class="g-pct">${settled ? "✓ សងរួច" : (owe ? "នៅជំពាក់" : "នៅខ្វះ")}</span></div>
+      <div class="g-bar"><span style="width:${Math.max(2, pct)}%"></span></div>
+      <div class="g-left">${owe ? "ខ្ចីសរុប" : "ឲ្យខ្ចីសរុប"} ${fmtUSD(p.b.added)} · ${owe ? "សងរួច" : "គេសងរួច"} ${fmtUSD(p.b.paid)}</div>
+      <div class="g-acts">
+        <button type="button" class="g-add">${owe ? "－ សងគេ" : "－ គេសង"}</button>
+        <button type="button" class="g-out">${owe ? "＋ ខ្ចីថែម" : "＋ ឲ្យថែម"}</button>
+      </div>`;
+    c.querySelector(".g-nm").textContent = p.n;
+    c.querySelector(".g-add").addEventListener("click", ()=> openDebtForm(owe ? "repay" : "collect", p.n));
+    c.querySelector(".g-out").addEventListener("click", ()=> openDebtForm(owe ? "borrow" : "lend", p.n));
+    return c;
+  };
+
+  const list = $("dList");
+  list.innerHTML = active.length ? "" : `<div class="empty">${owe ? "មិនជំពាក់នរណាទេ 🎉" : "គ្មាននរណាជំពាក់ទេ"}</div>`;
+  active.sort((a,b)=> b.b.t - a.b.t).forEach(p => list.appendChild(card(p)));
+
+  $("dDoneFold").hidden = !done.length;
+  $("dDoneLbl").textContent = "✓ សងរួច (" + khNum(done.length) + " នាក់)";
+  const dw = $("dDone");
+  dw.innerHTML = "";
+  done.forEach(p => dw.appendChild(card(p)));
+
+  renderEntries($("dHist"), all.filter(e => DEBT_KIND[e.debt].dir === debtDir), "មិនទាន់មានប្រវត្តិទេ");
+}
+$("dSum").addEventListener("click", e=>{
+  const b = e.target.closest(".dbox");
+  if(!b) return;
+  debtDir = b.dataset.d;
+  renderDebts();
+});
+$("dNew").addEventListener("click", ()=> openDebtForm(debtDir === "owe" ? "borrow" : "lend"));
+[["dDoneFold","dDone","dDoneTg"],["dHistFold","dHist","dHistTg"]].forEach(([btn, body, tg])=>{
+  $(btn).addEventListener("click", ()=>{
+    const open = $(body).hidden;
+    $(body).hidden = !open;
+    $(tg).textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
+  });
 });
 
 /* ================= សន្សំប្រាក់ ================= */
@@ -1934,6 +2155,7 @@ function render(){
   renderYear();
   renderAll();
   renderSavings();
+  renderDebts();
 }
 
 /* ពង្រីកទំហំទាំងមូល តាមទទឹងអេក្រង់ — អេក្រង់ធំ = អក្សរធំ */
