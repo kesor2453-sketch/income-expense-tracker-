@@ -135,6 +135,24 @@
   .ev-card .g-acts .g-out{background:var(--inc-bg);color:var(--inc);}
   .ev-card .ev-items{margin-top:10px;}
   .ev-card .ev-tg{color:var(--faint);font-size:13px;}
+  .ev-card .ev-nums.one{grid-template-columns:1fr;}
+  .ev-card .g-acts.one{grid-template-columns:1fr;}
+  .ev-card .ev-inc-on{border:none;background:none;color:var(--green);font-size:14px;font-weight:600;padding:8px 2px 0;}
+  .dep-seg button.on[data-p="full"]{background:var(--green);color:#fff;}
+  .dep-seg button.on[data-p="dep"]{background:#B07A1E;color:#fff;}
+  .dep-info{background:#FBF3E2;color:#7A5618;border-radius:14px;padding:10px 12px;font-size:14px;margin-bottom:12px;line-height:1.6;}
+  .dep-badge{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:1px;}
+  .dep-badge.dep{background:#FBF3E2;color:#B07A1E;}
+  .dep-badge.settle{background:var(--inc-bg);color:var(--inc);}
+  .dep-list{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;}
+  .dep-list .dh{font-size:13.5px;font-weight:700;color:#B07A1E;margin:0 2px 6px;}
+  .dep-row{display:flex;align-items:center;gap:10px;padding:6px 2px;}
+  .dep-row .dn{flex:1;min-width:0;}
+  .dep-row .dn b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dep-row .dn small{color:var(--soft);font-size:12.5px;}
+  .dep-row button{border:none;border-radius:12px;background:#FBF3E2;color:#7A5618;font-weight:700;font-size:13.5px;padding:9px 10px;white-space:nowrap;}
+  .chk{display:flex;align-items:center;gap:10px;font-size:15px;margin:0 2px 14px;}
+  .chk input{width:22px;height:22px;accent-color:var(--green);}
 
   /* debts */
   .debt-sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -603,6 +621,18 @@
           <button type="button" data-t="income">📤 ដកចេញ</button>
         </div>
 
+        <div id="fDepBox" hidden>
+          <div class="seg dep-seg" id="fPayMode" style="margin-bottom:10px">
+            <button type="button" data-p="full">💵 បង់ពេញ</button>
+            <button type="button" data-p="dep">🔖 កក់ប្រាក់</button>
+          </div>
+          <div class="field" id="fTotalField" hidden>
+            <label for="fTotal">តម្លៃសរុប (ត្រូវបង់ទាំងអស់)</label>
+            <input type="number" id="fTotal" min="0" step="0.01" inputmode="decimal" placeholder="ឧ. 2000">
+          </div>
+          <div class="dep-info" id="fDepInfo" hidden></div>
+          <label class="mini-label" id="fAmtLbl" style="margin-top:2px">ចំនួនបង់ពេលនេះ</label>
+        </div>
         <div class="amount-box">
           <input type="number" id="fAmount" min="0" step="0.01" inputmode="decimal" placeholder="0" aria-label="ចំនួនទឹកប្រាក់">
           <div class="seg cur-seg" id="fCur">
@@ -734,6 +764,7 @@
           <label for="eName">បង្កើតកម្មវិធីថ្មី</label>
           <input type="text" id="eName" placeholder="ឧ. មង្គលការ, ដើរលេងកំពត...">
         </div>
+        <label class="chk"><input type="checkbox" id="eHasInc"> មានលុយចូលដែរ (ឧ. ចំណងដៃ) — ស្រេចចិត្ត</label>
         <button type="button" class="btn" id="eAdd">＋ បង្កើតកម្មវិធី</button>
       </div>
       <button type="button" class="fold-btn" id="eHistFold">
@@ -1407,12 +1438,19 @@ function renderEntries(container, list, emptyMsg){
     const label = dk ? dk.label + " " + (e.note || "") : sv ? (e.type === "expense" ? "ដាក់សន្សំ" : "ដកប្រាក់សន្សំ")
       : ev ? (e.item || (e.type === "expense" ? "ចាយ" : "លុយចូល")) : e.category;
     const subline = ev ? (e.note || "") : (e.note && !dk ? e.note : "");
+    let badge = "";
+    if(ev && Number(e.depTotal) > 0){
+      const st = depositStatus(e);
+      badge = `<span class="dep-badge dep">🔖 កក់ · សរុប ${fmtUSD(st.total)}${st.left > 0.004 ? " · នៅ " + fmtUSD(st.left) : " · ✓"}</span>`;
+    } else if(ev && e.depOf){
+      badge = `<span class="dep-badge settle">បង់នៅសល់</span>`;
+    }
     const sign = sv ? (e.type === "expense" ? "+" : "−") : (e.type === "income" ? "+" : "−");
     const cls = sv ? (e.type === "expense" ? "save-in" : "save-out") : e.type;
     const row = document.createElement("div");
     row.className = "entry";
     row.innerHTML = `<span class="bub" style="background:${cs.bg}">${dk ? dk.icon : sv && e.type === "income" ? "📤" : ev ? eventIcon(e.note || "") : cs.icon}</span>
-      <span class="tx"><div class="c">${esc(label)}</div>${subline ? `<div class="n">${ev ? "🎊 " : ""}${esc(subline)}</div>` : ""}</span>
+      <span class="tx"><div class="c">${esc(label)}${badge || ""}</div>${subline ? `<div class="n">${ev ? "🎊 " : ""}${esc(subline)}</div>` : ""}</span>
       <span class="a ${cls}">${sign}${fmtAmt(e.amount, e.currency)}${conv}</span>
       <span class="acts"><button type="button" aria-label="កែប្រែ">✎</button><button type="button" aria-label="លុប">✕</button></span>`;
     const [editB, delB] = row.querySelectorAll(".acts button");
@@ -1442,9 +1480,13 @@ function openForm(type, cat, entry, presetNote, presetKind){
   const lastCur = lsGet(LAST_CUR_KEY) === "KHR" ? "KHR" : "USD";
   // កែពីបញ្ជីក្នុងទំព័របញ្ចូល → ក្រោយរក្សាទុក ត្រឡប់មកទំព័របញ្ចូលនោះវិញ
   const returnTo = (entry && currentView === "form" && form && !form.id)
-    ? { type: form.type, cat: form.cat, cur: form.cur, debt: form.debt, date: $("fDate").value } : null;
-  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []), returnTo,
-           debt: entry ? entry.debt : (presetKind || null) };
+    ? { type: form.type, cat: form.cat, cur: form.cur, debt: form.debt, date: $("fDate").value,
+        chips: form.cat === EVENT_CAT ? [...form.chips] : [] } : null;
+  form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []), items: new Set(), returnTo,
+           debt: entry ? entry.debt : (presetKind || null),
+           pay: entry && Number(entry.depTotal) > 0 ? "dep" : "full",
+           depOf: entry ? (entry.depOf || null) : null };
+  $("fTotal").value = entry && Number(entry.depTotal) > 0 ? entry.depTotal : "";
   if((cat === DEBT_CAT || cat === EVENT_CAT) && entry){ form.chips = new Set(entry.note ? [entry.note] : []); }
   $("fAmount").value = entry ? entry.amount : "";
   $("fNote").value = !entry ? "" : cat === EVENT_CAT ? (entry.item || "") : cat !== DEBT_CAT ? (entry.note || "") : "";
@@ -1458,7 +1500,7 @@ function openForm(type, cat, entry, presetNote, presetKind){
 function formTitle(){
   if(form.id) return "កែប្រែ";
   if((form.cat === SAVE_CAT)) return form.type === "expense" ? "ដាក់ប្រាក់សន្សំ" : "ដកប្រាក់សន្សំ";
-  if(form.cat === EVENT_CAT) return form.type === "expense" ? "ចាយលើកម្មវិធី" : "លុយចូលកម្មវិធី";
+  if(form.cat === EVENT_CAT) return (form.type === "expense" ? "ចាយ · " : "លុយចូល · ") + ([...form.chips][0] || "កម្មវិធី");
   if(form.cat === DEBT_CAT) return { borrow:"ខ្ចីលុយគេ", repay:"សងលុយគេ", lend:"ឲ្យគេខ្ចីលុយ", collect:"គេសងលុយមកវិញ" }[form.debt] || "ជំពាក់ / សងលុយ";
   return "បញ្ចូល" + (form.type === "income" ? "ចំណូល" : "ចំណាយ");
 }
@@ -1469,12 +1511,28 @@ function renderForm(){
   const ev = (form.cat === EVENT_CAT);
   $("fCatField").hidden = sv || db || ev;
   $("fSaveMode").hidden = !sv;
-  $("fEventMode").hidden = !ev;
+  $("fEventMode").hidden = !ev || !eventHasIncome([...form.chips][0] || "") || !!form.depOf;
+  // កក់ / បង់ពេញ — សម្រាប់ចាយលើកម្មវិធី
+  const depOn = ev && form.type === "expense";
+  $("fDepBox").hidden = !depOn;
+  if(depOn){
+    const settle = form.depOf ? entries.find(e => e.id === form.depOf) : null;
+    $("fPayMode").hidden = !!settle;
+    document.querySelectorAll("#fPayMode button").forEach(b => b.classList.toggle("on", b.dataset.p === form.pay));
+    $("fTotalField").hidden = !!settle || form.pay !== "dep";
+    $("fDepInfo").hidden = !settle;
+    if(settle){
+      const st = depositStatus(settle);
+      $("fDepInfo").innerHTML = `🔖 បង់នៅសល់ · <b>${esc(settle.item || "ការកក់")}</b><br>
+        តម្លៃសរុប ${fmtUSD(st.total)} · បង់រួច ${fmtUSD(st.paid)} · <b>នៅសល់ ${fmtUSD(st.left)}</b>`;
+    }
+    $("fAmtLbl").textContent = settle ? "ចំនួនបង់ពេលនេះ" : form.pay === "dep" ? "ចំនួនកក់" : "ចំនួនបង់";
+  }
   document.querySelectorAll("#fEventMode button").forEach(b => b.classList.toggle("on", b.dataset.t === form.type));
   $("fDebtMode").hidden = !db;
   document.querySelectorAll("#fDebtMode button").forEach(b => b.classList.toggle("on", b.dataset.k === form.debt));
-  $("fNoteLbl").textContent = db ? "ឈ្មោះអ្នក (ចាំបាច់)" : ev ? "ជ្រើសកម្មវិធី · ព័ត៌មានលម្អិត (ស្រេចចិត្ត)" : "ចំណាំ (ស្រេចចិត្ត)";
-  $("fNote").placeholder = db ? "ឈ្មោះថ្មី..." : ev ? (form.type === "expense" ? "ឧ. ថ្លៃរោង, ថ្លៃឡាន..." : "ឧ. ចំណងដៃពី...") : "សរសេរបន្ថែម...";
+  $("fNoteLbl").textContent = db ? "ឈ្មោះអ្នក (ចាំបាច់)" : ev ? "ព័ត៌មានលម្អិត (ស្រេចចិត្ត)" : "ចំណាំ (ស្រេចចិត្ត)";
+  $("fNote").placeholder = db ? "ឈ្មោះថ្មី..." : ev ? (form.type === "expense" ? "វាយផ្សេងទៀត..." : "ឧ. ចំណងដៃពី...") : "សរសេរបន្ថែម...";
   document.querySelectorAll("#fSaveMode button").forEach(b => b.classList.toggle("on", b.dataset.t === form.type));
   if(currentView === "form") $("subTitle").textContent = formTitle();
 
@@ -1497,10 +1555,10 @@ function renderForm(){
   // ចំណាំរហ័ស (គ្រប់គ្រងនៅ ការកំណត់)
   const wrap = $("fChips");
   wrap.innerHTML = "";
-  (db ? debtPeople(DEBT_KIND[form.debt] ? DEBT_KIND[form.debt].dir : null) : sv ? goalNames() : ev ? eventNames() : notesFor(form.cat)).forEach(n=>{
+  (db ? debtPeople(DEBT_KIND[form.debt] ? DEBT_KIND[form.debt].dir : null) : sv ? goalNames() : ev ? eventItemSuggestions([...form.chips][0] || "", form.type) : notesFor(form.cat)).forEach(n=>{
     const chip = document.createElement("button");
     chip.type = "button";
-    chip.className = "chip" + (form.chips.has(n) ? " on" : "");
+    chip.className = "chip" + ((ev ? form.items.has(n) : form.chips.has(n)) ? " on" : "");
     chip.textContent = n;
     chip.addEventListener("click", ()=>{
       if(db){   // ជ្រើសបានតែម្នាក់
@@ -1510,11 +1568,9 @@ function renderForm(){
         wrap.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", form.chips.has(c.textContent)));
         return;
       }
-      if(ev){   // កម្មវិធី៖ ជ្រើសបានតែមួយ
-        const was = form.chips.has(n);
-        form.chips.clear();
-        if(!was) form.chips.add(n);
-        wrap.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", form.chips.has(c.textContent)));
+      if(ev){   // កម្មវិធី៖ ព័ត៌មានលម្អិតរហ័ស (ជ្រើសបានច្រើន)
+        if(form.items.has(n)) form.items.delete(n); else form.items.add(n);
+        chip.classList.toggle("on");
         return;
       }
       if(form.chips.has(n)) form.chips.delete(n); else form.chips.add(n);
@@ -1532,10 +1588,10 @@ function renderFormEntries(){
   const sv = (form.cat === SAVE_CAT);
   const db = (form.cat === DEBT_CAT);
   const ev = (form.cat === EVENT_CAT);
-  const typeName = ev ? "កម្មវិធី" : db ? "ការខ្ចី / សង" : sv ? "ប្រាក់សន្សំ" : form.type === "income" ? "ចំណូល" : "ចំណាយ";
+  const typeName = ev ? ([...form.chips][0] || "កម្មវិធី") : db ? "ការខ្ចី / សង" : sv ? "ប្រាក់សន្សំ" : form.type === "income" ? "ចំណូល" : "ចំណាយ";
   const isThisMonth = selMonth === today.slice(0,7);
   document.querySelector('#fRange [data-r="month"]').textContent = isThisMonth ? "ខែនេះ" : "ខែ" + monthName(selMonth);
-  const base = ev ? eventEntries() : db ? debtEntries() : sv ? savingsEntries() : flowEntries().filter(e => e.type === form.type);
+  const base = ev ? eventEntries().filter(e => (e.note || "").trim() === [...form.chips][0]) : db ? debtEntries() : sv ? savingsEntries() : flowEntries().filter(e => e.type === form.type);
   const list = base.filter(e =>
     fRange === "today" ? e.date === today :
     fRange === "month" ? inMonth(e, selMonth) : true);
@@ -1566,10 +1622,19 @@ $("fDebtMode").addEventListener("click", e=>{
   $("fAmount").focus();
 });
 
+$("fPayMode").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  form.pay = b.dataset.p;
+  renderForm();
+  (form.pay === "dep" ? $("fTotal") : $("fAmount")).focus();
+});
+
 $("fEventMode").addEventListener("click", e=>{
   const b = e.target.closest("button");
   if(!b) return;
   form.type = b.dataset.t;
+  form.items = new Set();
   renderForm();
   $("fAmount").focus();
 });
@@ -1623,7 +1688,21 @@ function saveForm(){
 
   const data = { date, type: form.type, category: form.cat, note, amount, currency: form.cur };
   if(isD) data.debt = form.debt;
-  if(isE) data.item = typed;
+  if(isE && form.type === "expense" && !form.depOf && form.pay === "dep"){
+    const total = parseFloat($("fTotal").value);
+    if(!(total > 0)){ $("fTotal").focus(); toast("សូមបញ្ចូលតម្លៃសរុប"); return; }
+    if(total < amount){ $("fTotal").focus(); toast("តម្លៃសរុប តូចជាងចំនួនកក់"); return; }
+    data.depTotal = total;
+  } else if(isE) data.depTotal = 0;
+  if(isE && form.depOf) data.depOf = form.depOf;
+  if(isE && form.depOf && !form.id){   // បង់លើស → សួរ
+    const d = entries.find(e => e.id === form.depOf);
+    if(d){ const st = depositStatus(d); if(toUSDv(amount, form.cur) > st.left + 0.004 && !confirm("បង់លើសចំនួននៅសល់ (" + fmtUSD(st.left) + ")។ បន្តទៀត?")) return; }
+  }
+  if(isE){
+    data.item = [...(form.items || []), typed].filter(Boolean).join(", ");
+    if(typed && !form.id) addEventItem([...form.chips][0], form.type, typed);   // ចងចាំសម្រាប់លើកក្រោយ
+  }
   if(form.id){
     const i = entries.findIndex(e => e.id === form.id);
     if(i !== -1) entries[i] = Object.assign({}, entries[i], data);
@@ -1638,11 +1717,12 @@ function saveForm(){
   const wasEdit = !!form.id;
   saveEntries();
   render();
-  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : isD ? DEBT_KIND[form.debt].icon + " បានកត់ត្រា" : isE ? "🎊 បានកត់ត្រា «" + note + "»" : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
+  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : isD ? DEBT_KIND[form.debt].icon + " បានកត់ត្រា" : isE ? (data.depTotal > 0 ? "🔖 បានកត់ត្រាការកក់" : form.depOf ? "✅ បានបង់នៅសល់" : "🎊 បានកត់ត្រា «" + note + "»") : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
   if(wasEdit){
     const back = form.returnTo;
     if(!back){ goBack(); return; }
-    form = { type: back.type, cat: back.cat, id: null, cur: back.cur, debt: back.debt, chips: new Set() };
+    form = { type: back.type, cat: back.cat, id: null, cur: back.cur, debt: back.debt, chips: new Set(back.chips || []), items: new Set(), pay: "full", depOf: null };
+    $("fTotal").value = "";
     $("fAmount").value = ""; $("fNote").value = ""; $("fDate").value = back.date || todayStr();
     renderForm();
     $("subTitle").textContent = formTitle();
@@ -1652,6 +1732,10 @@ function saveForm(){
   // បញ្ចូលថ្មី → នៅទំព័រដដែល ដើម្បីបញ្ចូលបន្តទៀត (រក្សាប្រភេទ ថ្ងៃខែ និងរូបិយប័ណ្ណ)
   form.id = null;
   form.chips = (isD || isE) ? new Set([note]) : new Set();
+  form.items = new Set();
+  if(form.depOf){ goBack(); return; }   // បង់នៅសល់រួច → ត្រឡប់ទៅកម្មវិធី
+  form.pay = "full";
+  $("fTotal").value = "";
   $("fAmount").value = "";
   $("fNote").value = "";
   renderForm();
@@ -1970,12 +2054,81 @@ function eventNames(){
   notesFor(EVENT_CAT).forEach(n => { if(!out.includes(n)) out.unshift(n); });
   return out;
 }
+/* ព័ត៌មានលម្អិតរហ័ស តាមប្រភេទកម្មវិធី + អ្វីដែលធ្លាប់វាយ (រក្សាទុកតាមគណនី) */
+const EVENT_ITEM_PRESETS = [
+  [["ថត","pre-wedding","Pre-wedding","prewedding"], ["ថ្លៃថត","សម្លៀកបំពាក់","ផាត់មុខ/សក់","ទីតាំងថត","ធ្វើដំណើរ","ម្ហូប/ភេសជ្ជៈ"]],
+  [["មង្គល","រៀបការ","ភ្ជាប់ពាក្យ","ស្តីដណ្តឹង","wedding"], ["ថ្លៃរោង/តុ","ម្ហូប/ភេសជ្ជៈ","តុបតែង","ថតរូប/វីដេអូ","សម្លៀកបំពាក់","ផាត់មុខ","តន្ត្រី/ភ្លេង","ធៀបការ","ជំនូន/ខាន់ស្លា","មាស/ចិញ្ចៀន"]],
+  [["ដើរលេង","ដំណើរ","កម្សាន្ត","trip"], ["សាំង/ធ្វើដំណើរ","កន្លែងស្នាក់នៅ","ម្ហូប/ភេសជ្ជៈ","សំបុត្រចូល","កាដូ/វត្ថុអនុស្សាវរីយ៍"]],
+  [["ខួប","កំណើត","birthday"], ["នំខួប","ម្ហូប/ភេសជ្ជៈ","កាដូ","តុបតែង","ទីតាំង"]],
+  [["បុណ្យ","វត្ត","ភ្ជុំ","កឋិន","ផ្កា"], ["ម្ហូប/ភេសជ្ជៈ","ចង្ហាន់ព្រះ","បច្ច័យ","តុបតែង","ធ្វើដំណើរ"]],
+  [["ឆ្នាំថ្មី"], ["ម្ហូប/ភេសជ្ជៈ","កាដូ","លុយក្រដាសក្រហម","ធ្វើដំណើរ"]],
+  [["ផ្ទះ"], ["សម្ភារៈ","ជាង/កម្មករ","ដឹកជញ្ជូន","តុបតែង"]]
+];
+const EVENT_INCOME_PRESETS = ["ចំណងដៃ","ជំនួយគ្រួសារ","ឧបត្ថម្ភ"];
+const EV_ITEM_KEY = n => "កម្មវិធី@" + n;
+function eventItemSuggestions(name, type){
+  const out = [];
+  const push = x => { if(x && !out.includes(x)) out.push(x); };
+  (customNotes[EV_ITEM_KEY(name) + "@" + type] || []).forEach(push);          // ធ្លាប់វាយ
+  eventEntries().filter(e => (e.note || "").trim() === name && e.type === type)   // ធ្លាប់ប្រើក្នុងកម្មវិធីនេះ
+    .forEach(e => String(e.item || "").split(", ").forEach(push));
+  if(type === "income") EVENT_INCOME_PRESETS.forEach(push);
+  else {
+    const low = name.toLowerCase();
+    const hit = EVENT_ITEM_PRESETS.find(([keys]) => keys.some(k => low.includes(k.toLowerCase())));
+    (hit ? hit[1] : ["ម្ហូប/ភេសជ្ជៈ","ធ្វើដំណើរ","ទីតាំង","កាដូ"]).forEach(push);
+  }
+  return out;
+}
+function openSettleForm(dep){
+  const st = depositStatus(dep);
+  openForm("expense", EVENT_CAT, null, dep.note);
+  form.depOf = dep.id;
+  form.cur = dep.currency === "KHR" ? "KHR" : "USD";
+  $("fAmount").value = dep.currency === "KHR" ? Math.round(st.left * KHR_RATE) : Math.round(st.left * 100) / 100;
+  $("fNote").value = dep.item || "";
+  renderForm();
+  $("subTitle").textContent = "បង់នៅសល់ · " + (dep.note || "");
+}
+function addEventItem(name, type, text){
+  const k = EV_ITEM_KEY(name) + "@" + type;
+  const l = customNotes[k] || [];
+  if(!l.includes(text)){ customNotes[k] = [text, ...l].slice(0, 20); saveCustomNotes(); }
+}
+
+/* ===== ការកក់ប្រាក់ (កម្មវិធី) =====
+   ប្រតិបត្តិការកក់៖ e.depTotal = តម្លៃសរុប (រូបិយប័ណ្ណដូច e.currency)
+   បង់នៅសល់៖ e.depOf = id នៃការកក់ */
+const toUSDv = (amt, cur) => (Number(amt) || 0) / (cur === "KHR" ? KHR_RATE : 1);
+function depositStatus(d){
+  const total = toUSDv(d.depTotal, d.currency);
+  const paid = toUSDv(d.amount, d.currency) +
+    entries.filter(e => e.depOf === d.id).reduce((t, e) => t + toUSDv(e.amount, e.currency), 0);
+  return { total, paid, left: Math.max(0, total - paid) };
+}
+// ការកក់ដែលនៅមិនទាន់បង់គ្រប់
+function openDeposits(list){
+  return list.filter(e => Number(e.depTotal) > 0 && depositStatus(e).left > 0.004);
+}
+
+const EV_INC_KEY = "កម្មវិធី#មានលុយចូល";
+// កម្មវិធីនេះមានលុយចូលឬទេ (បើកដោយអ្នកប្រើ ឬមានប្រតិបត្តិការលុយចូលរួចហើយ)
+function eventHasIncome(n){
+  return (customNotes[EV_INC_KEY] || []).includes(n) || eventEntries().some(e => e.type === "income" && (e.note || "").trim() === n);
+}
+function setEventIncome(n, on){
+  const l = (customNotes[EV_INC_KEY] || []).filter(x => x !== n);
+  if(on) l.push(n);
+  customNotes[EV_INC_KEY] = l;
+  saveCustomNotes();
+}
 const openEvents = new Set();
 function renderEvents(){
   const all = eventEntries();
   const spent = sumOf(all.filter(e => e.type === "expense")).t, got = sumOf(all.filter(e => e.type === "income")).t;
   $("eNet").textContent = fmtUSD(got - spent);
-  $("eDet").textContent = "ចាយសរុប " + fmtUSD(spent) + " · ចូលសរុប " + fmtUSD(got);
+  const dueAll = openDeposits(all).reduce((t, d) => t + depositStatus(d).left, 0);
+  $("eDet").textContent = "ចាយសរុប " + fmtUSD(spent) + " · ចូលសរុប " + fmtUSD(got) + (dueAll > 0.004 ? " · 🔖 នៅត្រូវបង់ " + fmtUSD(dueAll) : "");
 
   const wrap = $("eList");
   wrap.innerHTML = "";
@@ -1985,6 +2138,9 @@ function renderEvents(){
     const list = all.filter(e => (e.note || "").trim() === n);
     const out = sumOf(list.filter(e => e.type === "expense")).t, inn = sumOf(list.filter(e => e.type === "income")).t;
     const net = inn - out;
+    const hasInc = eventHasIncome(n);
+    const deps = openDeposits(list);
+    const due = deps.reduce((t, d) => t + depositStatus(d).left, 0);
     const open = openEvents.has(n);
     const last = list.map(e => e.date).sort().pop();
     const c = document.createElement("div");
@@ -1996,20 +2152,38 @@ function renderEvents(){
         <span class="ev-tg">${list.length ? khNum(list.length) + " ដង " + (open ? "▾" : "▸") : ""}</span>
         <button type="button" class="g-btn" data-act="del" aria-label="លុបកម្មវិធី">✕</button>
       </div>
-      <div class="ev-nums">
+      ${hasInc ? `<div class="ev-nums">
         <div><div class="l">💸 ចាយ</div><div class="v" style="color:var(--exp)">${fmtUSD(out)}</div></div>
         <div><div class="l">💰 ចូល</div><div class="v" style="color:var(--inc)">${fmtUSD(inn)}</div></div>
         <div><div class="l">សុទ្ធ</div><div class="v" style="color:${net >= 0 ? "var(--inc)" : "var(--exp)"}">${fmtUSD(net)}</div></div>
-      </div>
-      ${last ? `<div class="g-left">ចុងក្រោយ ${khDate(last)}</div>` : ""}
-      <div class="g-acts">
+      </div>` : `<div class="ev-nums one">
+        <div><div class="l">💸 ចាយសរុប</div><div class="v" style="color:var(--exp)">${fmtUSD(out)}</div></div>
+      </div>`}
+      ${last ? `<div class="g-left">ចុងក្រោយ ${khDate(last)}${due > 0.004 ? ` · <b style="color:#B07A1E">🔖 នៅត្រូវបង់ ${fmtUSD(due)}</b>` : ""}</div>` : ""}
+      ${deps.length ? `<div class="dep-list"><div class="dh">🔖 កក់រួច · នៅត្រូវបង់</div></div>` : ""}
+      <div class="g-acts${hasInc ? "" : " one"}">
         <button type="button" class="g-add">－ ចាយ</button>
-        <button type="button" class="g-out">＋ ចូល</button>
+        ${hasInc ? `<button type="button" class="g-out">＋ ចូល</button>` : ""}
       </div>
+      ${hasInc ? "" : `<button type="button" class="ev-inc-on">＋ កម្មវិធីនេះមានលុយចូលដែរ</button>`}
       <div class="ev-items"${open ? "" : " hidden"}></div>`;
     c.querySelector(".g-nm").textContent = n;
+    if(deps.length){
+      const dl = c.querySelector(".dep-list");
+      deps.forEach(d=>{
+        const st = depositStatus(d);
+        const r = document.createElement("div");
+        r.className = "dep-row";
+        r.innerHTML = `<span class="dn"><b></b><small>សរុប ${fmtUSD(st.total)} · បង់រួច ${fmtUSD(st.paid)} · នៅ <b style="display:inline;color:#B07A1E">${fmtUSD(st.left)}</b></small></span>
+          <button type="button">បង់នៅសល់</button>`;
+        r.querySelector(".dn b").textContent = d.item || "ការកក់";
+        r.querySelector("button").addEventListener("click", ()=> openSettleForm(d));
+        dl.appendChild(r);
+      });
+    }
     c.querySelector(".g-add").addEventListener("click", ()=> openForm("expense", EVENT_CAT, null, n));
-    c.querySelector(".g-out").addEventListener("click", ()=> openForm("income", EVENT_CAT, null, n));
+    if(hasInc) c.querySelector(".g-out").addEventListener("click", ()=> openForm("income", EVENT_CAT, null, n));
+    else c.querySelector(".ev-inc-on").addEventListener("click", ()=>{ setEventIncome(n, true); renderEvents(); });
     c.querySelector(".g-top").addEventListener("click", ev=>{
       if(ev.target.closest('[data-act="del"]') || !list.length) return;
       if(openEvents.has(n)) openEvents.delete(n); else openEvents.add(n);
@@ -2020,6 +2194,7 @@ function renderEvents(){
         ? "លុបកម្មវិធី «" + n + "» ចេញពីម៉ឺនុយ?\n(ប្រតិបត្តិការ " + khNum(list.length) + " ដង នៅតែរក្សាទុក ហើយកម្មវិធីនេះនឹងនៅបង្ហាញ រហូតដល់លុបប្រតិបត្តិការទាំងនោះ)"
         : "លុបកម្មវិធី «" + n + "»?")) return;
       removeNote(EVENT_CAT, n);
+      setEventIncome(n, false);
       renderEvents();
     });
     if(open) renderEntries(c.querySelector(".ev-items"), list, "");
@@ -2033,7 +2208,9 @@ function addEvent(){
   if(!n){ $("eName").focus(); return; }
   if(eventNames().includes(n)){ toast("កម្មវិធីនេះមានរួចហើយ"); return; }
   addNote(EVENT_CAT, n);
+  if($("eHasInc").checked) setEventIncome(n, true);
   $("eName").value = "";
+  $("eHasInc").checked = false;
   renderEvents();
   toast("🎊 បានបង្កើត «" + n + "»");
 }
