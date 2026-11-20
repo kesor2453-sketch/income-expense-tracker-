@@ -123,6 +123,18 @@
   .ic.set{background:#DCE1DF;color:#4F5B57;}
   .ic.all{background:#EDE3F3;color:#6E4A8A;}
   .ic.debt{background:#E6E4F3;color:#4E4A8A;}
+  .ic.evt{background:#F3E3EE;color:#7E4E73;}
+  .evt-seg button.on[data-t="expense"]{background:var(--exp);color:#fff;}
+  .evt-seg button.on[data-t="income"]{background:var(--inc);color:#fff;}
+  .ev-card .g-top{cursor:pointer;}
+  .ev-card .ev-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 2px;}
+  .ev-card .ev-nums div{background:var(--bg);border-radius:12px;padding:8px 10px;min-width:0;}
+  .ev-card .ev-nums .l{font-size:12.5px;color:var(--soft);}
+  .ev-card .ev-nums .v{font-weight:700;font-size:15.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ev-card .g-acts .g-add{background:var(--exp-bg);color:var(--exp);}
+  .ev-card .g-acts .g-out{background:var(--inc-bg);color:var(--inc);}
+  .ev-card .ev-items{margin-top:10px;}
+  .ev-card .ev-tg{color:var(--faint);font-size:13px;}
 
   /* debts */
   .debt-sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -554,13 +566,17 @@
           <span class="ic sav"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v4c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 10v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4M5 14v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4"/></svg></span>
           សន្សំប្រាក់<span class="v" id="tSave">$0</span>
         </button>
-        <button type="button" class="tile wide" data-go="debt">
-          <span class="ic debt"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg></span>
-          <span class="wt">ជំពាក់/សងលុយ<span class="v" id="tDebt"></span></span>
+        <button type="button" class="tile" data-go="event">
+          <span class="ic evt"><svg viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.8"/><path d="M4 3h.01M22 8h.01M15 2h.01M22 20h.01"/><path d="m22 2-2.2.7a2.9 2.9 0 0 0-1.9 3.3c.2.9-.4 1.8-1.3 1.9L15 8"/><path d="M8.6 15.4 4.4 19.6"/><path d="M8.6 15.4a2 2 0 1 0 2.8-2.8l-4-4a2 2 0 1 0-2.8 2.8z"/></svg></span>
+          កម្មវិធី<span class="v" id="tEvt"></span>
         </button>
-        <button type="button" class="tile wide" data-go="settings">
+        <button type="button" class="tile" data-go="debt">
+          <span class="ic debt"><svg viewBox="0 0 24 24"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/></svg></span>
+          ជំពាក់/សង<span class="v" id="tDebt"></span>
+        </button>
+        <button type="button" class="tile" data-go="settings">
           <span class="ic set"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
-          <span class="wt">ការកំណត់<span class="v" id="tSet"></span></span>
+          ការកំណត់<span class="v" id="tSet"></span>
         </button>
       </div>
     </section>
@@ -577,6 +593,10 @@
           <button type="button" data-k="repay">💸 សងគេ</button>
           <button type="button" data-k="lend">📤 ឲ្យគេខ្ចី</button>
           <button type="button" data-k="collect">📥 គេសងមកវិញ</button>
+        </div>
+        <div class="seg evt-seg" id="fEventMode" style="margin-bottom:14px" hidden>
+          <button type="button" data-t="expense">💸 ចាយ</button>
+          <button type="button" data-t="income">💰 លុយចូល</button>
         </div>
         <div class="seg save-seg" id="fSaveMode" style="margin-bottom:14px" hidden>
           <button type="button" data-t="expense">🐷 ដាក់សន្សំ</button>
@@ -627,6 +647,7 @@
           <div class="hbox"><div class="l">ចំណាយ</div><div class="v" id="mExp">$0</div></div>
           <div class="hbox"><div class="l">សល់</div><div class="v" id="mNet">$0</div></div>
         </div>
+        <div class="det" id="mExtra" style="margin-top:8px"></div>
         <div class="hfoot">
           <span>សល់ពីខែមុន: <b id="mCarry">$0</b></span>
           <span>សរុបទាំងអស់: <b id="mTotal">$0</b></span>
@@ -659,6 +680,7 @@
           <div class="hbox"><div class="l">ចំណាយ</div><div class="v" id="yExp">$0</div></div>
           <div class="hbox"><div class="l">សល់</div><div class="v" id="yNet">$0</div></div>
         </div>
+        <div class="det" id="yExtra" style="margin-top:8px"></div>
       </div>
       <div class="card">
         <div class="seg" id="yType" style="margin-bottom:6px">
@@ -682,6 +704,7 @@
           <div class="hbox"><div class="l">ចំណាយ</div><div class="v" id="aExp">$0</div></div>
           <div class="hbox"><div class="l">សល់</div><div class="v" id="aNet">$0</div></div>
         </div>
+        <div class="det" id="aExtra" style="margin-top:8px"></div>
         <div class="hfoot"><span id="aSince"></span><span>ប្រាក់សន្សំ: <b id="aSave">$0</b></span></div>
       </div>
       <div class="card">
@@ -695,6 +718,28 @@
         <span>📊 តាមឆ្នាំ</span><span class="fold-tg" id="aFoldTg">បង្ហាញ ▸</span>
       </button>
       <div class="card" id="aList" style="padding:6px 12px" hidden></div>
+    </section>
+
+    <!-- EVENTS (មង្គលការ ដើរលេង...) -->
+    <section class="view" id="view-event">
+      <div class="type-sum" style="background:#7E4E73">
+        <div class="l">កម្មវិធីទាំងអស់ (ចូល − ចាយ)</div>
+        <div class="v" id="eNet">$0</div>
+        <div class="det" id="eDet"></div>
+      </div>
+      <div class="sec-label"><span>កម្មវិធី</span><span style="font-weight:400">ចាយ = ដកពីសមតុល្យ · ចូល = បូកចូល</span></div>
+      <div id="eList"></div>
+      <div class="card">
+        <div class="field" style="margin-bottom:10px">
+          <label for="eName">បង្កើតកម្មវិធីថ្មី</label>
+          <input type="text" id="eName" placeholder="ឧ. មង្គលការ, ដើរលេងកំពត...">
+        </div>
+        <button type="button" class="btn" id="eAdd">＋ បង្កើតកម្មវិធី</button>
+      </div>
+      <button type="button" class="fold-btn" id="eHistFold">
+        <span>📋 ប្រវត្តិកម្មវិធី</span><span class="fold-tg" id="eHistTg">បង្ហាញ ▸</span>
+      </button>
+      <div id="eHist" hidden></div>
     </section>
 
     <!-- DEBTS -->
@@ -864,6 +909,7 @@ const CAT_STYLE = {
   "សិក្សា":                 {icon:"📚", bg:"#E2E9F3"},
   "សម្លៀកបំពាក់":            {icon:"👗", bg:"#EFE4F3"},
   "កម្សាន្ត":               {icon:"🎉", bg:"#F6EBDA"},
+  "កម្មវិធី":               {icon:"🎊", bg:"#F3E3EE"},
   "សន្សំ":                  {icon:"🐷", bg:"#F3EAD6"},
   "ជំពាក់":                 {icon:"🤝", bg:"#E6E4F3"},
   "ផ្សេងៗ":                 {icon:"🌈", bg:"#E9ECEB"}
@@ -961,7 +1007,26 @@ function debtBal(list, dir){
   t = added - paid;
   return { t, added, paid };
 }
-const flowEntries = () => entries.filter(e => !isSave(e) && !isDebt(e));
+/* កម្មវិធី (មង្គលការ ដើរលេង...) — e.note = ឈ្មោះកម្មវិធី, e.item = ព័ត៌មានលម្អិត
+   ចាយ = type "expense" (ដកពីសមតុល្យ) ; លុយចូល = type "income" (បូកចូលសមតុល្យ)
+   មិនរាប់ក្នុង ចំណូល/ចំណាយ ប្រចាំខែ ប៉ុន្តែប៉ះពាល់សមតុល្យ */
+const EVENT_CAT = "កម្មវិធី";
+const isEvent = e => e.category === EVENT_CAT;
+const eventEntries = () => entries.filter(isEvent);
+
+// ចំណូល/ចំណាយធម្មតា (សម្រាប់ប្រអប់ ចំណូល/ចំណាយ និងសរុបតាមប្រភេទ)
+const flowEntries = () => entries.filter(e => !isSave(e) && !isDebt(e) && !isEvent(e));
+// គ្រប់យ៉ាងដែលប៉ះពាល់សមតុល្យ = ចំណូល/ចំណាយ + កម្មវិធី + ខ្ចី/សង (មិនរួមប្រាក់សន្សំ)
+const cashEntries = () => entries.filter(e => !isSave(e) && (!isDebt(e) || DEBT_KIND[e.debt]));
+// "កម្មវិធី −$X · ខ្ចី/សង +$Y" — ពន្យល់ពីមូលហេតុដែល សល់ ≠ ចំណូល − ចំណាយ
+function extraText(list){
+  const ev = signedSum(list.filter(isEvent)).t, db = signedSum(list.filter(isDebt)).t;
+  const sg = v => (v > 0 ? "+" : "") + fmtUSD(v);
+  const parts = [];
+  if(Math.abs(ev) > 0.004) parts.push("កម្មវិធី " + sg(ev));
+  if(Math.abs(db) > 0.004) parts.push("ខ្ចី/សង " + sg(db));
+  return parts.length ? "រួមទាំង " + parts.join(" · ") : "";
+}
 // សមតុល្យសន្សំ = ដាក់ − ដក
 function saveBal(list){
   const dep = sumOf(list.filter(e => e.type === "expense")), wd = sumOf(list.filter(e => e.type === "income"));
@@ -1032,7 +1097,7 @@ function catsFor(type){
 function addCat(type, name, icon){
   const u = ucat(type);
   if(u.hidden.includes(name)){ u.hidden = u.hidden.filter(c => c !== name); saveUserCats(); return true; }
-  if(catsFor(type).includes(name) || name === SAVE_CAT || name === DEBT_CAT) return false;
+  if(catsFor(type).includes(name) || name === SAVE_CAT || name === DEBT_CAT || name === EVENT_CAT) return false;
   u.added.push({ name, icon: icon || "🏷️" });
   saveUserCats();
   return true;
@@ -1252,8 +1317,8 @@ function showApp(){
 }
 
 /* ================= ប្តូរទំព័រ ================= */
-const VIEW_SECTION = { home:"home", form:"form", month:"month", year:"year", all:"all", savings:"savings", debt:"debt", settings:"settings" };
-const VIEW_TITLE = { month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", all:"សង្ខេបទាំងអស់", savings:"សន្សំប្រាក់", debt:"ជំពាក់ / សងលុយ", settings:"ការកំណត់" };
+const VIEW_SECTION = { home:"home", form:"form", month:"month", year:"year", all:"all", savings:"savings", event:"event", debt:"debt", settings:"settings" };
+const VIEW_TITLE = { month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", all:"សង្ខេបទាំងអស់", savings:"សន្សំប្រាក់", event:"កម្មវិធី", debt:"ជំពាក់ / សងលុយ", settings:"ការកំណត់" };
 
 function showView(v, push = true){
   if(!VIEW_SECTION[v]) v = "home";
@@ -1290,11 +1355,12 @@ function renderHome(){
   const mE = flowEntries().filter(e => inMonth(e, selMonth));
   const inc = sumOf(mE.filter(e => e.type === "income"));
   const exp = sumOf(mE.filter(e => e.type === "expense"));
-  const net = { u: inc.u - exp.u, k: inc.k - exp.k, t: inc.t - exp.t };
+  const cashM = cashEntries().filter(e => inMonth(e, selMonth));
+  const net = signedSum(cashM);   // សមតុល្យ = ចំណូល − ចំណាយ ± កម្មវិធី ± ខ្ចី/សង
   $("hMonth").textContent = monthLabel(selMonth);
   $("homeUser").textContent = currentUser ? currentUser.username : "";
   $("hNet").textContent = fmtUSD(net.t);
-  $("hNetDet").textContent = detail(net);
+  $("hNetDet").textContent = extraText(cashM) || detail(net);
   $("hInc").textContent = fmtUSD(inc.t);
   $("hExp").textContent = fmtUSD(exp.t);
 
@@ -1303,7 +1369,9 @@ function renderHome(){
   $("tNet").textContent = fmtUSD(net.t);
   $("tYear").textContent = "ឆ្នាំ " + khNum(selMonth.slice(0,4));
   $("tSave").textContent = fmtUSD(saveBal(savingsEntries()).t);
-  $("tAll").textContent = fmtUSD(signedSum(flowEntries()).t);
+  $("tAll").textContent = fmtUSD(signedSum(cashEntries()).t);
+  const evs = eventNames();
+  $("tEvt").textContent = evs.length ? khNum(evs.length) + " កម្មវិធី" : "បង្កើតថ្មី";
   const dl = debtEntries(), owe = debtBal(dl, "owe").t, lent = debtBal(dl, "lent").t;
   $("tDebt").textContent = owe > 0.004 ? "ជំពាក់ " + fmtUSD(owe) : lent > 0.004 ? "គេជំពាក់ " + fmtUSD(lent) : "គ្មានបំណុល";
   $("tSet").textContent = "$1 = " + KHR_RATE.toLocaleString("en-US") + "៛";
@@ -1335,13 +1403,16 @@ function renderEntries(container, list, emptyMsg){
     const conv = e.currency === "KHR" ? `<small>${fmtUSD((Number(e.amount)||0) / KHR_RATE)}</small>` : "";
     const sv = isSave(e);
     const dk = isDebt(e) ? DEBT_KIND[e.debt] : null;
-    const label = dk ? dk.label + " " + (e.note || "") : sv ? (e.type === "expense" ? "ដាក់សន្សំ" : "ដកប្រាក់សន្សំ") : e.category;
+    const ev = isEvent(e);
+    const label = dk ? dk.label + " " + (e.note || "") : sv ? (e.type === "expense" ? "ដាក់សន្សំ" : "ដកប្រាក់សន្សំ")
+      : ev ? (e.item || (e.type === "expense" ? "ចាយ" : "លុយចូល")) : e.category;
+    const subline = ev ? (e.note || "") : (e.note && !dk ? e.note : "");
     const sign = sv ? (e.type === "expense" ? "+" : "−") : (e.type === "income" ? "+" : "−");
     const cls = sv ? (e.type === "expense" ? "save-in" : "save-out") : e.type;
     const row = document.createElement("div");
     row.className = "entry";
-    row.innerHTML = `<span class="bub" style="background:${cs.bg}">${dk ? dk.icon : sv && e.type === "income" ? "📤" : cs.icon}</span>
-      <span class="tx"><div class="c">${esc(label)}</div>${e.note && !dk ? `<div class="n">${esc(e.note)}</div>` : ""}</span>
+    row.innerHTML = `<span class="bub" style="background:${cs.bg}">${dk ? dk.icon : sv && e.type === "income" ? "📤" : ev ? eventIcon(e.note || "") : cs.icon}</span>
+      <span class="tx"><div class="c">${esc(label)}</div>${subline ? `<div class="n">${ev ? "🎊 " : ""}${esc(subline)}</div>` : ""}</span>
       <span class="a ${cls}">${sign}${fmtAmt(e.amount, e.currency)}${conv}</span>
       <span class="acts"><button type="button" aria-label="កែប្រែ">✎</button><button type="button" aria-label="លុប">✕</button></span>`;
     const [editB, delB] = row.querySelectorAll(".acts button");
@@ -1374,9 +1445,9 @@ function openForm(type, cat, entry, presetNote, presetKind){
     ? { type: form.type, cat: form.cat, cur: form.cur, debt: form.debt, date: $("fDate").value } : null;
   form = { type, cat, id: entry ? entry.id : null, cur: entry ? (entry.currency === "KHR" ? "KHR" : "USD") : lastCur, chips: new Set(presetNote ? [presetNote] : []), returnTo,
            debt: entry ? entry.debt : (presetKind || null) };
-  if(cat === DEBT_CAT && entry){ form.chips = new Set(entry.note ? [entry.note] : []); }
+  if((cat === DEBT_CAT || cat === EVENT_CAT) && entry){ form.chips = new Set(entry.note ? [entry.note] : []); }
   $("fAmount").value = entry ? entry.amount : "";
-  $("fNote").value = entry && cat !== DEBT_CAT ? (entry.note || "") : "";
+  $("fNote").value = !entry ? "" : cat === EVENT_CAT ? (entry.item || "") : cat !== DEBT_CAT ? (entry.note || "") : "";
   const thisMonth = todayStr().slice(0,7);
   $("fDate").value = entry ? entry.date : (selMonth === thisMonth ? todayStr() : selMonth + "-01");
   renderForm();
@@ -1387,6 +1458,7 @@ function openForm(type, cat, entry, presetNote, presetKind){
 function formTitle(){
   if(form.id) return "កែប្រែ";
   if((form.cat === SAVE_CAT)) return form.type === "expense" ? "ដាក់ប្រាក់សន្សំ" : "ដកប្រាក់សន្សំ";
+  if(form.cat === EVENT_CAT) return form.type === "expense" ? "ចាយលើកម្មវិធី" : "លុយចូលកម្មវិធី";
   if(form.cat === DEBT_CAT) return { borrow:"ខ្ចីលុយគេ", repay:"សងលុយគេ", lend:"ឲ្យគេខ្ចីលុយ", collect:"គេសងលុយមកវិញ" }[form.debt] || "ជំពាក់ / សងលុយ";
   return "បញ្ចូល" + (form.type === "income" ? "ចំណូល" : "ចំណាយ");
 }
@@ -1394,12 +1466,15 @@ function renderForm(){
   document.querySelectorAll("#fCur button").forEach(b => b.classList.toggle("on", b.dataset.cur === form.cur));
   const sv = (form.cat === SAVE_CAT);
   const db = (form.cat === DEBT_CAT);
-  $("fCatField").hidden = sv || db;
+  const ev = (form.cat === EVENT_CAT);
+  $("fCatField").hidden = sv || db || ev;
   $("fSaveMode").hidden = !sv;
+  $("fEventMode").hidden = !ev;
+  document.querySelectorAll("#fEventMode button").forEach(b => b.classList.toggle("on", b.dataset.t === form.type));
   $("fDebtMode").hidden = !db;
   document.querySelectorAll("#fDebtMode button").forEach(b => b.classList.toggle("on", b.dataset.k === form.debt));
-  $("fNoteLbl").textContent = db ? "ឈ្មោះអ្នក (ចាំបាច់)" : "ចំណាំ (ស្រេចចិត្ត)";
-  $("fNote").placeholder = db ? "ឈ្មោះថ្មី..." : "សរសេរបន្ថែម...";
+  $("fNoteLbl").textContent = db ? "ឈ្មោះអ្នក (ចាំបាច់)" : ev ? "ជ្រើសកម្មវិធី · ព័ត៌មានលម្អិត (ស្រេចចិត្ត)" : "ចំណាំ (ស្រេចចិត្ត)";
+  $("fNote").placeholder = db ? "ឈ្មោះថ្មី..." : ev ? (form.type === "expense" ? "ឧ. ថ្លៃរោង, ថ្លៃឡាន..." : "ឧ. ចំណងដៃពី...") : "សរសេរបន្ថែម...";
   document.querySelectorAll("#fSaveMode button").forEach(b => b.classList.toggle("on", b.dataset.t === form.type));
   if(currentView === "form") $("subTitle").textContent = formTitle();
 
@@ -1422,7 +1497,7 @@ function renderForm(){
   // ចំណាំរហ័ស (គ្រប់គ្រងនៅ ការកំណត់)
   const wrap = $("fChips");
   wrap.innerHTML = "";
-  (db ? debtPeople(DEBT_KIND[form.debt] ? DEBT_KIND[form.debt].dir : null) : sv ? goalNames() : notesFor(form.cat)).forEach(n=>{
+  (db ? debtPeople(DEBT_KIND[form.debt] ? DEBT_KIND[form.debt].dir : null) : sv ? goalNames() : ev ? eventNames() : notesFor(form.cat)).forEach(n=>{
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "chip" + (form.chips.has(n) ? " on" : "");
@@ -1432,6 +1507,13 @@ function renderForm(){
         const was = form.chips.has(n);
         form.chips.clear();
         if(!was){ form.chips.add(n); $("fNote").value = ""; }
+        wrap.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", form.chips.has(c.textContent)));
+        return;
+      }
+      if(ev){   // កម្មវិធី៖ ជ្រើសបានតែមួយ
+        const was = form.chips.has(n);
+        form.chips.clear();
+        if(!was) form.chips.add(n);
         wrap.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", form.chips.has(c.textContent)));
         return;
       }
@@ -1449,15 +1531,16 @@ function renderFormEntries(){
   const today = todayStr();
   const sv = (form.cat === SAVE_CAT);
   const db = (form.cat === DEBT_CAT);
-  const typeName = db ? "ការខ្ចី / សង" : sv ? "ប្រាក់សន្សំ" : form.type === "income" ? "ចំណូល" : "ចំណាយ";
+  const ev = (form.cat === EVENT_CAT);
+  const typeName = ev ? "កម្មវិធី" : db ? "ការខ្ចី / សង" : sv ? "ប្រាក់សន្សំ" : form.type === "income" ? "ចំណូល" : "ចំណាយ";
   const isThisMonth = selMonth === today.slice(0,7);
   document.querySelector('#fRange [data-r="month"]').textContent = isThisMonth ? "ខែនេះ" : "ខែ" + monthName(selMonth);
-  const base = db ? debtEntries() : sv ? savingsEntries() : flowEntries().filter(e => e.type === form.type);
+  const base = ev ? eventEntries() : db ? debtEntries() : sv ? savingsEntries() : flowEntries().filter(e => e.type === form.type);
   const list = base.filter(e =>
     fRange === "today" ? e.date === today :
     fRange === "month" ? inMonth(e, selMonth) : true);
   $("fListLbl").textContent = typeName;
-  $("fListSum").textContent = list.length && !db ? (sv ? "សុទ្ធ " + fmtUSD(saveBal(list).t) : "សរុប " + fmtUSD(sumOf(list).t)) : "";
+  $("fListSum").textContent = list.length && ev ? "សុទ្ធ " + fmtUSD(signedSum(list).t) : list.length && !db ? (sv ? "សុទ្ធ " + fmtUSD(saveBal(list).t) : "សរុប " + fmtUSD(sumOf(list).t)) : "";
   const label = fRange === "today" ? "ថ្ងៃនេះ" : fRange === "month" ? "ក្នុងខែនេះ" : "";
   renderEntries($("fEntries"), list, "មិនទាន់មាន" + typeName + label + "ទេ");
 }
@@ -1483,6 +1566,14 @@ $("fDebtMode").addEventListener("click", e=>{
   $("fAmount").focus();
 });
 
+$("fEventMode").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  form.type = b.dataset.t;
+  renderForm();
+  $("fAmount").focus();
+});
+
 $("fSaveMode").addEventListener("click", e=>{
   const b = e.target.closest("button");
   if(!b) return;
@@ -1504,7 +1595,9 @@ function saveForm(){
   if(!(amount > 0)){ $("fAmount").focus(); toast("សូមបញ្ចូលចំនួនទឹកប្រាក់"); return; }
   const typed = $("fNote").value.trim();
   const isD = form.cat === DEBT_CAT;
-  const note = isD ? (typed || [...form.chips][0] || "") : [...form.chips, typed].filter(Boolean).join(", ");
+  const isE = form.cat === EVENT_CAT;
+  if(isE && !form.chips.size){ toast("សូមជ្រើសកម្មវិធី"); return; }
+  const note = isE ? [...form.chips][0] : isD ? (typed || [...form.chips][0] || "") : [...form.chips, typed].filter(Boolean).join(", ");
   const date = $("fDate").value || todayStr();
 
   if(isD){
@@ -1519,7 +1612,7 @@ function saveForm(){
   }
 
   // ចងចាំចំណាំថ្មី ជាប៊ូតុងរហ័ស
-  if(typed && !form.id && !isD) addNote(form.cat, typed);
+  if(typed && !form.id && !isD && !isE) addNote(form.cat, typed);
 
   if((form.cat === SAVE_CAT) && form.type === "income"){
     const goalList = savingsEntries().filter(e => e.id !== form.id && (!note || (e.note || "").trim() === note));
@@ -1530,6 +1623,7 @@ function saveForm(){
 
   const data = { date, type: form.type, category: form.cat, note, amount, currency: form.cur };
   if(isD) data.debt = form.debt;
+  if(isE) data.item = typed;
   if(form.id){
     const i = entries.findIndex(e => e.id === form.id);
     if(i !== -1) entries[i] = Object.assign({}, entries[i], data);
@@ -1537,14 +1631,14 @@ function saveForm(){
     entries.push(Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7) }, data));
   }
   lsSet(LAST_CUR_KEY, form.cur);
-  if(form.cat !== SAVE_CAT && form.cat !== DEBT_CAT) lsSet(LAST_CAT_KEY + form.type, form.cat);
+  if(form.cat !== SAVE_CAT && form.cat !== DEBT_CAT && !isE) lsSet(LAST_CAT_KEY + form.type, form.cat);
   // បើបញ្ចូលក្នុងខែផ្សេង ប្តូរទៅខែនោះ ដើម្បីមើលឃើញ
   selMonth = date.slice(0,7);
 
   const wasEdit = !!form.id;
   saveEntries();
   render();
-  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : isD ? DEBT_KIND[form.debt].icon + " បានកត់ត្រា" : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
+  toast(wasEdit ? "បានរក្សាទុកការកែប្រែ" : isD ? DEBT_KIND[form.debt].icon + " បានកត់ត្រា" : isE ? "🎊 បានកត់ត្រា «" + note + "»" : (form.cat === SAVE_CAT) ? (form.type === "expense" ? "🐷 បានដាក់សន្សំ" : "📤 បានដកប្រាក់សន្សំ") : (form.type === "income" ? "បានបញ្ចូលចំណូល" : "បានបញ្ចូលចំណាយ"));
   if(wasEdit){
     const back = form.returnTo;
     if(!back){ goBack(); return; }
@@ -1557,7 +1651,7 @@ function saveForm(){
 
   // បញ្ចូលថ្មី → នៅទំព័រដដែល ដើម្បីបញ្ចូលបន្តទៀត (រក្សាប្រភេទ ថ្ងៃខែ និងរូបិយប័ណ្ណ)
   form.id = null;
-  form.chips = isD ? new Set([note]) : new Set();
+  form.chips = (isD || isE) ? new Set([note]) : new Set();
   $("fAmount").value = "";
   $("fNote").value = "";
   renderForm();
@@ -1574,9 +1668,11 @@ function renderMonth(){
   $("mMonth").textContent = monthLabel(selMonth);
   $("mInc").textContent = fmtUSD(inc.t);
   $("mExp").textContent = fmtUSD(exp.t);
-  $("mNet").textContent = fmtUSD(inc.t - exp.t);
-  $("mCarry").textContent = fmtUSD(signedSum(flowEntries().filter(e => e.date && e.date.slice(0,7) < selMonth)).t);
-  $("mTotal").textContent = fmtUSD(signedSum(flowEntries()).t);
+  const cashM = cashEntries().filter(e => inMonth(e, selMonth));
+  $("mNet").textContent = fmtUSD(signedSum(cashM).t);
+  $("mExtra").textContent = extraText(cashM);
+  $("mCarry").textContent = fmtUSD(signedSum(cashEntries().filter(e => e.date && e.date.slice(0,7) < selMonth)).t);
+  $("mTotal").textContent = fmtUSD(signedSum(cashEntries()).t);
 
   // តាមប្រភេទ (ចុចលើប្រភេទ ដើម្បីមើលចំណាំ)
   renderBreakdown($("mBars"), mE.filter(e => e.type === monthType), monthType, openMonthCats,
@@ -1683,12 +1779,16 @@ function renderYear(){
   for(let i = 1; i <= 12; i++){
     const key = y + "-" + String(i).padStart(2,"0");
     const mE = flowEntries().filter(e => inMonth(e, key));
-    months.push({ key, inc: sumOf(mE.filter(e => e.type === "income")).t, exp: sumOf(mE.filter(e => e.type === "expense")).t, has: mE.length > 0 });
+    const cE = cashEntries().filter(e => inMonth(e, key));
+    months.push({ key, inc: sumOf(mE.filter(e => e.type === "income")).t, exp: sumOf(mE.filter(e => e.type === "expense")).t,
+                  net: signedSum(cE).t, has: cE.length > 0 });
   }
   const yInc = months.reduce((s,m)=> s + m.inc, 0), yExp = months.reduce((s,m)=> s + m.exp, 0);
   $("yInc").textContent = fmtUSD(yInc);
   $("yExp").textContent = fmtUSD(yExp);
-  $("yNet").textContent = fmtUSD(yInc - yExp);
+  const cashY = cashEntries().filter(e => e.date && e.date.slice(0,4) === y);
+  $("yNet").textContent = fmtUSD(signedSum(cashY).t);
+  $("yExtra").textContent = extraText(cashY);
 
   const yE = flowEntries().filter(e => e.date && e.date.slice(0,4) === y);
   renderBreakdown($("yBars"), yE.filter(e => e.type === yearType), yearType, openYearCats, "ក្នុងឆ្នាំនេះ", null);
@@ -1697,7 +1797,7 @@ function renderYear(){
   const wrap = $("yList");
   wrap.innerHTML = "";
   months.forEach(m=>{
-    const net = m.inc - m.exp;
+    const net = m.net;
     const r = document.createElement("div");
     r.className = "yr-row" + (m.has ? "" : " off");
     r.innerHTML = `<span class="mn">${monthName(m.key)}</span>
@@ -1732,10 +1832,12 @@ function renderAll(){
   const exp = sumOf(list.filter(e => e.type === "expense")).t;
   $("aInc").textContent = fmtUSD(inc);
   $("aExp").textContent = fmtUSD(exp);
-  $("aNet").textContent = fmtUSD(inc - exp);
+  const cashA = cashEntries().filter(e => e.date);
+  $("aNet").textContent = fmtUSD(signedSum(cashA).t);
+  $("aExtra").textContent = extraText(cashA);
   $("aSave").textContent = fmtUSD(saveBal(savingsEntries()).t);
 
-  const months = [...new Set(list.map(e => e.date.slice(0,7)))].sort();
+  const months = [...new Set(cashA.map(e => e.date.slice(0,7)))].sort();
   $("aLabel").textContent = months.length
     ? "ខែ" + monthName(months[0]) + " " + khNum(months[0].slice(0,4)) + " – ខែ" + monthName(months[months.length-1]) + " " + khNum(months[months.length-1].slice(0,4))
     : "ទាំងអស់";
@@ -1744,17 +1846,18 @@ function renderAll(){
   renderBreakdown($("aBars"), list.filter(e => e.type === allType), allType, openAllCats, "", null);
 
   // តាមឆ្នាំ
-  const years = [...new Set(list.map(e => e.date.slice(0,4)))].sort().reverse();
+  const years = [...new Set(cashA.map(e => e.date.slice(0,4)))].sort().reverse();
   const rows = years.map(y=>{
     const yE = list.filter(e => e.date.slice(0,4) === y);
+    const yC = cashA.filter(e => e.date.slice(0,4) === y);
     return { y, inc: sumOf(yE.filter(e => e.type === "income")).t, exp: sumOf(yE.filter(e => e.type === "expense")).t,
-             last: yE.map(e => e.date.slice(0,7)).sort().pop() };
+             net: signedSum(yC).t, last: yC.map(e => e.date.slice(0,7)).sort().pop() };
   });
   const max = Math.max(0.0001, ...rows.map(r => Math.max(r.inc, r.exp)));
   const wrap = $("aList");
   wrap.innerHTML = rows.length ? "" : `<div class="empty">មិនទាន់មានទិន្នន័យទេ</div>`;
   rows.forEach(r=>{
-    const net = r.inc - r.exp;
+    const net = r.net;
     const d = document.createElement("div");
     d.className = "yr-row";
     d.innerHTML = `<span class="mn">${khNum(r.y)}</span>
@@ -1850,6 +1953,96 @@ $("dNew").addEventListener("click", ()=> openDebtForm(debtDir === "owe" ? "borro
     $(body).hidden = !open;
     $(tg).textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
   });
+});
+
+/* ================= កម្មវិធី ================= */
+function eventIcon(name){
+  const rules = [["មង្គល","💍"],["រៀបការ","💍"],["ការ","💍"],["ដើរលេង","✈️"],["ដំណើរ","✈️"],["ខួប","🎂"],
+    ["កំណើត","🎂"],["បុណ្យ","🙏"],["វត្ត","🙏"],["ឆ្នាំថ្មី","🎆"],["ភ្ជុំ","🙏"],["ផ្ទះ","🏠"],["ពេទ្យ","💊"]];
+  const hit = rules.find(([k]) => name.includes(k));
+  return hit ? hit[1] : "🎊";
+}
+// ឈ្មោះកម្មវិធី = កម្មវិធីដែលបានបង្កើត (តាមអ្នកប្រើ) + ឈ្មោះក្នុងប្រតិបត្តិការ — ថ្មីៗមុនគេ
+function eventNames(){
+  const out = [];
+  [...eventEntries()].sort((a,b)=> b.date.localeCompare(a.date))
+    .forEach(e => { const n = (e.note || "").trim(); if(n && !out.includes(n)) out.push(n); });
+  notesFor(EVENT_CAT).forEach(n => { if(!out.includes(n)) out.unshift(n); });
+  return out;
+}
+const openEvents = new Set();
+function renderEvents(){
+  const all = eventEntries();
+  const spent = sumOf(all.filter(e => e.type === "expense")).t, got = sumOf(all.filter(e => e.type === "income")).t;
+  $("eNet").textContent = fmtUSD(got - spent);
+  $("eDet").textContent = "ចាយសរុប " + fmtUSD(spent) + " · ចូលសរុប " + fmtUSD(got);
+
+  const wrap = $("eList");
+  wrap.innerHTML = "";
+  const names = eventNames();
+  if(!names.length) wrap.innerHTML = `<div class="empty">មិនទាន់មានកម្មវិធីទេ — បង្កើតកម្មវិធីដំបូងនៅខាងក្រោម (ឧ. មង្គលការ)</div>`;
+  names.forEach(n=>{
+    const list = all.filter(e => (e.note || "").trim() === n);
+    const out = sumOf(list.filter(e => e.type === "expense")).t, inn = sumOf(list.filter(e => e.type === "income")).t;
+    const net = inn - out;
+    const open = openEvents.has(n);
+    const last = list.map(e => e.date).sort().pop();
+    const c = document.createElement("div");
+    c.className = "goal ev-card";
+    c.innerHTML = `
+      <div class="g-top">
+        <span class="bub" style="background:#F3E3EE">${eventIcon(n)}</span>
+        <span class="g-nm"></span>
+        <span class="ev-tg">${list.length ? khNum(list.length) + " ដង " + (open ? "▾" : "▸") : ""}</span>
+        <button type="button" class="g-btn" data-act="del" aria-label="លុបកម្មវិធី">✕</button>
+      </div>
+      <div class="ev-nums">
+        <div><div class="l">💸 ចាយ</div><div class="v" style="color:var(--exp)">${fmtUSD(out)}</div></div>
+        <div><div class="l">💰 ចូល</div><div class="v" style="color:var(--inc)">${fmtUSD(inn)}</div></div>
+        <div><div class="l">សុទ្ធ</div><div class="v" style="color:${net >= 0 ? "var(--inc)" : "var(--exp)"}">${fmtUSD(net)}</div></div>
+      </div>
+      ${last ? `<div class="g-left">ចុងក្រោយ ${khDate(last)}</div>` : ""}
+      <div class="g-acts">
+        <button type="button" class="g-add">－ ចាយ</button>
+        <button type="button" class="g-out">＋ ចូល</button>
+      </div>
+      <div class="ev-items"${open ? "" : " hidden"}></div>`;
+    c.querySelector(".g-nm").textContent = n;
+    c.querySelector(".g-add").addEventListener("click", ()=> openForm("expense", EVENT_CAT, null, n));
+    c.querySelector(".g-out").addEventListener("click", ()=> openForm("income", EVENT_CAT, null, n));
+    c.querySelector(".g-top").addEventListener("click", ev=>{
+      if(ev.target.closest('[data-act="del"]') || !list.length) return;
+      if(openEvents.has(n)) openEvents.delete(n); else openEvents.add(n);
+      renderEvents();
+    });
+    c.querySelector('[data-act="del"]').addEventListener("click", ()=>{
+      if(!confirm(list.length
+        ? "លុបកម្មវិធី «" + n + "» ចេញពីម៉ឺនុយ?\n(ប្រតិបត្តិការ " + khNum(list.length) + " ដង នៅតែរក្សាទុក ហើយកម្មវិធីនេះនឹងនៅបង្ហាញ រហូតដល់លុបប្រតិបត្តិការទាំងនោះ)"
+        : "លុបកម្មវិធី «" + n + "»?")) return;
+      removeNote(EVENT_CAT, n);
+      renderEvents();
+    });
+    if(open) renderEntries(c.querySelector(".ev-items"), list, "");
+    wrap.appendChild(c);
+  });
+
+  renderEntries($("eHist"), all, "មិនទាន់មានប្រវត្តិទេ");
+}
+function addEvent(){
+  const n = $("eName").value.trim();
+  if(!n){ $("eName").focus(); return; }
+  if(eventNames().includes(n)){ toast("កម្មវិធីនេះមានរួចហើយ"); return; }
+  addNote(EVENT_CAT, n);
+  $("eName").value = "";
+  renderEvents();
+  toast("🎊 បានបង្កើត «" + n + "»");
+}
+$("eAdd").addEventListener("click", addEvent);
+$("eName").addEventListener("keydown", e => { if(e.key === "Enter") addEvent(); });
+$("eHistFold").addEventListener("click", ()=>{
+  const open = $("eHist").hidden;
+  $("eHist").hidden = !open;
+  $("eHistTg").textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
 });
 
 /* ================= សន្សំប្រាក់ ================= */
@@ -2155,6 +2348,7 @@ function render(){
   renderYear();
   renderAll();
   renderSavings();
+  renderEvents();
   renderDebts();
 }
 
