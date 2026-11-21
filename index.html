@@ -151,6 +151,64 @@
   .dep-row .dn b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .dep-row .dn small{color:var(--soft);font-size:12.5px;}
   .dep-row button{border:none;border-radius:12px;background:#FBF3E2;color:#7A5618;font-weight:700;font-size:13.5px;padding:9px 10px;white-space:nowrap;}
+  .d-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px;}
+  .d-actions button{
+    border:1.5px solid var(--line);background:var(--card);border-radius:18px;
+    padding:12px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;min-width:0;
+  }
+  .d-actions button span{font-size:26px;line-height:1.1;}
+  .d-actions button.owe{background:#F4EFFA;}
+  .d-actions button.lent{background:#EEF6F2;}
+  .d-actions button:active{transform:scale(.95);}
+  .off-bar{background:#FFF4D6;color:#7A5618;border-radius:14px;padding:10px 12px;font-size:13.5px;margin:0 0 12px;line-height:1.6;}
+  .title-btns{display:flex;gap:8px;align-items:center;flex-shrink:0;margin-left:auto;}
+  .title-btns .user-chip{max-width:170px;}
+  .icon-chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;width:40px;height:38px;font-size:17px;padding:0;}
+  .card-h{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px;margin:0 2px 8px;}
+  .card-h .text-btn{padding:4px 6px;}
+  .share-row{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:14px;}
+  .share-row .btn{padding:12px 8px;font-size:15px;}
+  /* alerts */
+  #alerts:empty{display:none;}
+  #alerts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .alert{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:10px 10px 10px 12px;}
+  .alert.warn{border-color:#E9CF94;background:#FFFAEE;}
+  .alert.bad{border-color:#E7B4AA;background:#FFF5F3;}
+  .alert .ai{font-size:22px;flex-shrink:0;}
+  .alert .at{flex:1;min-width:0;font-size:14px;line-height:1.5;}
+  .alert .at b{display:block;font-size:14.5px;}
+  .alert .at small{color:var(--soft);font-size:12.5px;}
+  .alert button{border:none;border-radius:11px;padding:8px 10px;font-size:13.5px;font-weight:700;white-space:nowrap;background:var(--green);color:#fff;}
+  .alert button.ghost{background:var(--line-soft);color:var(--soft);}
+  /* budgets */
+  .bud-row{padding:7px 2px;}
+  .bud-row .bt{display:flex;justify-content:space-between;gap:8px;font-size:14.5px;margin-bottom:5px;}
+  .bud-row .bt span:last-child{font-weight:600;white-space:nowrap;}
+  .bud-bar{height:9px;border-radius:5px;background:var(--line-soft);overflow:hidden;}
+  .bud-bar span{display:block;height:100%;border-radius:5px;background:var(--inc);}
+  .bud-row.warn .bud-bar span{background:#C9973B;}
+  .bud-row.over .bud-bar span{background:var(--exp);}
+  .bud-row.over .bt span:last-child{color:var(--exp);}
+  .bud-in{display:flex;align-items:center;gap:10px;padding:5px 0;}
+  .bud-in .bn2{flex:1;min-width:0;font-size:14.5px;}
+  .bud-in input{width:110px;font-family:var(--font);font-size:16px;padding:9px 10px;border:1.5px solid var(--line);border-radius:12px;text-align:right;}
+  /* recurring list */
+  .rec-item{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line-soft);}
+  .rec-item:last-child{border-bottom:none;}
+  .rec-item .rt{flex:1;min-width:0;font-size:14.5px;}
+  .rec-item .rt small{display:block;color:var(--soft);font-size:12.5px;}
+  .rec-item button{border:none;background:var(--exp-bg);color:var(--exp);width:36px;height:36px;border-radius:11px;}
+  /* charts */
+  .donut-wrap{display:flex;align-items:center;gap:14px;margin:6px 0 10px;}
+  .donut-wrap svg{flex-shrink:0;}
+  .donut-leg{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;font-size:13px;}
+  .donut-leg div{display:flex;align-items:center;gap:6px;min-width:0;}
+  .donut-leg i{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+  .donut-leg span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .donut-leg b{font-weight:600;}
+  .chart-leg{display:flex;gap:14px;justify-content:center;font-size:12.5px;color:var(--soft);margin-top:4px;}
+  .chart-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;}
   .chk{display:flex;align-items:center;gap:10px;font-size:15px;margin:0 2px 14px;}
   .chk input{width:22px;height:22px;accent-color:var(--green);}
 
@@ -532,6 +590,7 @@
 
   <!-- ================= APP ================= -->
   <div id="appRoot" hidden>
+    <div class="off-bar" id="offBar" hidden>📴 គ្មានអ៊ីនធឺណិត — ទិន្នន័យរក្សាទុកក្នុងទូរស័ព្ទសិន ហើយនឹងផ្ញើទៅ Sheet ពេលមានអ៊ីនធឺណិតវិញ</div>
 
     <div class="subbar" id="subbar" hidden>
       <button type="button" class="back" id="backBtn" aria-label="ត្រឡប់ក្រោយ">‹</button>
@@ -542,7 +601,10 @@
     <section class="view" id="view-home">
       <div class="title-row">
         <h1 class="app-title">សៀវភៅចំណូលចំណាយ</h1>
-        <button type="button" class="user-chip" data-go="settings" aria-label="គណនី និងការកំណត់">👤 <span id="homeUser"></span> ⚙️</button>
+        <span class="title-btns">
+          <button type="button" class="icon-chip" data-go="search" aria-label="ស្វែងរក">🔍</button>
+          <button type="button" class="user-chip" data-go="settings" aria-label="គណនី និងការកំណត់">👤 <span id="homeUser"></span> ⚙️</button>
+        </span>
       </div>
       <div class="hero">
         <div class="mnav">
@@ -558,6 +620,7 @@
           <div class="hbox"><div class="l">ចំណាយ</div><div class="v" id="hExp">$0</div></div>
         </div>
       </div>
+      <div id="alerts"></div>
 
       <div class="tiles">
         <button type="button" class="tile" data-add="income">
@@ -651,6 +714,11 @@
           <label for="fDate">កាលបរិច្ឆេទ</label>
           <input type="date" id="fDate">
         </div>
+        <div class="field" id="fDueField" hidden>
+          <label for="fDue">⏰ ថ្ងៃកំណត់សង (ស្រេចចិត្ត — នឹងរំលឹកនៅទំព័រដើម)</label>
+          <input type="date" id="fDue">
+        </div>
+        <label class="chk" id="fRecurWrap" hidden><input type="checkbox" id="fRecur"> <span id="fRecurLbl">🔁 បញ្ចូលរៀងរាល់ខែ</span></label>
 
         <button type="button" class="btn" id="fSave">រក្សាទុក</button>
       </div>
@@ -683,12 +751,21 @@
           <span>សរុបទាំងអស់: <b id="mTotal">$0</b></span>
         </div>
       </div>
+      <div class="share-row">
+        <button type="button" class="btn ghost" id="mShare">📤 ចែករំលែក</button>
+        <button type="button" class="btn ghost" id="mCsv">⬇️ Excel</button>
+      </div>
+      <div class="card" id="mBudgetCard" hidden>
+        <div class="card-h"><span>💰 ថវិកាខែនេះ</span><button type="button" class="text-btn" data-go="settings" data-focus="budget">កែ</button></div>
+        <div id="mBudget"></div>
+      </div>
 
       <div class="card">
         <div class="seg" id="mType" style="margin-bottom:6px">
           <button type="button" data-t="expense" class="on">ចំណាយ</button>
           <button type="button" data-t="income">ចំណូល</button>
         </div>
+        <div id="mDonut"></div>
         <div id="mBars"></div>
       </div>
 
@@ -717,12 +794,29 @@
           <button type="button" data-t="expense" class="on">ចំណាយ</button>
           <button type="button" data-t="income">ចំណូល</button>
         </div>
+        <div id="yDonut"></div>
         <div id="yBars"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span>📊 ចំណូល / ចំណាយ ១២ ខែ</span></div>
+        <div id="yChart"></div>
       </div>
       <button type="button" class="fold-btn" id="yFold" aria-expanded="false">
         <span>📅 តាមខែ</span><span class="fold-tg" id="yFoldTg">បង្ហាញ ▸</span>
       </button>
       <div class="card" id="yList" style="padding:6px 12px" hidden></div>
+    </section>
+
+    <!-- SEARCH -->
+    <section class="view" id="view-search">
+      <div class="field"><input type="search" id="qInput" placeholder="ស្វែងរក ប្រភេទ / ចំណាំ / ឈ្មោះ / ចំនួន..." autocomplete="off"></div>
+      <div class="seg" id="qType" style="margin-bottom:10px">
+        <button type="button" data-t="all" class="on">ទាំងអស់</button>
+        <button type="button" data-t="income">ចំណូល</button>
+        <button type="button" data-t="expense">ចំណាយ</button>
+      </div>
+      <div class="sec-label"><span id="qCount"></span><span id="qSum"></span></div>
+      <div id="qResults"></div>
     </section>
 
     <!-- ALL-TIME SUMMARY -->
@@ -779,7 +873,12 @@
         <button type="button" class="dbox owe on" data-d="owe"><span class="l">ខ្ញុំជំពាក់គេ</span><span class="v" id="dOwe">$0</span></button>
         <button type="button" class="dbox lent" data-d="lent"><span class="l">គេជំពាក់ខ្ញុំ</span><span class="v" id="dLent">$0</span></button>
       </div>
-      <button type="button" class="btn" id="dNew" style="margin:12px 0 2px"></button>
+      <div class="d-actions" id="dActions">
+        <button type="button" data-k="borrow" class="owe"><span>🤝</span>ខ្ចីគេ</button>
+        <button type="button" data-k="repay" class="owe"><span>💸</span>សងគេ</button>
+        <button type="button" data-k="lend" class="lent"><span>📤</span>ឲ្យគេខ្ចី</button>
+        <button type="button" data-k="collect" class="lent"><span>📥</span>គេសងមកវិញ</button>
+      </div>
       <div class="sec-label"><span id="dListLbl"></span></div>
       <div id="dList"></div>
       <button type="button" class="fold-btn" id="dDoneFold" hidden>
@@ -885,6 +984,27 @@
         <div class="add-row">
           <input type="text" id="nInput" placeholder="ចំណាំថ្មី...">
           <button type="button" id="nAdd">＋ បន្ថែម</button>
+        </div>
+      </div>
+
+      <div class="card" id="budgetCard">
+        <button type="button" class="fold-head" id="bFold">
+          <span>💰 ថវិកាប្រចាំខែ (តាមប្រភេទ)</span><span class="fold-tg" id="bFoldTg">បង្ហាញ ▸</span>
+        </button>
+        <div id="bBody" hidden>
+          <div class="mini-label" style="margin:12px 2px 8px">ដាក់ចំនួន $ ក្នុងមួយខែ សម្រាប់ប្រភេទដែលចង់តាមដាន (ទុកទទេ = គ្មានថវិកា)</div>
+          <div id="bList"></div>
+          <button type="button" class="btn" id="bSave" style="margin-top:6px">រក្សាទុកថវិកា</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <button type="button" class="fold-head" id="rFold">
+          <span>🔁 ប្រតិបត្តិការប្រចាំខែ</span><span class="fold-tg" id="rFoldTg">បង្ហាញ ▸</span>
+        </button>
+        <div id="rBody" hidden>
+          <div class="mini-label" style="margin:12px 2px 8px">បង្កើតពីទំព័របញ្ចូល ដោយធីក «🔁 បញ្ចូលរៀងរាល់ខែ»។ ដើមខែ ទំព័រដើមនឹងសួរឲ្យបញ្ចូល។</div>
+          <div id="rList"></div>
         </div>
       </div>
 
@@ -1104,7 +1224,8 @@ function pushSettings(){
   pushTimer = setTimeout(async ()=>{
     try{
       await apiCall("saveSettings", { username: currentUser.username, token: currentUser.token,
-        settings: { cats: userCats, notes: customNotes, hidden: hiddenNotes, goals: goalTargets, rate: KHR_RATE } });
+        settings: { cats: userCats, notes: customNotes, hidden: hiddenNotes, goals: goalTargets, rate: KHR_RATE,
+                    budgets, recurring } });
     }catch(e){ console.error("saveSettings failed", e); }
   }, 600);
 }
@@ -1117,6 +1238,8 @@ function applyServerSettings(st){
   lsSet(userKey(HIDDEN_NOTES_KEY), JSON.stringify(st.hidden || {}));
   lsSet(userKey(GOAL_TARGET_KEY), JSON.stringify(st.goals || {}));
   if(Number(st.rate) > 0){ KHR_RATE = Number(st.rate); lsSet(RATE_KEY, String(KHR_RATE)); }
+  if(st.budgets) lsSet(userKey(BUDGET_KEY), JSON.stringify(st.budgets));
+  if(Array.isArray(st.recurring)) lsSet(userKey(RECUR_KEY), JSON.stringify(st.recurring));
 }
 const ucat = type => (userCats[type] = userCats[type] || { added: [], hidden: [] });
 function catsFor(type){
@@ -1140,6 +1263,14 @@ function removeCat(type, name){
   saveUserCats();
 }
 
+// ថវិកាប្រចាំខែ {ប្រភេទ: $} និង ប្រតិបត្តិការប្រចាំខែ [{id,type,cat,note,amount,currency,day,last}]
+const BUDGET_KEY = "tracker_budgets_v1";
+const RECUR_KEY = "tracker_recurring_v1";
+let budgets = {};
+let recurring = [];
+const saveBudgets = () => { lsSet(userKey(BUDGET_KEY), JSON.stringify(budgets)); pushSettings(); };
+const saveRecurring = () => { lsSet(userKey(RECUR_KEY), JSON.stringify(recurring)); pushSettings(); };
+
 // ផ្ទុកចំណាំរបស់អ្នកប្រើដែលកំពុងចូល
 function loadUserNotes(){
   const ck = userKey(CUSTOM_NOTES_KEY), hk = userKey(HIDDEN_NOTES_KEY);
@@ -1150,10 +1281,13 @@ function loadUserNotes(){
   hiddenNotes = readJSON(hk);
   goalTargets = readJSON(userKey(GOAL_TARGET_KEY));
   userCats = readJSON(userKey(CATS_KEY));
+  budgets = readJSON(userKey(BUDGET_KEY));
+  try { recurring = JSON.parse(lsGet(userKey(RECUR_KEY)) || "[]") || []; } catch(e){ recurring = []; }
+  if(!Array.isArray(recurring)) recurring = [];
 }
 // ពេលប្តូរឈ្មោះ → យកចំណាំទៅជាមួយ
 function moveUserNotes(oldName, newName){
-  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY, GOAL_TARGET_KEY, CATS_KEY].forEach(base=>{
+  [CUSTOM_NOTES_KEY, HIDDEN_NOTES_KEY, GOAL_TARGET_KEY, CATS_KEY, BUDGET_KEY, RECUR_KEY, CACHE_KEY, PENDING_KEY].forEach(base=>{
     const v = lsGet(base + "__" + oldName);
     if(v !== null){ lsSet(base + "__" + newName, v); lsDel(base + "__" + oldName); }
   });
@@ -1317,27 +1451,63 @@ async function tryRestoreSession(){
   }
   try{
     const r = await apiCall("login", { username: saved.username, token: saved.token });
-    if(r.success){ currentUser = saved; entries = r.entries || []; applyServerSettings(r.settings); showApp(); }
+    if(r.success){
+      currentUser = saved;
+      entries = r.entries || [];
+      // បានកែពេលគ្មានអ៊ីនធឺណិត ហើយមិនទាន់ផ្ញើ → ប្រើទិន្នន័យក្នុងទូរស័ព្ទ ហើយផ្ញើឡើង
+      const cached = readCache();
+      if(isPending() && Array.isArray(cached)){ entries = cached; setTimeout(saveEntries, 300); }
+      applyServerSettings(r.settings);
+      showApp();
+    }
     else if(r.code === "NEED_SETUP") openSetup(saved.username, false);
     else { lsSet(SESSION_KEY, JSON.stringify({ username: saved.username })); }
-  }catch(err){ console.error("Session restore failed", err); }
-}
-
-async function saveEntries(){
-  if(!currentUser) return;
-  try{
-    const r = await apiCall("save", { username: currentUser.username, token: currentUser.token, entries });
-    if(r.code === "BAD_TOKEN"){ alert("សូមចូលប្រើម្តងទៀត"); forceLogout(); return; }
-    $("syncDot").classList.toggle("off", !r.success);
-    if(!r.success) alert("រក្សាទុកមិនបានទេ៖ " + (r.message || "unknown error"));
   }catch(err){
-    $("syncDot").classList.add("off");
-    alert("មិនអាចភ្ជាប់ទៅ server បានទេ៖ " + err.message);
+    // គ្មានអ៊ីនធឺណិត → បើកពីទិន្នន័យក្នុងទូរស័ព្ទ
+    console.error("Session restore failed", err);
+    currentUser = saved;
+    const cached = readCache();
+    if(Array.isArray(cached)){ entries = cached; showApp(); setOffline(true); }
+    else currentUser = null;
   }
 }
 
+/* ===== ប្រើបានពេលគ្មានអ៊ីនធឺណិត =====
+   ទិន្នន័យរក្សាទុកក្នុងទូរស័ព្ទជានិច្ច; បើផ្ញើមិនបាន → ចាំ (pending) ហើយផ្ញើពេលមានអ៊ីនធឺណិត */
+const CACHE_KEY = "tracker_cache_v1";
+const PENDING_KEY = "tracker_pending_v1";
+const cacheEntries = () => { if(currentUser) lsSet(userKey(CACHE_KEY), JSON.stringify(entries)); };
+function readCache(){ try { return JSON.parse(lsGet(userKey(CACHE_KEY)) || "null"); } catch(e){ return null; } }
+const isPending = () => lsGet(userKey(PENDING_KEY)) === "1";
+function setOffline(on){
+  $("offBar").hidden = !on;
+  $("syncDot").classList.toggle("off", on);
+}
+let saving = false, saveAgain = false;
+async function saveEntries(){
+  if(!currentUser) return;
+  cacheEntries();
+  lsSet(userKey(PENDING_KEY), "1");
+  if(saving){ saveAgain = true; return; }
+  saving = true;
+  try{
+    const r = await apiCall("save", { username: currentUser.username, token: currentUser.token, entries });
+    if(r.code === "BAD_TOKEN"){ alert("សូមចូលប្រើម្តងទៀត"); forceLogout(); return; }
+    if(r.success){ lsDel(userKey(PENDING_KEY)); setOffline(false); }
+    else { $("syncDot").classList.add("off"); alert("រក្សាទុកមិនបានទេ៖ " + (r.message || "unknown error")); }
+  }catch(err){
+    setOffline(true);   // គ្មានអ៊ីនធឺណិត → នៅក្នុងទូរស័ព្ទ ហើយផ្ញើពេលក្រោយ
+  }finally{
+    saving = false;
+    if(saveAgain){ saveAgain = false; saveEntries(); }
+  }
+}
+window.addEventListener("online", ()=>{ if(currentUser && isPending()) saveEntries(); });
+setInterval(()=>{ if(currentUser && isPending() && navigator.onLine !== false) saveEntries(); }, 60000);
+
 function showApp(){
   loadUserNotes();
+  cacheEntries();
   // គណនីមិនទាន់មានការកំណត់ក្នុង Sheet → បញ្ជូនការកំណត់ពីទូរស័ព្ទនេះឡើង (លើកដំបូង)
   if(!serverHasSettings){ serverHasSettings = true; pushSettings(); }
   $("loginScreen").hidden = true;
@@ -1348,14 +1518,15 @@ function showApp(){
 }
 
 /* ================= ប្តូរទំព័រ ================= */
-const VIEW_SECTION = { home:"home", form:"form", month:"month", year:"year", all:"all", savings:"savings", event:"event", debt:"debt", settings:"settings" };
-const VIEW_TITLE = { month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", all:"សង្ខេបទាំងអស់", savings:"សន្សំប្រាក់", event:"កម្មវិធី", debt:"ជំពាក់ / សងលុយ", settings:"ការកំណត់" };
+const VIEW_SECTION = { search:"search", home:"home", form:"form", month:"month", year:"year", all:"all", savings:"savings", event:"event", debt:"debt", settings:"settings" };
+const VIEW_TITLE = { search:"ស្វែងរក", month:"សង្ខេបខែ", year:"សង្ខេបឆ្នាំ", all:"សង្ខេបទាំងអស់", savings:"សន្សំប្រាក់", event:"កម្មវិធី", debt:"ជំពាក់ / សងលុយ", settings:"ការកំណត់" };
 
 function showView(v, push = true){
   if(!VIEW_SECTION[v]) v = "home";
   if(v === "form" && !form) v = "home";
   currentView = v;
-  if(v === "settings"){ renderCatSettings(); renderNoteSettings(); $("setRate").value = KHR_RATE; $("setUser").textContent = currentUser ? currentUser.username : ""; }
+  if(v === "search"){ setTimeout(()=> $("qInput").focus(), 60); renderSearch(); }
+  if(v === "settings"){ renderCatSettings(); renderNoteSettings(); renderBudgetSettings(); renderRecurringSettings(); $("setRate").value = KHR_RATE; $("setUser").textContent = currentUser ? currentUser.username : ""; }
 
   document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "view-" + VIEW_SECTION[v]));
   $("subbar").hidden = (v === "home");
@@ -1378,7 +1549,13 @@ document.addEventListener("click", e=>{
   const add = e.target.closest("[data-add]");
   if(add){ openForm(add.dataset.add); return; }
   const b = e.target.closest("[data-go]");
-  if(b) showView(b.dataset.go);
+  if(b){
+    showView(b.dataset.go);
+    if(b.dataset.focus === "budget"){   // បើកផ្នែកថវិកាភ្លាម
+      $("bBody").hidden = false; $("bFoldTg").textContent = "លាក់ ▾";
+      setTimeout(()=> $("budgetCard").scrollIntoView({ block: "start" }), 50);
+    }
+  }
 });
 
 /* ================= ទំព័រដើម ================= */
@@ -1487,6 +1664,8 @@ function openForm(type, cat, entry, presetNote, presetKind){
            pay: entry && Number(entry.depTotal) > 0 ? "dep" : "full",
            depOf: entry ? (entry.depOf || null) : null };
   $("fTotal").value = entry && Number(entry.depTotal) > 0 ? entry.depTotal : "";
+  $("fDue").value = entry && entry.due ? entry.due : "";
+  $("fRecur").checked = false;
   if((cat === DEBT_CAT || cat === EVENT_CAT) && entry){ form.chips = new Set(entry.note ? [entry.note] : []); }
   $("fAmount").value = entry ? entry.amount : "";
   $("fNote").value = !entry ? "" : cat === EVENT_CAT ? (entry.item || "") : cat !== DEBT_CAT ? (entry.note || "") : "";
@@ -1513,6 +1692,12 @@ function renderForm(){
   $("fSaveMode").hidden = !sv;
   $("fEventMode").hidden = !ev || !eventHasIncome([...form.chips][0] || "") || !!form.depOf;
   // កក់ / បង់ពេញ — សម្រាប់ចាយលើកម្មវិធី
+  // ថ្ងៃកំណត់សង៖ ខ្ចីគេ / ឲ្យគេខ្ចី / កក់ប្រាក់
+  $("fDueField").hidden = !((db && (form.debt === "borrow" || form.debt === "lend")) || (ev && form.type === "expense" && form.pay === "dep" && !form.depOf));
+  // ប្រចាំខែ៖ តែចំណូល/ចំណាយធម្មតា ពេលបញ្ចូលថ្មី
+  $("fRecurWrap").hidden = sv || db || ev || !!form.id;
+  const dd = parseInt(($("fDate").value || todayStr()).slice(8,10), 10);
+  $("fRecurLbl").textContent = "🔁 បញ្ចូលរៀងរាល់ខែ (ថ្ងៃទី " + khNum(dd) + ")";
   const depOn = ev && form.type === "expense";
   $("fDepBox").hidden = !depOn;
   if(depOn){
@@ -1688,6 +1873,12 @@ function saveForm(){
 
   const data = { date, type: form.type, category: form.cat, note, amount, currency: form.cur };
   if(isD) data.debt = form.debt;
+  if(!$("fDueField").hidden && $("fDue").value) data.due = $("fDue").value; else if(form.id) data.due = "";
+  if(!$("fRecurWrap").hidden && $("fRecur").checked && !form.id){
+    recurring.push({ id: "r" + Date.now().toString(36), type: form.type, cat: form.cat, note, amount, currency: form.cur,
+                     day: parseInt(date.slice(8,10), 10), last: date.slice(0,7) });
+    saveRecurring();
+  }
   if(isE && form.type === "expense" && !form.depOf && form.pay === "dep"){
     const total = parseFloat($("fTotal").value);
     if(!(total > 0)){ $("fTotal").focus(); toast("សូមបញ្ចូលតម្លៃសរុប"); return; }
@@ -1736,12 +1927,15 @@ function saveForm(){
   if(form.depOf){ goBack(); return; }   // បង់នៅសល់រួច → ត្រឡប់ទៅកម្មវិធី
   form.pay = "full";
   $("fTotal").value = "";
+  $("fDue").value = "";
+  $("fRecur").checked = false;
   $("fAmount").value = "";
   $("fNote").value = "";
   renderForm();
   setTimeout(()=> $("fAmount").focus(), 60);
 }
 $("fSave").addEventListener("click", saveForm);
+$("fDate").addEventListener("change", ()=>{ if(form) renderForm(); });
 $("fAmount").addEventListener("keydown", e => { if(e.key === "Enter") saveForm(); });
 
 /* ================= សង្ខេបខែ ================= */
@@ -1755,6 +1949,8 @@ function renderMonth(){
   const cashM = cashEntries().filter(e => inMonth(e, selMonth));
   $("mNet").textContent = fmtUSD(signedSum(cashM).t);
   $("mExtra").textContent = extraText(cashM);
+  renderMonthBudget();
+  renderDonut($("mDonut"), mE.filter(e => e.type === monthType));
   $("mCarry").textContent = fmtUSD(signedSum(cashEntries().filter(e => e.date && e.date.slice(0,7) < selMonth)).t);
   $("mTotal").textContent = fmtUSD(signedSum(cashEntries()).t);
 
@@ -1873,6 +2069,8 @@ function renderYear(){
   const cashY = cashEntries().filter(e => e.date && e.date.slice(0,4) === y);
   $("yNet").textContent = fmtUSD(signedSum(cashY).t);
   $("yExtra").textContent = extraText(cashY);
+  renderDonut($("yDonut"), flowEntries().filter(e => e.date && e.date.slice(0,4) === y && e.type === yearType));
+  renderYearChart(y);
 
   const yE = flowEntries().filter(e => e.date && e.date.slice(0,4) === y);
   renderBreakdown($("yBars"), yE.filter(e => e.type === yearType), yearType, openYearCats, "ក្នុងឆ្នាំនេះ", null);
@@ -1980,7 +2178,6 @@ function renderDebts(){
   $("dLent").textContent = fmtUSD(debtBal(all, "lent").t);
   document.querySelectorAll("#dSum .dbox").forEach(b => b.classList.toggle("on", b.dataset.d === debtDir));
   const owe = debtDir === "owe";
-  $("dNew").textContent = owe ? "🤝 ＋ ខ្ចីលុយគេ (ថ្មី)" : "📤 ＋ ឲ្យគេខ្ចីលុយ (ថ្មី)";
   $("dListLbl").textContent = owe ? "អ្នកដែលខ្ញុំជំពាក់" : "អ្នកដែលជំពាក់ខ្ញុំ";
 
   const people = debtPeople(debtDir).map(n=>{
@@ -2030,7 +2227,11 @@ $("dSum").addEventListener("click", e=>{
   debtDir = b.dataset.d;
   renderDebts();
 });
-$("dNew").addEventListener("click", ()=> openDebtForm(debtDir === "owe" ? "borrow" : "lend"));
+// ប៊ូតុង ៤៖ ខ្ចីគេ · សងគេ · ឲ្យគេខ្ចី · គេសងមកវិញ — ចុចបញ្ចូលភ្លាម
+$("dActions").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(b) openDebtForm(b.dataset.k);
+});
 [["dDoneFold","dDone","dDoneTg"],["dHistFold","dHist","dHistTg"]].forEach(([btn, body, tg])=>{
   $(btn).addEventListener("click", ()=>{
     const open = $(body).hidden;
@@ -2483,7 +2684,7 @@ $("pinSave").addEventListener("click", ()=> busy($("pinSave"), async ()=>{
 function forceLogout(){
   const name = currentUser ? currentUser.username : "";
   currentUser = null;
-  customNotes = {}; hiddenNotes = {}; goalTargets = {}; userCats = {};
+  customNotes = {}; hiddenNotes = {}; goalTargets = {}; userCats = {}; budgets = {}; recurring = [];
   entries = [];
   lsSet(SESSION_KEY, JSON.stringify({ username: name }));   // ចងចាំឈ្មោះ តែមិនចងចាំ token
   history.replaceState(null, "", location.pathname + location.search);
@@ -2499,6 +2700,7 @@ $("logout").addEventListener("click", ()=>{
   hiddenNotes = {};
   goalTargets = {};
   userCats = {};
+  budgets = {}; recurring = [];
   entries = [];
   lsDel(SESSION_KEY);
   history.replaceState(null, "", location.pathname + location.search);
@@ -2506,6 +2708,268 @@ $("logout").addEventListener("click", ()=>{
   $("loginScreen").hidden = false;
   $("authPin").value = "";
   showAuth("pLogin");
+});
+
+/* ================= ការរំលឹក នៅទំព័រដើម ================= */
+const daysInMonth = ym => new Date(+ym.slice(0,4), +ym.slice(5,7), 0).getDate();
+function daysUntil(d){
+  const a = new Date(todayStr() + "T00:00:00"), b = new Date(d + "T00:00:00");
+  return Math.round((b - a) / 86400000);
+}
+function dueText(d){
+  const n = daysUntil(d);
+  return n < 0 ? "ហួសកំណត់ " + khNum(-n) + " ថ្ងៃ" : n === 0 ? "ថ្ងៃនេះ" : n === 1 ? "ស្អែក" : "នៅ " + khNum(n) + " ថ្ងៃ (" + khDate(d) + ")";
+}
+function renderAlerts(){
+  const box = $("alerts");
+  box.innerHTML = "";
+  const add = (cls, icon, title, sub, btns)=>{
+    const a = document.createElement("div");
+    a.className = "alert " + cls;
+    a.innerHTML = `<span class="ai">${icon}</span><span class="at"><b></b><small></small></span>`;
+    a.querySelector("b").textContent = title;
+    a.querySelector("small").textContent = sub;
+    btns.forEach(([label, fn, ghost])=>{
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = label;
+      if(ghost) b.className = "ghost";
+      b.addEventListener("click", fn);
+      a.appendChild(b);
+    });
+    box.appendChild(a);
+  };
+  const today = todayStr(), ym = today.slice(0,7), dayNow = +today.slice(8,10);
+
+  // 🔁 ប្រចាំខែ
+  recurring.forEach(r=>{
+    if(r.last >= ym) return;
+    const day = Math.min(r.day, daysInMonth(ym));
+    if(dayNow < day) return;
+    add("", "🔁", (r.type === "income" ? "ចំណូល៖ " : "ចំណាយ៖ ") + r.cat + (r.note ? " · " + r.note : ""),
+      fmtAmt(r.amount, r.currency) + " · ប្រចាំខែ ថ្ងៃទី " + khNum(r.day),
+      [["បញ្ចូល", ()=>{
+        entries.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,7), date: ym + "-" + String(day).padStart(2,"0"),
+          type: r.type, category: r.cat, note: r.note || "", amount: r.amount, currency: r.currency });
+        r.last = ym; saveRecurring(); saveEntries(); render(); toast("🔁 បានបញ្ចូល " + r.cat);
+      }], ["រំលង", ()=>{ r.last = ym; saveRecurring(); renderAlerts(); }, true]]);
+  });
+
+  // ⏰ ថ្ងៃកំណត់សង — ខ្ចី/សង
+  const dl = debtEntries();
+  const seen = new Set();
+  dl.filter(e => e.due && (e.debt === "borrow" || e.debt === "lend")).sort((a,b)=> a.due.localeCompare(b.due)).forEach(e=>{
+    const dir = DEBT_KIND[e.debt].dir, n = (e.note || "").trim(), key = dir + "|" + n;
+    if(seen.has(key)) return;
+    const left = debtBal(dl.filter(x => (x.note || "").trim() === n), dir).t;
+    if(left <= 0.004 || daysUntil(e.due) > 7) return;
+    seen.add(key);
+    const owe = dir === "owe";
+    add(daysUntil(e.due) < 0 ? "bad" : "warn", "⏰", owe ? "ត្រូវសង " + n + " " + fmtUSD(left) : n + " ត្រូវសងខ្ញុំ " + fmtUSD(left), dueText(e.due),
+      [[owe ? "សង" : "កត់ត្រា", ()=> openDebtForm(owe ? "repay" : "collect", n)]]);
+  });
+  // ⏰ កក់ប្រាក់
+  openDeposits(eventEntries()).filter(d => d.due && daysUntil(d.due) <= 7).sort((a,b)=> a.due.localeCompare(b.due)).forEach(d=>{
+    const st = depositStatus(d);
+    add(daysUntil(d.due) < 0 ? "bad" : "warn", "🔖", "បង់នៅសល់ " + (d.item || "ការកក់") + " " + fmtUSD(st.left), (d.note || "") + " · " + dueText(d.due),
+      [["បង់", ()=> openSettleForm(d)]]);
+  });
+
+  // ⚠️ ថវិកា (ខែបច្ចុប្បន្ន)
+  budgetRows(ym).filter(b => b.pct >= 80).forEach(b=>{
+    add(b.pct >= 100 ? "bad" : "warn", b.pct >= 100 ? "🚨" : "⚠️",
+      (b.pct >= 100 ? "លើសថវិកា " : "ជិតដល់ថវិកា ") + b.cat, "ចាយ " + fmtUSD(b.spent) + " / " + fmtUSD(b.budget) + " (" + khNum(Math.round(b.pct)) + "%)",
+      [["មើល", ()=>{ selMonth = ym; render(); showView("month"); }, true]]);
+  });
+}
+
+/* ================= ថវិកាប្រចាំខែ ================= */
+function budgetRows(ym){
+  const mE = flowEntries().filter(e => inMonth(e, ym) && e.type === "expense");
+  return Object.keys(budgets).filter(c => Number(budgets[c]) > 0).map(c=>{
+    const spent = sumOf(mE.filter(e => e.category === c)).t, budget = Number(budgets[c]);
+    return { cat: c, spent, budget, pct: spent / budget * 100 };
+  }).sort((a,b)=> b.pct - a.pct);
+}
+function renderMonthBudget(){
+  const rows = budgetRows(selMonth);
+  $("mBudgetCard").hidden = !rows.length;
+  const box = $("mBudget");
+  box.innerHTML = "";
+  rows.forEach(b=>{
+    const d = document.createElement("div");
+    d.className = "bud-row" + (b.pct >= 100 ? " over" : b.pct >= 80 ? " warn" : "");
+    d.innerHTML = `<div class="bt"><span>${catStyle(b.cat).icon} ${esc(b.cat)}</span>
+      <span>${fmtUSD(b.spent)} / ${fmtUSD(b.budget)}</span></div>
+      <div class="bud-bar"><span style="width:${Math.min(100, Math.max(2, b.pct))}%"></span></div>`;
+    box.appendChild(d);
+  });
+}
+function renderBudgetSettings(){
+  const box = $("bList");
+  box.innerHTML = "";
+  catsFor("expense").forEach(c=>{
+    const d = document.createElement("div");
+    d.className = "bud-in";
+    d.innerHTML = `<span class="bn2">${catStyle(c).icon} ${esc(c)}</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="$">`;
+    const inp = d.querySelector("input");
+    inp.dataset.cat = c;
+    if(Number(budgets[c]) > 0) inp.value = budgets[c];
+    box.appendChild(d);
+  });
+}
+$("bSave").addEventListener("click", ()=>{
+  const nb = {};
+  document.querySelectorAll("#bList input").forEach(i => { const v = parseFloat(i.value); if(v > 0) nb[i.dataset.cat] = v; });
+  budgets = nb;
+  saveBudgets();
+  render();
+  toast("💰 បានរក្សាទុកថវិកា");
+});
+
+/* ================= ប្រតិបត្តិការប្រចាំខែ (ការកំណត់) ================= */
+function renderRecurringSettings(){
+  const box = $("rList");
+  box.innerHTML = recurring.length ? "" : `<div class="empty" style="padding:10px">មិនទាន់មានទេ</div>`;
+  recurring.forEach(r=>{
+    const d = document.createElement("div");
+    d.className = "rec-item";
+    d.innerHTML = `<span class="bub" style="background:${catStyle(r.cat).bg}">${catStyle(r.cat).icon}</span>
+      <span class="rt"><b></b><small>${r.type === "income" ? "ចំណូល" : "ចំណាយ"} · ${fmtAmt(r.amount, r.currency)} · ថ្ងៃទី ${khNum(r.day)} រៀងរាល់ខែ</small></span>
+      <button type="button" aria-label="លុប">✕</button>`;
+    d.querySelector("b").textContent = r.cat + (r.note ? " · " + r.note : "");
+    d.querySelector("button").addEventListener("click", ()=>{
+      if(!confirm("ឈប់បញ្ចូល «" + r.cat + "» រៀងរាល់ខែ?")) return;
+      recurring = recurring.filter(x => x.id !== r.id);
+      saveRecurring();
+      renderRecurringSettings();
+      renderAlerts();
+    });
+    box.appendChild(d);
+  });
+}
+[["bFold","bBody","bFoldTg"],["rFold","rBody","rFoldTg"]].forEach(([btn, body, tg])=>{
+  $(btn).addEventListener("click", ()=>{
+    const open = $(body).hidden;
+    $(body).hidden = !open;
+    $(tg).textContent = open ? "លាក់ ▾" : "បង្ហាញ ▸";
+  });
+});
+
+/* ================= ក្រាហ្វ ================= */
+const CHART_COLORS = ["#3B6B5D","#C9973B","#B04E40","#4E4A8A","#3A7CA5","#8A4A6E","#7A8A3B","#A0A7A4"];
+function renderDonut(container, list){
+  const by = {};
+  list.forEach(e => { by[e.category] = (by[e.category] || 0) + toUSDv(e.amount, e.currency); });
+  let rows = Object.keys(by).map(c => ({ c, v: by[c] })).filter(r => r.v > 0).sort((a,b)=> b.v - a.v);
+  if(!rows.length){ container.innerHTML = ""; return; }
+  if(rows.length > 6){ const rest = rows.slice(5).reduce((t,r)=> t + r.v, 0); rows = rows.slice(0,5).concat([{ c: "ផ្សេងៗទៀត", v: rest, other: true }]); }
+  const total = rows.reduce((t,r)=> t + r.v, 0);
+  const R = 46, C = 2 * Math.PI * R;
+  let off = 0;
+  const arcs = rows.map((r,i)=>{
+    const len = r.v / total * C;
+    const a = `<circle r="${R}" cx="60" cy="60" fill="none" stroke="${CHART_COLORS[i % CHART_COLORS.length]}" stroke-width="20"
+      stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 60 60)"/>`;
+    off += len;
+    return a;
+  }).join("");
+  container.innerHTML = `<div class="donut-wrap">
+    <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="ក្រាហ្វតាមប្រភេទ">${arcs}
+      <text x="60" y="57" text-anchor="middle" font-size="10" fill="#6B7773">សរុប</text>
+      <text x="60" y="72" text-anchor="middle" font-size="13" font-weight="700" fill="#1F2A27">${fmtUSD(total)}</text></svg>
+    <div class="donut-leg">${rows.map((r,i)=> `<div><i style="background:${CHART_COLORS[i % CHART_COLORS.length]}"></i>
+      <span>${r.other ? "" : catStyle(r.c).icon + " "}${esc(r.c)}</span><b>${khNum(Math.round(r.v / total * 100))}%</b></div>`).join("")}</div>
+  </div>`;
+}
+function renderYearChart(y){
+  const W = 320, H = 150, pad = 18, bw = (W - pad * 2) / 12;
+  const data = [];
+  for(let i = 1; i <= 12; i++){
+    const key = y + "-" + String(i).padStart(2,"0");
+    const mE = flowEntries().filter(e => inMonth(e, key));
+    data.push({ m: i, inc: sumOf(mE.filter(e => e.type === "income")).t, exp: sumOf(mE.filter(e => e.type === "expense")).t });
+  }
+  const max = Math.max(1, ...data.map(d => Math.max(d.inc, d.exp)));
+  const bars = data.map((d,i)=>{
+    const x = pad + i * bw, h1 = d.inc / max * (H - 34), h2 = d.exp / max * (H - 34);
+    return `<rect x="${(x + bw*0.12).toFixed(1)}" y="${(H - 18 - h1).toFixed(1)}" width="${(bw*0.36).toFixed(1)}" height="${h1.toFixed(1)}" rx="2" fill="#3E7A50"/>
+      <rect x="${(x + bw*0.52).toFixed(1)}" y="${(H - 18 - h2).toFixed(1)}" width="${(bw*0.36).toFixed(1)}" height="${h2.toFixed(1)}" rx="2" fill="#B04E40"/>
+      <text x="${(x + bw/2).toFixed(1)}" y="${H - 4}" text-anchor="middle" font-size="9" fill="#6B7773">${khNum(d.m)}</text>`;
+  }).join("");
+  $("yChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="ក្រាហ្វ ១២ ខែ">
+    <line x1="${pad}" y1="${H-18}" x2="${W-pad}" y2="${H-18}" stroke="#DCE1DE"/>${bars}</svg>
+    <div class="chart-leg"><span><i style="background:#3E7A50"></i>ចំណូល</span><span><i style="background:#B04E40"></i>ចំណាយ</span></div>`;
+}
+
+/* ================= ចែករំលែក / Excel ================= */
+function monthReportText(){
+  const mE = flowEntries().filter(e => inMonth(e, selMonth));
+  const inc = sumOf(mE.filter(e => e.type === "income")).t, exp = sumOf(mE.filter(e => e.type === "expense")).t;
+  const cashM = cashEntries().filter(e => inMonth(e, selMonth));
+  const lines = ["📒 សៀវភៅចំណូលចំណាយ — " + monthLabel(selMonth), "",
+    "💚 ចំណូល: " + fmtUSD(inc), "💸 ចំណាយ: " + fmtUSD(exp), "💎 សល់: " + fmtUSD(signedSum(cashM).t)];
+  const extra = extraText(cashM);
+  if(extra) lines.push("   (" + extra + ")");
+  const by = {};
+  mE.filter(e => e.type === "expense").forEach(e => { by[e.category] = (by[e.category] || 0) + toUSDv(e.amount, e.currency); });
+  const cats = Object.keys(by).sort((a,b)=> by[b] - by[a]);
+  if(cats.length){ lines.push("", "ចំណាយតាមប្រភេទ:"); cats.forEach(c => lines.push(catStyle(c).icon + " " + c + ": " + fmtUSD(by[c]))); }
+  const bud = budgetRows(selMonth);
+  if(bud.length){ lines.push("", "ថវិកា:"); bud.forEach(b => lines.push((b.pct >= 100 ? "🚨 " : b.pct >= 80 ? "⚠️ " : "✅ ") + b.cat + ": " + fmtUSD(b.spent) + " / " + fmtUSD(b.budget))); }
+  lines.push("", "🐷 ប្រាក់សន្សំ: " + fmtUSD(saveBal(savingsEntries()).t));
+  return lines.join("\n");
+}
+$("mShare").addEventListener("click", async ()=>{
+  const text = monthReportText();
+  try{
+    if(navigator.share){ await navigator.share({ title: "របាយការណ៍ " + monthLabel(selMonth), text }); return; }
+  }catch(e){ if(e && e.name === "AbortError") return; }
+  try{ await navigator.clipboard.writeText(text); toast("📋 បានចម្លង — Paste ក្នុង Telegram បាន"); }
+  catch(e){ prompt("ចម្លងអត្ថបទនេះ៖", text); }
+});
+function typeLabel(e){
+  if(isSave(e)) return e.type === "expense" ? "ដាក់សន្សំ" : "ដកសន្សំ";
+  if(isDebt(e)) return { borrow:"ខ្ចីគេ", repay:"សងគេ", lend:"ឲ្យគេខ្ចី", collect:"គេសងមកវិញ" }[e.debt] || "ខ្ចី/សង";
+  if(isEvent(e)) return (e.type === "expense" ? "កម្មវិធី-ចាយ" : "កម្មវិធី-ចូល") + (Number(e.depTotal) > 0 ? " (កក់)" : e.depOf ? " (បង់នៅសល់)" : "");
+  return e.type === "income" ? "ចំណូល" : "ចំណាយ";
+}
+$("mCsv").addEventListener("click", ()=>{
+  const rows = entries.filter(e => inMonth(e, selMonth)).sort((a,b)=> a.date.localeCompare(b.date));
+  const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+  const out = [["កាលបរិច្ឆេទ","ប្រភេទ","ផ្នែក","ចំណាំ","ព័ត៌មានលម្អិត","ចំនួន","រូបិយប័ណ្ណ","ជាដុល្លារ"].map(q).join(",")];
+  rows.forEach(e => out.push([e.date, typeLabel(e), e.category, e.note || "", e.item || "", e.amount, e.currency || "USD",
+    toUSDv(e.amount, e.currency).toFixed(2)].map(q).join(",")));
+  const blob = new Blob(["\ufeff" + out.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "income-expense-" + selMonth + ".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 2000);
+  toast("⬇️ បានទាញយក " + a.download);
+});
+
+/* ================= ស្វែងរកទាំងអស់ ================= */
+let qType = "all";
+function renderSearch(){
+  const q = $("qInput").value.trim().toLowerCase();
+  if(!q){ $("qCount").textContent = "វាយពាក្យដើម្បីស្វែងរក ក្នុងគ្រប់ខែ គ្រប់ឆ្នាំ"; $("qSum").textContent = ""; $("qResults").innerHTML = ""; return; }
+  const list = entries.filter(e=>{
+    if(qType !== "all" && e.type !== qType) return false;
+    const hay = [e.category, e.note, e.item, typeLabel(e), e.amount, e.date].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  $("qCount").textContent = "រកឃើញ " + khNum(list.length) + " ប្រតិបត្តិការ";
+  const inc = sumOf(list.filter(e => e.type === "income")).t, exp = sumOf(list.filter(e => e.type === "expense")).t;
+  $("qSum").textContent = list.length ? (qType === "income" ? fmtUSD(inc) : qType === "expense" ? fmtUSD(exp) : "+" + fmtUSD(inc) + " · −" + fmtUSD(exp)) : "";
+  renderEntries($("qResults"), list.slice(0, 300), "រកមិនឃើញទេ");
+}
+$("qInput").addEventListener("input", renderSearch);
+$("qType").addEventListener("click", e=>{
+  const b = e.target.closest("button");
+  if(!b) return;
+  qType = b.dataset.t;
+  document.querySelectorAll("#qType button").forEach(x => x.classList.toggle("on", x === b));
+  renderSearch();
 });
 
 /* ================= ផ្សេងៗ ================= */
@@ -2519,7 +2983,9 @@ function toast(msg){
 }
 
 function render(){
+  cacheEntries();
   renderHome();
+  renderAlerts();
   renderFormEntries();
   renderMonth();
   renderYear();
@@ -2527,6 +2993,7 @@ function render(){
   renderSavings();
   renderEvents();
   renderDebts();
+  if(currentView === "search") renderSearch();
 }
 
 /* ពង្រីកទំហំទាំងមូល តាមទទឹងអេក្រង់ — អេក្រង់ធំ = អក្សរធំ */
